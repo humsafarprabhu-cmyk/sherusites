@@ -9,6 +9,7 @@ import { getOrCreateUser, saveUser, createSiteData, getSiteData, saveSiteData, a
 import { generateContent } from './ai-content.ts';
 import { renderSite } from './template-renderer.ts';
 import { agentHandle } from './site-agent.ts';
+import { smartRoute } from './smart-router.ts';
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
@@ -374,10 +375,10 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       // "kal chhuti hai", "timing 9 se 9 karo", etc.
       if (session.slug) {
         try {
-          const agentReply = await agentHandle(phone, msg, session.slug);
-          return { replies: [agentReply] };
+          const reply = await smartRoute(phone, msg, session.slug);
+          return { replies: [reply] };
         } catch (err: any) {
-          console.error('[Agent] Error:', err.message);
+          console.error('[Router] Error:', err.message);
           // Fallback to default
         }
       }

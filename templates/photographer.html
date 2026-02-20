@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{businessName}} — {{tagline}}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--gold:#f59e0b;--gold2:#d97706;--dark:#0a0a0a;--card:rgba(18,18,18,0.8);
+--text:#e2e8f0;--text2:#94a3b8;--white:#fff;
+--grad:linear-gradient(135deg,var(--gold),var(--gold2));
+--glass:rgba(18,18,18,0.7);
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);overflow-x:hidden;line-height:1.6}
+h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;font-weight:600}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--dark)}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}
+
+.fade-up{opacity:0;transform:translateY(40px);transition:opacity .7s,transform .7s}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+.fade-scale{opacity:0;transform:scale(0.9);transition:opacity .6s,transform .6s}
+.fade-scale.visible{opacity:1;transform:scale(1)}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;transition:all .3s}
+nav.scrolled{background:rgba(10,10,10,0.9);backdrop-filter:blur(20px);border-bottom:1px solid rgba(245,158,11,0.1)}
+.nav-brand{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:var(--gold)}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{font-size:.85rem;font-weight:500;color:var(--text2);transition:color .3s}
+.nav-links a:hover{color:var(--gold)}
+.nav-cta{background:var(--grad);color:var(--dark);padding:.5rem 1.2rem;border-radius:50px;font-weight:700;font-size:.8rem;transition:transform .3s,box-shadow .3s}
+.nav-cta:hover{transform:scale(1.05);box-shadow:0 0 25px rgba(245,158,11,0.3)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;z-index:1001}
+.hamburger span{width:24px;height:2px;background:var(--text);transition:all .3s}
+.mobile-menu{display:none;position:fixed;inset:0;background:rgba(10,10,10,0.97);backdrop-filter:blur(20px);flex-direction:column;justify-content:center;align-items:center;gap:2rem;z-index:999}
+.mobile-menu.active{display:flex}
+.mobile-menu a{font-size:1.4rem;font-family:'Cormorant Garamond',serif;color:var(--text)}
+@media(max-width:768px){.nav-links{display:none}.hamburger{display:flex}}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;text-align:center;padding:6rem 1.5rem}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(245,158,11,0.08),transparent 60%)}
+.hero-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 40%,var(--dark) 100%)}
+.hero-content{position:relative;z-index:1;max-width:800px}
+.hero-line{width:60px;height:1px;background:var(--gold);margin:0 auto 1.5rem}
+.hero h1{font-size:clamp(2.5rem,7vw,5rem);line-height:1.1;color:var(--white);margin-bottom:1rem}
+.hero h1 span{color:var(--gold);font-style:italic}
+.hero p{font-size:1.1rem;color:var(--text2);margin-bottom:2.5rem;max-width:500px;margin-left:auto;margin-right:auto}
+.hero-buttons{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:var(--grad);color:var(--dark);padding:.85rem 2rem;border-radius:50px;font-weight:700;font-size:.95rem;transition:transform .3s,box-shadow .3s;display:inline-flex;align-items:center;gap:.5rem;border:none;cursor:pointer}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 40px rgba(245,158,11,0.3)}
+.btn-secondary{background:transparent;border:1.5px solid rgba(245,158,11,0.4);color:var(--gold);padding:.85rem 2rem;border-radius:50px;font-weight:600;font-size:.95rem;transition:all .3s;display:inline-flex;align-items:center;gap:.5rem;cursor:pointer}
+.btn-secondary:hover{background:rgba(245,158,11,0.1)}
+.hero-scroll{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);color:var(--text2);font-size:.75rem;letter-spacing:2px;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:.5rem;animation:bounce-scroll 2s infinite}
+@keyframes bounce-scroll{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+
+section{padding:5rem 1.5rem}
+.container{max-width:1100px;margin:0 auto}
+.section-header{text-align:center;margin-bottom:3.5rem}
+.section-label{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem}
+.section-header h2{font-size:clamp(1.8rem,4vw,3rem);color:var(--white)}
+.section-header p{color:var(--text2);max-width:550px;margin:.5rem auto 0;font-size:.95rem}
+.gold-line{width:40px;height:2px;background:var(--grad);margin:1rem auto 0}
+
+/* Portfolio Masonry */
+.portfolio-section{background:var(--dark)}
+.portfolio-filters{display:flex;justify-content:center;gap:.8rem;margin-bottom:2rem;flex-wrap:wrap}
+.filter-btn{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.15);color:var(--text2);padding:.4rem 1.2rem;border-radius:50px;font-size:.8rem;cursor:pointer;transition:all .3s;font-family:'Inter',sans-serif}
+.filter-btn:hover,.filter-btn.active{background:var(--grad);color:var(--dark);border-color:var(--gold);font-weight:600}
+.masonry{columns:3;column-gap:1rem}
+.masonry-item{break-inside:avoid;margin-bottom:1rem;border-radius:16px;overflow:hidden;position:relative;cursor:pointer;transition:transform .3s}
+.masonry-item:hover{transform:scale(1.02)}
+.masonry-item:hover .masonry-overlay{opacity:1}
+.masonry-placeholder{width:100%;display:flex;align-items:center;justify-content:center;font-size:2rem;color:rgba(255,255,255,0.3)}
+.masonry-item:nth-child(1) .masonry-placeholder{height:280px;background:linear-gradient(135deg,rgba(245,158,11,0.3),rgba(217,119,6,0.15))}
+.masonry-item:nth-child(2) .masonry-placeholder{height:200px;background:linear-gradient(135deg,rgba(168,85,247,0.25),rgba(245,158,11,0.1))}
+.masonry-item:nth-child(3) .masonry-placeholder{height:320px;background:linear-gradient(135deg,rgba(236,72,153,0.25),rgba(245,158,11,0.1))}
+.masonry-item:nth-child(4) .masonry-placeholder{height:240px;background:linear-gradient(135deg,rgba(59,130,246,0.25),rgba(245,158,11,0.1))}
+.masonry-item:nth-child(5) .masonry-placeholder{height:300px;background:linear-gradient(135deg,rgba(245,158,11,0.25),rgba(234,179,8,0.15))}
+.masonry-item:nth-child(6) .masonry-placeholder{height:220px;background:linear-gradient(135deg,rgba(16,185,129,0.25),rgba(245,158,11,0.1))}
+.masonry-item:nth-child(7) .masonry-placeholder{height:260px;background:linear-gradient(135deg,rgba(239,68,68,0.2),rgba(245,158,11,0.1))}
+.masonry-item:nth-child(8) .masonry-placeholder{height:190px;background:linear-gradient(135deg,rgba(99,102,241,0.25),rgba(245,158,11,0.1))}
+.masonry-item:nth-child(9) .masonry-placeholder{height:280px;background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(168,85,247,0.15))}
+.masonry-item:nth-child(10) .masonry-placeholder{height:230px;background:linear-gradient(135deg,rgba(34,197,94,0.2),rgba(245,158,11,0.1))}
+.masonry-item:nth-child(11) .masonry-placeholder{height:310px;background:linear-gradient(135deg,rgba(245,158,11,0.3),rgba(239,68,68,0.15))}
+.masonry-item:nth-child(12) .masonry-placeholder{height:200px;background:linear-gradient(135deg,rgba(6,182,212,0.2),rgba(245,158,11,0.1))}
+.masonry-overlay{position:absolute;inset:0;background:rgba(10,10,10,0.7);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold)}
+@media(max-width:768px){.masonry{columns:2}}
+@media(max-width:480px){.masonry{columns:1}}
+
+/* Packages */
+.packages-section{background:linear-gradient(180deg,var(--dark),#111)}
+.packages-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+.package-card{background:var(--glass);backdrop-filter:blur(20px);border:1px solid rgba(245,158,11,0.08);border-radius:24px;padding:2.5rem 2rem;transition:all .4s;position:relative;overflow:hidden}
+.package-card:hover{transform:translateY(-8px);border-color:rgba(245,158,11,0.3);box-shadow:0 20px 60px rgba(0,0,0,0.4)}
+.package-card.featured{border-color:rgba(245,158,11,0.3);background:linear-gradient(135deg,rgba(245,158,11,0.06),rgba(217,119,6,0.03))}
+.package-card.featured::after{content:'POPULAR';position:absolute;top:1.2rem;right:-2rem;background:var(--grad);color:var(--dark);font-size:.6rem;font-weight:800;padding:.3rem 2.5rem;transform:rotate(45deg);letter-spacing:1px}
+.package-name{font-size:1.8rem;color:var(--white);margin-bottom:.3rem}
+.package-price{font-size:2.8rem;font-family:'Inter',sans-serif;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.package-desc{font-size:.8rem;color:var(--text2);margin-bottom:1.5rem}
+.package-features{list-style:none;margin-bottom:2rem}
+.package-features li{padding:.45rem 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:.85rem;color:var(--text2);display:flex;align-items:center;gap:.5rem}
+.package-features li::before{content:'✦';color:var(--gold);font-size:.7rem}
+.package-btn{display:block;width:100%;text-align:center;background:var(--grad);color:var(--dark);padding:.85rem;border-radius:50px;font-weight:700;transition:transform .3s}
+.package-btn:hover{transform:scale(1.03)}
+
+/* About */
+.about-section{background:#111}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
+.about-photo{width:100%;aspect-ratio:4/5;border-radius:20px;background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(217,119,6,0.1));display:flex;align-items:center;justify-content:center;font-size:5rem;position:relative}
+.about-photo::after{content:'';position:absolute;inset:-8px;border:1px solid rgba(245,158,11,0.15);border-radius:24px}
+.about-content h2{font-size:2.5rem;color:var(--white);margin-bottom:1rem}
+.about-content p{color:var(--text2);margin-bottom:1rem;font-size:.95rem}
+.about-stats{display:flex;gap:2rem;margin-top:2rem}
+.about-stat h3{font-size:2rem;font-family:'Inter',sans-serif;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.about-stat p{font-size:.75rem;color:var(--text2)}
+@media(max-width:768px){.about-grid{grid-template-columns:1fr}.about-photo{max-width:300px;margin:0 auto}}
+
+/* Process */
+.process-section{background:var(--dark)}
+.timeline{max-width:700px;margin:0 auto;position:relative}
+.timeline::before{content:'';position:absolute;left:20px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--gold),transparent)}
+.timeline-item{display:flex;gap:2rem;margin-bottom:3rem;position:relative}
+.timeline-dot{width:42px;height:42px;border-radius:50%;background:var(--glass);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;z-index:1}
+.timeline-content h3{font-size:1.3rem;color:var(--white);margin-bottom:.3rem;font-family:'Inter',sans-serif;font-weight:700}
+.timeline-content p{color:var(--text2);font-size:.85rem}
+
+/* Horizontal Scroll Gallery */
+.scroll-section{background:#111;padding:5rem 0}
+.scroll-header{text-align:center;margin-bottom:2rem;padding:0 1.5rem}
+.scroll-gallery{display:flex;gap:1rem;overflow-x:auto;padding:0 1.5rem;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory}
+.scroll-gallery::-webkit-scrollbar{height:4px}
+.scroll-gallery::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px}
+.scroll-item{min-width:280px;height:350px;border-radius:16px;overflow:hidden;flex-shrink:0;scroll-snap-align:start;position:relative;transition:transform .3s}
+.scroll-item:hover{transform:scale(1.02)}
+.scroll-item .placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem}
+.scroll-item:nth-child(1) .placeholder{background:linear-gradient(135deg,rgba(245,158,11,0.3),rgba(236,72,153,0.15))}
+.scroll-item:nth-child(2) .placeholder{background:linear-gradient(135deg,rgba(168,85,247,0.3),rgba(245,158,11,0.15))}
+.scroll-item:nth-child(3) .placeholder{background:linear-gradient(135deg,rgba(59,130,246,0.3),rgba(245,158,11,0.15))}
+.scroll-item:nth-child(4) .placeholder{background:linear-gradient(135deg,rgba(16,185,129,0.3),rgba(245,158,11,0.15))}
+.scroll-item:nth-child(5) .placeholder{background:linear-gradient(135deg,rgba(239,68,68,0.3),rgba(245,158,11,0.15))}
+.scroll-item:nth-child(6) .placeholder{background:linear-gradient(135deg,rgba(245,158,11,0.3),rgba(234,179,8,0.15))}
+
+/* Testimonials */
+.testimonials-section{background:var(--dark)}
+.testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.testimonial-card{background:var(--glass);backdrop-filter:blur(20px);border:1px solid rgba(245,158,11,0.06);border-radius:20px;padding:2rem;transition:all .3s}
+.testimonial-card:hover{border-color:rgba(245,158,11,0.2)}
+.testimonial-stars{color:var(--gold);margin-bottom:.8rem}
+.testimonial-text{font-size:.9rem;color:var(--text);line-height:1.7;margin-bottom:1rem;font-style:italic}
+.testimonial-author{display:flex;align-items:center;gap:.8rem}
+.testimonial-avatar{width:40px;height:40px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;color:var(--dark)}
+.testimonial-name{font-weight:600;font-size:.85rem;color:var(--white)}
+.testimonial-role{font-size:.75rem;color:var(--text2)}
+
+/* CTA */
+.cta-section{background:linear-gradient(135deg,rgba(245,158,11,0.06),rgba(217,119,6,0.03))}
+.cta-content{text-align:center;max-width:600px;margin:0 auto}
+.cta-content h2{font-size:clamp(1.8rem,4vw,2.8rem);color:var(--white);margin-bottom:1rem}
+.cta-content p{color:var(--text2);margin-bottom:2rem}
+.cta-buttons{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+
+/* Map */
+.map-section{padding:0}
+.map-container{width:100%;height:350px;background:linear-gradient(135deg,#111,#1a1a1a);display:flex;align-items:center;justify-content:center;position:relative}
+.map-overlay{position:absolute;inset:0;background:rgba(10,10,10,0.5);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;color:var(--text2)}
+.map-overlay span{font-size:2rem}
+
+footer{background:#050505;border-top:1px solid rgba(255,255,255,0.03);padding:2rem 1.5rem;text-align:center}
+.footer-social{display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem}
+.footer-social a{width:40px;height:40px;border-radius:50%;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.15);display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .3s}
+.footer-social a:hover{background:var(--grad);color:var(--dark)}
+.footer-brand{font-size:.85rem;color:var(--text2)}
+.footer-brand a{color:var(--gold);font-weight:600}
+
+.whatsapp-fab{position:fixed;bottom:1.5rem;right:1.5rem;width:60px;height:60px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:#fff;z-index:999;cursor:pointer;transition:transform .3s;box-shadow:0 4px 20px rgba(37,211,102,0.4);animation:pulse-wa 2s infinite}
+.whatsapp-fab:hover{transform:scale(1.1)}
+@keyframes pulse-wa{0%{box-shadow:0 0 0 0 rgba(37,211,102,0.5)}70%{box-shadow:0 0 0 15px rgba(37,211,102,0)}100%{box-shadow:0 0 0 0 rgba(37,211,102,0)}}
+
+@media(max-width:768px){section{padding:3.5rem 1.2rem}.hero{padding:5rem 1.2rem}.cta-buttons{flex-direction:column;align-items:center}}
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <a href="#" class="nav-brand">📷 Raj Photography</a>
+  <div class="nav-links">
+    <a href="#portfolio">Portfolio</a>
+    <a href="#packages">Packages</a>
+    <a href="#about">About</a>
+    <a href="#process">Process</a>
+    <a href="#reviews">Reviews</a>
+    <a href="https://wa.me/{{whatsapp}}?text=Hi%2C%20I%20want%20to%20check%20availability%20for%20a%20shoot" class="nav-cta">📅 Book Now</a>
+  </div>
+  <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#portfolio" onclick="toggleMenu()">Portfolio</a>
+  <a href="#packages" onclick="toggleMenu()">Packages</a>
+  <a href="#about" onclick="toggleMenu()">About</a>
+  <a href="#process" onclick="toggleMenu()">Process</a>
+  <a href="#reviews" onclick="toggleMenu()">Reviews</a>
+  <a href="https://wa.me/{{whatsapp}}" class="btn-primary" onclick="toggleMenu()">📅 Book Now</a>
+</div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-vignette"></div>
+  <div class="hero-content fade-up">
+    <div class="hero-line"></div>
+    <h1>Capturing <span>Timeless</span><br>Moments</h1>
+    <p>Wedding • Portrait • Event • Product Photography — Turning your special moments into art, one frame at a time.</p>
+    <div class="hero-buttons">
+      <a href="https://wa.me/{{whatsapp}}?text=Hi%20Raj%2C%20I%27d%20like%20to%20check%20availability%20for%20a%20photo%20shoot" class="btn-primary">📅 Check Availability</a>
+      <a href="#portfolio" class="btn-secondary">🖼️ View Portfolio</a>
+    </div>
+  </div>
+  <div class="hero-scroll">Scroll Down<br>↓</div>
+</section>
+
+<!-- Portfolio -->
+<section class="portfolio-section" id="portfolio">
+  <div class="container">
+    <div class="section-header fade-up">
+      <span class="section-label">Portfolio</span>
+      <h2>Selected Works</h2>
+      <div class="gold-line"></div>
+    </div>
+    <div class="portfolio-filters fade-up">
+      <button class="filter-btn active">All</button>
+      <button class="filter-btn">Wedding</button>
+      <button class="filter-btn">Portrait</button>
+      <button class="filter-btn">Event</button>
+      <button class="filter-btn">Product</button>
+    </div>
+    <div class="masonry fade-up">
+      <div class="masonry-item"><div class="masonry-placeholder">💒</div><div class="masonry-overlay">Wedding — Sharma Family</div></div>
+      <div class="masonry-item"><div class="masonry-placeholder">👤</div><div class="masonry-overlay">Portrait — Corporate</div></div>
+      <div class="masonry-item"><div class="masonry-placeholder">🎉</div><div class="masonry-overlay">Event — Birthday Gala</div></div>
+      <div class="masonry-item"><div class="masonry-placeholder">📦</div><div class="masonry-overlay">Product — Jewelry</div></div>
+      <div class="masonry-item"><div class="masonry-placeholder">💐</div><div class="masonry-overlay">Wedding — Mehendi Ceremony</div></div>
+      <div class="masonry-item"><div class="masonry-placeholder">🤵</div><div class="masonry-overlay">Portrait — Engagement</div></div>
+      <div class="masonry-item"><div class="masonry-placeholder">🎊</div><div class="masonry-overlay">Event — Award Night</div></div>
+      <div class="masonry-item"><div class="masonry-placeholder">🍰</div><div class="masonry-overlay">Product — Food</div></div>
+      <div class="masonry-item"><div class="masonry-placeholder">💍</div><div class="masonry-overlay">Wedding — Ring Ceremony</div></div>
+      <div class="masonry-item"><div class="masonry-placeholder">👨‍👩‍👧</div><div class="masonry-overlay">Portrait — Family</div></div>
+      <div class="masonry-item"><div class="masonry-placeholder">🎭</div><div class="masonry-overlay">Event — Cultural Night</div></div>
+      <div class="masonry-item"><div class="masonry-placeholder">👗</div><div class="masonry-overlay">Product — Fashion</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Packages -->
+<section class="packages-section" id="packages">
+  <div class="container">
+    <div class="section-header fade-up">
+      <span class="section-label">Investment</span>
+      <h2>Photography Packages</h2>
+      <div class="gold-line"></div>
+    </div>
+    <div class="packages-grid">
+      <div class="package-card fade-up">
+        <h3 class="package-name">Basic</h3>
+        <p class="package-price">₹5,999</p>
+        <p class="package-desc">Perfect for portraits & small events</p>
+        <ul class="package-features">
+          <li>2 hour shoot</li>
+          <li>1 location</li>
+          <li>50 edited photos</li>
+          <li>Digital delivery</li>
+          <li>5 social media edits</li>
+          <li>Delivery in 5 days</li>
+        </ul>
+        <a href="https://wa.me/{{whatsapp}}?text=Hi%2C%20I%27m%20interested%20in%20the%20Basic%20package%20(₹5999)" class="package-btn">Book This Package</a>
+      </div>
+      <div class="package-card featured fade-up">
+        <h3 class="package-name">Premium</h3>
+        <p class="package-price">₹14,999</p>
+        <p class="package-desc">Ideal for pre-wedding & events</p>
+        <ul class="package-features">
+          <li>Full day shoot (8 hours)</li>
+          <li>Multiple locations</li>
+          <li>200 edited photos</li>
+          <li>1 minute highlight reel</li>
+          <li>Online gallery</li>
+          <li>20 social media edits</li>
+          <li>Delivery in 7 days</li>
+        </ul>
+        <a href="https://wa.me/{{whatsapp}}?text=Hi%2C%20I%27m%20interested%20in%20the%20Premium%20package%20(₹14999)" class="package-btn">Book This Package</a>
+      </div>
+      <div class="package-card fade-up">
+        <h3 class="package-name">Wedding</h3>
+        <p class="package-price">₹29,999</p>
+        <p class="package-desc">Complete wedding coverage</p>
+        <ul class="package-features">
+          <li>2-day wedding coverage</li>
+          <li>2 photographers + 1 videographer</li>
+          <li>500+ edited photos</li>
+          <li>3-5 min cinematic film</li>
+          <li>Drone shots</li>
+          <li>Wedding album (40 pages)</li>
+          <li>All raw files included</li>
+          <li>Delivery in 15 days</li>
+        </ul>
+        <a href="https://wa.me/{{whatsapp}}?text=Hi%2C%20I%27m%20interested%20in%20the%20Wedding%20package%20(₹29999)" class="package-btn">Book This Package</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About -->
+<section class="about-section" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-photo fade-up">📸</div>
+      <div class="about-content fade-up">
+        <span class="section-label">About Me</span>
+        <h2>The Story Behind the Lens</h2>
+        <p>I'm Raj, and I've been telling stories through photographs for over 8 years. What started as a passion during college has become my life's purpose — capturing the real, raw, beautiful moments that make life worth living.</p>
+        <p>I specialize in candid wedding photography, bringing an editorial touch to every frame. My approach is simple: I disappear into the background and let your story unfold naturally.</p>
+        <p><strong style="color:var(--gold)">Equipment:</strong> Canon R6 Mark II, Sony A7 IV, professional lighting, DJI Mini 3 Pro drone.</p>
+        <div class="about-stats">
+          <div class="about-stat"><h3>500+</h3><p>Events Covered</p></div>
+          <div class="about-stat"><h3>200+</h3><p>Weddings</p></div>
+          <div class="about-stat"><h3>8+</h3><p>Years Exp.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Process -->
+<section class="process-section" id="process">
+  <div class="container">
+    <div class="section-header fade-up">
+      <span class="section-label">How It Works</span>
+      <h2>From Booking to Delivery</h2>
+      <div class="gold-line"></div>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item fade-up">
+        <div class="timeline-dot">1</div>
+        <div class="timeline-content">
+          <h3>Book</h3>
+          <p>Message me on WhatsApp with your date, location, and requirements. I'll check availability and share a custom quote within 2 hours.</p>
+        </div>
+      </div>
+      <div class="timeline-item fade-up">
+        <div class="timeline-dot">2</div>
+        <div class="timeline-content">
+          <h3>Shoot</h3>
+          <p>On the day, I arrive with my team and equipment. We plan the shots, cover every moment, and make sure you enjoy while we work our magic.</p>
+        </div>
+      </div>
+      <div class="timeline-item fade-up">
+        <div class="timeline-dot">3</div>
+        <div class="timeline-content">
+          <h3>Edit</h3>
+          <p>Every photo is carefully color-graded and retouched. Videos are edited with cinematic music. You get a sneak peek within 48 hours.</p>
+        </div>
+      </div>
+      <div class="timeline-item fade-up">
+        <div class="timeline-dot">4</div>
+        <div class="timeline-content">
+          <h3>Deliver</h3>
+          <p>All photos and videos delivered via Google Drive. Albums printed and shipped to your doorstep. Lifetime storage on our cloud.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Recent Work Scroll -->
+<section class="scroll-section">
+  <div class="scroll-header fade-up">
+    <span class="section-label">Recent Work</span>
+    <h2 style="font-size:clamp(1.8rem,4vw,2.5rem);color:var(--white)">Latest From the Studio</h2>
+  </div>
+  <div class="scroll-gallery">
+    <div class="scroll-item"><div class="placeholder">💒</div></div>
+    <div class="scroll-item"><div class="placeholder">🌅</div></div>
+    <div class="scroll-item"><div class="placeholder">🎂</div></div>
+    <div class="scroll-item"><div class="placeholder">👰</div></div>
+    <div class="scroll-item"><div class="placeholder">🏛️</div></div>
+    <div class="scroll-item"><div class="placeholder">🌸</div></div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials-section" id="reviews">
+  <div class="container">
+    <div class="section-header fade-up">
+      <span class="section-label">Client Love</span>
+      <h2>What They Say</h2>
+      <div class="gold-line"></div>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card fade-up">
+        <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+        <p class="testimonial-text">"Raj captured our wedding so beautifully that every photo makes us relive the day. The candid shots are pure magic. The album quality is outstanding!"</p>
+        <div class="testimonial-author"><div class="testimonial-avatar">AS</div><div><div class="testimonial-name">Ananya & Siddharth</div><div class="testimonial-role">Wedding, Dec 2025</div></div></div>
+      </div>
+      <div class="testimonial-card fade-up">
+        <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+        <p class="testimonial-text">"We hired Raj for our product photography and the results were incredible. Sales went up 40% after updating our website with his photos."</p>
+        <div class="testimonial-author"><div class="testimonial-avatar">PK</div><div><div class="testimonial-name">Priya Kapoor</div><div class="testimonial-role">E-commerce Business</div></div></div>
+      </div>
+      <div class="testimonial-card fade-up">
+        <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+        <p class="testimonial-text">"The pre-wedding shoot was so fun and the photos came out amazing. Raj has a great eye for locations and lighting. Highly recommend!"</p>
+        <div class="testimonial-author"><div class="testimonial-avatar">NK</div><div><div class="testimonial-name">Neha & Kunal</div><div class="testimonial-role">Pre-Wedding, Oct 2025</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-content fade-up">
+    <h2>Let's Create Something Beautiful</h2>
+    <p>Every event is unique. Let's discuss your vision and create memories that last forever. Limited dates available — book early!</p>
+    <div class="cta-buttons">
+      <a href="https://wa.me/{{whatsapp}}?text=Hi%20Raj%2C%20I%27d%20like%20to%20check%20availability%20for%20a%20shoot" class="btn-primary">📅 Check Availability</a>
+      <a href="tel:{{phone}}" class="btn-secondary">📞 Call Now</a>
+      <a href="https://instagram.com/" class="btn-secondary" target="_blank">📷 Instagram</a>
+    </div>
+  </div>
+</section>
+
+<!-- Map -->
+<section class="map-section">
+  <div class="map-container">
+    <div class="map-overlay">
+      <span>📍</span>
+      <p style="color:var(--text2)">{{address}}</p>
+      <a href="https://maps.google.com/?q={{address}}" class="btn-primary" style="font-size:.85rem;padding:.6rem 1.5rem" target="_blank">Open in Google Maps</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-social">
+    <a href="https://instagram.com/" target="_blank">📷</a>
+    <a href="https://wa.me/{{whatsapp}}" target="_blank">💬</a>
+    <a href="tel:{{phone}}">📞</a>
+    <a href="https://youtube.com/" target="_blank">▶️</a>
+  </div>
+  <p class="footer-brand">⚡ Website by <a href="https://sherusites.com" target="_blank">SheruSites</a> — Apna bhi banwao</p>
+</footer>
+
+<a href="https://wa.me/{{whatsapp}}?text=Hi%2C%20I%27d%20like%20to%20book%20a%20photo%20shoot" class="whatsapp-fab" target="_blank">💬</a>
+
+<script>
+const nav=document.getElementById('navbar');
+window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>50)});
+function toggleMenu(){document.getElementById('mobileMenu').classList.toggle('active');document.body.style.overflow=document.getElementById('mobileMenu').classList.contains('active')?'hidden':''}
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}})},{threshold:0.1,rootMargin:'0px 0px -50px 0px'});
+document.querySelectorAll('.fade-up,.fade-scale').forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{businessName}} — {{tagline}}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--lime:#84cc16;--green:#22c55e;--dark:#0a0a0a;--card:rgba(20,20,20,0.8);
+--text:#e2e8f0;--text2:#94a3b8;--white:#fff;--gold:#f59e0b;
+--grad:linear-gradient(135deg,var(--lime),var(--green));
+--glass:rgba(20,20,20,0.7);
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);overflow-x:hidden;line-height:1.6}
+h1,h2,h3{font-family:'Bebas Neue',sans-serif;letter-spacing:1px}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--dark)}
+::-webkit-scrollbar-thumb{background:var(--lime);border-radius:3px}
+
+.fade-up{opacity:0;transform:translateY(40px);transition:opacity .7s,transform .7s}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;transition:all .3s}
+nav.scrolled{background:rgba(10,10,10,0.9);backdrop-filter:blur(20px);border-bottom:1px solid rgba(132,204,22,0.1)}
+.nav-brand{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{font-size:.85rem;font-weight:500;color:var(--text2);transition:color .3s}
+.nav-links a:hover{color:var(--lime)}
+.nav-cta{background:var(--grad);color:var(--dark);padding:.5rem 1.2rem;border-radius:50px;font-weight:700;font-size:.8rem;transition:transform .3s,box-shadow .3s}
+.nav-cta:hover{transform:scale(1.05);box-shadow:0 0 25px rgba(132,204,22,0.4)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;z-index:1001}
+.hamburger span{width:24px;height:2px;background:var(--text);transition:all .3s}
+.mobile-menu{display:none;position:fixed;inset:0;background:rgba(10,10,10,0.97);backdrop-filter:blur(20px);flex-direction:column;justify-content:center;align-items:center;gap:2rem;z-index:999}
+.mobile-menu.active{display:flex}
+.mobile-menu a{font-size:1.3rem;font-weight:500;color:var(--text);font-family:'Bebas Neue',sans-serif;letter-spacing:2px}
+@media(max-width:768px){.nav-links{display:none}.hamburger{display:flex}}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;padding:6rem 1.5rem 4rem}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 80%,rgba(132,204,22,0.12),transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(34,197,94,0.08),transparent 50%)}
+.hero-lines{position:absolute;inset:0;overflow:hidden}
+.hero-line{position:absolute;width:1px;height:100%;background:linear-gradient(to bottom,transparent,rgba(132,204,22,0.1),transparent);animation:line-move 8s linear infinite}
+@keyframes line-move{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
+.hero-content{position:relative;z-index:1;max-width:700px}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(132,204,22,0.1);border:1px solid rgba(132,204,22,0.2);padding:.4rem 1rem;border-radius:50px;font-size:.8rem;color:var(--lime);margin-bottom:1.5rem;font-family:'Inter',sans-serif}
+.hero h1{font-size:clamp(3rem,8vw,6rem);line-height:.95;margin-bottom:1rem;color:var(--white)}
+.hero h1 span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:1.1rem;color:var(--text2);margin-bottom:2rem;max-width:500px}
+.hero-buttons{display:flex;gap:1rem;flex-wrap:wrap}
+.btn-primary{background:var(--grad);color:var(--dark);padding:.85rem 2rem;border-radius:50px;font-weight:700;font-size:.95rem;transition:transform .3s,box-shadow .3s;display:inline-flex;align-items:center;gap:.5rem;border:none;cursor:pointer;animation:pulse-btn 2s infinite}
+@keyframes pulse-btn{0%{box-shadow:0 0 0 0 rgba(132,204,22,0.4)}70%{box-shadow:0 0 0 12px rgba(132,204,22,0)}100%{box-shadow:0 0 0 0 rgba(132,204,22,0)}}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-secondary{background:transparent;border:1.5px solid rgba(132,204,22,0.4);color:var(--lime);padding:.85rem 2rem;border-radius:50px;font-weight:600;font-size:.95rem;transition:all .3s;display:inline-flex;align-items:center;gap:.5rem;cursor:pointer}
+.btn-secondary:hover{background:rgba(132,204,22,0.1)}
+.hero-counters{display:flex;gap:3rem;margin-top:3rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,0.05)}
+.counter h3{font-size:2.5rem;font-family:'Bebas Neue',sans-serif;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.counter p{font-size:.75rem;color:var(--text2);font-family:'Inter',sans-serif}
+
+section{padding:5rem 1.5rem}
+.container{max-width:1100px;margin:0 auto}
+.section-header{text-align:center;margin-bottom:3.5rem}
+.section-label{display:inline-block;font-size:.75rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--lime);margin-bottom:.75rem;font-family:'Inter',sans-serif}
+.section-header h2{font-size:clamp(2rem,5vw,3.5rem);color:var(--white)}
+.section-header p{color:var(--text2);max-width:550px;margin:.5rem auto 0;font-size:.95rem}
+
+/* Plans */
+.plans-section{background:linear-gradient(180deg,var(--dark),#0d1a0d)}
+.plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.plan-card{background:var(--glass);backdrop-filter:blur(20px);border:1px solid rgba(132,204,22,0.08);border-radius:24px;padding:2.5rem 2rem;transition:all .4s;position:relative;overflow:hidden;text-align:center}
+.plan-card:hover{transform:translateY(-8px);border-color:rgba(132,204,22,0.3);box-shadow:0 20px 60px rgba(0,0,0,0.4)}
+.plan-card.featured{border-color:rgba(132,204,22,0.4);background:linear-gradient(135deg,rgba(132,204,22,0.08),rgba(34,197,94,0.04))}
+.plan-card.featured::after{content:'BEST VALUE';position:absolute;top:1.2rem;right:-2.5rem;background:var(--grad);color:var(--dark);font-size:.6rem;font-weight:800;padding:.3rem 3rem;transform:rotate(45deg);font-family:'Inter',sans-serif;letter-spacing:1px}
+.plan-name{font-size:1.5rem;color:var(--white);margin-bottom:.5rem}
+.plan-price{font-size:3rem;font-family:'Bebas Neue',sans-serif;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.2rem}
+.plan-period{font-size:.8rem;color:var(--text2);margin-bottom:1.5rem;font-family:'Inter',sans-serif}
+.plan-features{list-style:none;text-align:left;margin-bottom:2rem}
+.plan-features li{padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:.85rem;color:var(--text2);display:flex;align-items:center;gap:.5rem;font-family:'Inter',sans-serif}
+.plan-features li::before{content:'✓';color:var(--lime);font-weight:700}
+.plan-btn{display:block;width:100%;background:var(--grad);color:var(--dark);padding:.85rem;border-radius:50px;font-weight:700;text-align:center;transition:transform .3s;font-family:'Inter',sans-serif}
+.plan-btn:hover{transform:scale(1.03)}
+
+/* Facilities */
+.facilities-section{background:#0d1a0d}
+.facilities-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem}
+.facility-card{background:var(--glass);backdrop-filter:blur(20px);border:1px solid rgba(132,204,22,0.06);border-radius:18px;padding:1.8rem 1.2rem;text-align:center;transition:all .3s}
+.facility-card:hover{transform:translateY(-4px);border-color:rgba(132,204,22,0.2);box-shadow:0 10px 30px rgba(0,0,0,0.3)}
+.facility-icon{font-size:2rem;margin-bottom:.8rem}
+.facility-card h3{font-size:1rem;color:var(--white);margin-bottom:.3rem;font-family:'Inter',sans-serif;font-weight:600}
+.facility-card p{font-size:.75rem;color:var(--text2)}
+
+/* Trainers */
+.trainers-section{background:var(--dark)}
+.trainers-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.trainer-card{background:var(--glass);backdrop-filter:blur(20px);border:1px solid rgba(132,204,22,0.08);border-radius:20px;overflow:hidden;transition:all .4s}
+.trainer-card:hover{transform:translateY(-5px);border-color:rgba(132,204,22,0.25)}
+.trainer-photo{width:100%;height:250px;background:linear-gradient(135deg,rgba(132,204,22,0.2),rgba(34,197,94,0.1));display:flex;align-items:center;justify-content:center;font-size:4rem}
+.trainer-info{padding:1.5rem}
+.trainer-info h3{font-size:1.3rem;color:var(--white);font-family:'Inter',sans-serif;font-weight:700}
+.trainer-info .specialty{color:var(--lime);font-size:.85rem;font-weight:600;margin-bottom:.5rem}
+.trainer-info p{font-size:.8rem;color:var(--text2)}
+
+/* Schedule */
+.schedule-section{background:linear-gradient(180deg,var(--dark),#0d1a0d)}
+.schedule-table{width:100%;max-width:900px;margin:0 auto;border-collapse:collapse;border-radius:16px;overflow:hidden}
+.schedule-table th{background:rgba(132,204,22,0.15);color:var(--lime);font-family:'Inter',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:1rem;text-align:left}
+.schedule-table td{padding:.9rem 1rem;border-bottom:1px solid rgba(255,255,255,0.04);font-size:.85rem;color:var(--text2)}
+.schedule-table tr:hover td{background:rgba(132,204,22,0.03)}
+.class-badge{display:inline-block;padding:.2rem .6rem;border-radius:6px;font-size:.7rem;font-weight:600;background:rgba(132,204,22,0.1);color:var(--lime)}
+.schedule-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* Transformations */
+.transform-section{background:#0d1a0d}
+.transform-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+.transform-card{border-radius:20px;overflow:hidden;background:var(--glass);border:1px solid rgba(132,204,22,0.08);transition:all .3s}
+.transform-card:hover{border-color:rgba(132,204,22,0.2)}
+.transform-images{display:grid;grid-template-columns:1fr 1fr;height:200px}
+.transform-before,.transform-after{display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:'Inter',sans-serif}
+.transform-before{background:linear-gradient(135deg,rgba(239,68,68,0.2),rgba(239,68,68,0.1));color:#ef4444}
+.transform-after{background:linear-gradient(135deg,rgba(132,204,22,0.2),rgba(34,197,94,0.1));color:var(--lime)}
+.transform-info{padding:1.2rem}
+.transform-info h3{font-size:1rem;color:var(--white);font-family:'Inter',sans-serif;font-weight:600}
+.transform-info p{font-size:.8rem;color:var(--text2)}
+
+/* Gallery */
+.gallery-section{background:var(--dark)}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.gallery-item{aspect-ratio:1;border-radius:16px;overflow:hidden;position:relative;cursor:pointer;transition:transform .3s}
+.gallery-item:hover{transform:scale(1.03)}
+.gallery-item .placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem}
+.gallery-item:nth-child(1) .placeholder{background:linear-gradient(135deg,rgba(132,204,22,0.3),rgba(34,197,94,0.15))}
+.gallery-item:nth-child(2) .placeholder{background:linear-gradient(135deg,rgba(34,197,94,0.3),rgba(16,185,129,0.15))}
+.gallery-item:nth-child(3) .placeholder{background:linear-gradient(135deg,rgba(132,204,22,0.2),rgba(245,158,11,0.15))}
+.gallery-item:nth-child(4) .placeholder{background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(132,204,22,0.15))}
+.gallery-item:nth-child(5) .placeholder{background:linear-gradient(135deg,rgba(168,85,247,0.2),rgba(132,204,22,0.15))}
+.gallery-item:nth-child(6) .placeholder{background:linear-gradient(135deg,rgba(236,72,153,0.2),rgba(132,204,22,0.15))}
+@media(max-width:600px){.gallery-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* Reviews */
+.reviews-section{background:linear-gradient(180deg,var(--dark),#0d1a0d)}
+.reviews-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.review-card{background:var(--glass);backdrop-filter:blur(20px);border:1px solid rgba(132,204,22,0.06);border-radius:20px;padding:2rem;transition:all .3s}
+.review-card:hover{border-color:rgba(132,204,22,0.2)}
+.review-stars{color:var(--gold);margin-bottom:.8rem}
+.review-text{font-size:.9rem;color:var(--text);line-height:1.7;margin-bottom:1rem;font-style:italic}
+.review-author{display:flex;align-items:center;gap:.8rem}
+.review-avatar{width:40px;height:40px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;color:var(--dark)}
+.review-name{font-weight:600;font-size:.85rem;color:var(--white)}
+.review-role{font-size:.75rem;color:var(--text2)}
+
+/* CTA */
+.cta-section{background:linear-gradient(135deg,rgba(132,204,22,0.08),rgba(34,197,94,0.04))}
+.cta-content{text-align:center;max-width:600px;margin:0 auto}
+.cta-content h2{font-size:clamp(2rem,5vw,3.5rem);color:var(--white);margin-bottom:1rem}
+.cta-content p{color:var(--text2);margin-bottom:2rem}
+.cta-buttons{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+
+/* Map */
+.map-section{padding:0}
+.map-container{width:100%;height:350px;background:linear-gradient(135deg,#111,#1a1a1a);display:flex;align-items:center;justify-content:center;color:var(--text2);position:relative}
+.map-overlay{position:absolute;inset:0;background:rgba(10,10,10,0.5);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem}
+.map-overlay span{font-size:2rem}
+
+/* Footer */
+footer{background:#050505;border-top:1px solid rgba(255,255,255,0.03);padding:2rem 1.5rem;text-align:center}
+.footer-brand{font-size:.85rem;color:var(--text2)}
+.footer-brand a{color:var(--lime);font-weight:600}
+.footer-links{display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem}
+.footer-links a{color:var(--text2);font-size:.8rem;transition:color .3s}
+.footer-links a:hover{color:var(--lime)}
+
+/* WhatsApp FAB */
+.whatsapp-fab{position:fixed;bottom:1.5rem;right:1.5rem;width:60px;height:60px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:#fff;z-index:999;cursor:pointer;transition:transform .3s;box-shadow:0 4px 20px rgba(37,211,102,0.4);animation:pulse-wa 2s infinite}
+.whatsapp-fab:hover{transform:scale(1.1)}
+@keyframes pulse-wa{0%{box-shadow:0 0 0 0 rgba(37,211,102,0.5)}70%{box-shadow:0 0 0 15px rgba(37,211,102,0)}100%{box-shadow:0 0 0 0 rgba(37,211,102,0)}}
+
+@media(max-width:768px){
+  section{padding:3.5rem 1.2rem}
+  .hero{padding:5rem 1.2rem 3rem}
+  .hero-counters{gap:1.5rem;flex-wrap:wrap}
+  .cta-buttons{flex-direction:column;align-items:center}
+}
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <a href="#" class="nav-brand">💪 IRON TEMPLE</a>
+  <div class="nav-links">
+    <a href="#plans">Plans</a>
+    <a href="#facilities">Facilities</a>
+    <a href="#trainers">Trainers</a>
+    <a href="#schedule">Schedule</a>
+    <a href="#reviews">Reviews</a>
+    <a href="https://wa.me/{{whatsapp}}?text=Hi%2C%20I%20want%20to%20join%20the%20gym" class="nav-cta">🏋️ Join Now</a>
+  </div>
+  <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#plans" onclick="toggleMenu()">Plans</a>
+  <a href="#facilities" onclick="toggleMenu()">Facilities</a>
+  <a href="#trainers" onclick="toggleMenu()">Trainers</a>
+  <a href="#schedule" onclick="toggleMenu()">Schedule</a>
+  <a href="#reviews" onclick="toggleMenu()">Reviews</a>
+  <a href="https://wa.me/{{whatsapp}}?text=Hi%2C%20I%20want%20to%20join" class="btn-primary" onclick="toggleMenu()">🏋️ Join Now</a>
+</div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines" id="heroLines"></div>
+  <div class="hero-content fade-up">
+    <div class="hero-badge">🔥 Now Open — Limited Slots Available</div>
+    <h1>UNLEASH<br>YOUR <span>BEAST</span><br>MODE</h1>
+    <p>Transform your body and mind at {{businessName}}. State-of-the-art equipment, expert trainers, and a community that pushes you further.</p>
+    <div class="hero-buttons">
+      <a href="https://wa.me/{{whatsapp}}?text=Hi%2C%20I%20want%20to%20join%20Iron%20Temple%20Gym" class="btn-primary">🏋️ Join Now — ₹999/mo</a>
+      <a href="tel:{{phone}}" class="btn-secondary">📞 Call Us</a>
+    </div>
+    <div class="hero-counters">
+      <div class="counter"><h3>500+</h3><p>Active Members</p></div>
+      <div class="counter"><h3>5+</h3><p>Expert Trainers</p></div>
+      <div class="counter"><h3>4.8</h3><p>Google Rating</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Plans -->
+<section class="plans-section" id="plans">
+  <div class="container">
+    <div class="section-header fade-up">
+      <span class="section-label">Membership Plans</span>
+      <h2>CHOOSE YOUR PLAN</h2>
+      <p>Flexible plans for every fitness goal. No hidden charges.</p>
+    </div>
+    <div class="plans-grid">
+      <div class="plan-card fade-up">
+        <h3 class="plan-name">MONTHLY</h3>
+        <p class="plan-price">₹999</p>
+        <p class="plan-period">per month</p>
+        <ul class="plan-features">
+          <li>Full gym access</li>
+          <li>Cardio zone</li>
+          <li>Locker facility</li>
+          <li>Basic trainer guidance</li>
+        </ul>
+        <a href="https://wa.me/{{whatsapp}}?text=Hi%2C%20I%20want%20the%20Monthly%20plan%20at%20₹999" class="plan-btn">Get Started</a>
+      </div>
+      <div class="plan-card featured fade-up">
+        <h3 class="plan-name">QUARTERLY</h3>
+        <p class="plan-price">₹2,499</p>
+        <p class="plan-period">per 3 months (save ₹498)</p>
+        <ul class="plan-features">
+          <li>Everything in Monthly</li>
+          <li>Personal trainer (2x/week)</li>
+          <li>Diet plan</li>
+          <li>Body composition analysis</li>
+          <li>Towel service</li>
+        </ul>
+        <a href="https://wa.me/{{whatsapp}}?text=Hi%2C%20I%20want%20the%20Quarterly%20plan%20at%20₹2499" class="plan-btn">Get Started</a>
+      </div>
+      <div class="plan-card fade-up">
+        <h3 class="plan-name">ANNUAL</h3>
+        <p class="plan-price">₹7,999</p>
+        <p class="plan-period">per year (save ₹3,989)</p>
+        <ul class="plan-features">
+          <li>Everything in Quarterly</li>
+          <li>Dedicated personal trainer</li>
+          <li>Monthly progress tracking</li>
+          <li>Supplement guidance</li>
+          <li>Free gym merchandise</li>
+          <li>Guest passes (2/month)</li>
+        </ul>
+        <a href="https://wa.me/{{whatsapp}}?text=Hi%2C%20I%20want%20the%20Annual%20plan%20at%20₹7999" class="plan-btn">Get Started</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Facilities -->
+<section class="facilities-section" id="facilities">
+  <div class="container">
+    <div class="section-header fade-up">
+      <span class="section-label">World-Class Facilities</span>
+      <h2>EVERYTHING YOU NEED</h2>
+    </div>
+    <div class="facilities-grid fade-up">
+      <div class="facility-card"><div class="facility-icon">🏋️</div><h3>Heavy Equipment</h3><p>Imported machines & free weights</p></div>
+      <div class="facility-card"><div class="facility-icon">❄️</div><h3>AC Training</h3><p>Fully air-conditioned floors</p></div>
+      <div class="facility-card"><div class="facility-icon">👨‍🏫</div><h3>Expert Trainers</h3><p>Certified fitness professionals</p></div>
+      <div class="facility-card"><div class="facility-icon">🔒</div><h3>Secure Lockers</h3><p>Personal storage with keys</p></div>
+      <div class="facility-card"><div class="facility-icon">🚿</div><h3>Hot Showers</h3><p>Clean changing rooms</p></div>
+      <div class="facility-card"><div class="facility-icon">🎵</div><h3>Sound System</h3><p>Pumping workout music</p></div>
+      <div class="facility-card"><div class="facility-icon">🅿️</div><h3>Free Parking</h3><p>Two & four wheeler</p></div>
+      <div class="facility-card"><div class="facility-icon">💧</div><h3>RO Water</h3><p>Purified drinking water</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Trainers -->
+<section class="trainers-section" id="trainers">
+  <div class="container">
+    <div class="section-header fade-up">
+      <span class="section-label">Our Team</span>
+      <h2>MEET YOUR TRAINERS</h2>
+    </div>
+    <div class="trainers-grid">
+      <div class="trainer-card fade-up">
+        <div class="trainer-photo">🧔</div>
+        <div class="trainer-info">
+          <h3>Vikram Singh</h3>
+          <p class="specialty">Head Trainer — Strength & Conditioning</p>
+          <p>10+ years experience. Former state-level powerlifter. ACE certified.</p>
+        </div>
+      </div>
+      <div class="trainer-card fade-up">
+        <div class="trainer-photo">👩</div>
+        <div class="trainer-info">
+          <h3>Neha Kapoor</h3>
+          <p class="specialty">Yoga & Flexibility Coach</p>
+          <p>8+ years experience. Certified yoga instructor. Specializes in weight loss yoga.</p>
+        </div>
+      </div>
+      <div class="trainer-card fade-up">
+        <div class="trainer-photo">🧑</div>
+        <div class="trainer-info">
+          <h3>Arjun Reddy</h3>
+          <p class="specialty">Cardio & HIIT Specialist</p>
+          <p>5+ years experience. Marathon runner. Expert in functional training.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Schedule -->
+<section class="schedule-section" id="schedule">
+  <div class="container">
+    <div class="section-header fade-up">
+      <span class="section-label">Class Schedule</span>
+      <h2>WEEKLY TIMETABLE</h2>
+      <p>Group classes included with Quarterly and Annual plans</p>
+    </div>
+    <div class="schedule-scroll fade-up">
+      <table class="schedule-table">
+        <thead><tr><th>Time</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+        <tbody>
+          <tr><td>6:00 AM</td><td><span class="class-badge">Yoga</span></td><td><span class="class-badge">Cardio</span></td><td><span class="class-badge">Yoga</span></td><td><span class="class-badge">Cardio</span></td><td><span class="class-badge">Yoga</span></td><td><span class="class-badge">Zumba</span></td></tr>
+          <tr><td>7:00 AM</td><td><span class="class-badge">HIIT</span></td><td><span class="class-badge">Weights</span></td><td><span class="class-badge">HIIT</span></td><td><span class="class-badge">Weights</span></td><td><span class="class-badge">HIIT</span></td><td><span class="class-badge">Weights</span></td></tr>
+          <tr><td>5:00 PM</td><td><span class="class-badge">Zumba</span></td><td><span class="class-badge">CrossFit</span></td><td><span class="class-badge">Zumba</span></td><td><span class="class-badge">CrossFit</span></td><td><span class="class-badge">Zumba</span></td><td>—</td></tr>
+          <tr><td>6:00 PM</td><td><span class="class-badge">Weights</span></td><td><span class="class-badge">Yoga</span></td><td><span class="class-badge">Weights</span></td><td><span class="class-badge">Yoga</span></td><td><span class="class-badge">Weights</span></td><td>—</td></tr>
+          <tr><td>7:00 PM</td><td><span class="class-badge">Cardio</span></td><td><span class="class-badge">HIIT</span></td><td><span class="class-badge">Cardio</span></td><td><span class="class-badge">HIIT</span></td><td><span class="class-badge">Cardio</span></td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Transformations -->
+<section class="transform-section">
+  <div class="container">
+    <div class="section-header fade-up">
+      <span class="section-label">Results</span>
+      <h2>REAL TRANSFORMATIONS</h2>
+      <p>Our members' incredible journeys</p>
+    </div>
+    <div class="transform-grid">
+      <div class="transform-card fade-up">
+        <div class="transform-images"><div class="transform-before">BEFORE</div><div class="transform-after">AFTER</div></div>
+        <div class="transform-info"><h3>Rohit — Lost 18kg in 6 months</h3><p>"Iron Temple changed my life. The trainers and community kept me going!"</p></div>
+      </div>
+      <div class="transform-card fade-up">
+        <div class="transform-images"><div class="transform-before">BEFORE</div><div class="transform-after">AFTER</div></div>
+        <div class="transform-info"><h3>Priya — Gained muscle, lost fat</h3><p>"I never thought I could get this strong. Best decision I ever made."</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Gallery -->
+<section class="gallery-section">
+  <div class="container">
+    <div class="section-header fade-up">
+      <span class="section-label">Our Space</span>
+      <h2>INSIDE THE TEMPLE</h2>
+    </div>
+    <div class="gallery-grid fade-up">
+      <div class="gallery-item"><div class="placeholder">🏋️</div></div>
+      <div class="gallery-item"><div class="placeholder">💪</div></div>
+      <div class="gallery-item"><div class="placeholder">🧘</div></div>
+      <div class="gallery-item"><div class="placeholder">🏃</div></div>
+      <div class="gallery-item"><div class="placeholder">🥊</div></div>
+      <div class="gallery-item"><div class="placeholder">⚡</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Reviews -->
+<section class="reviews-section" id="reviews">
+  <div class="container">
+    <div class="section-header fade-up">
+      <span class="section-label">Member Reviews</span>
+      <h2>WHAT THEY SAY</h2>
+    </div>
+    <div class="reviews-grid">
+      <div class="review-card fade-up">
+        <div class="review-stars">⭐⭐⭐⭐⭐</div>
+        <p class="review-text">"Best gym in the area! Equipment is top-notch, trainers are motivating, and the vibe is incredible. Worth every rupee."</p>
+        <div class="review-author"><div class="review-avatar">AK</div><div><div class="review-name">Anil Kumar</div><div class="review-role">Member since 2023</div></div></div>
+      </div>
+      <div class="review-card fade-up">
+        <div class="review-stars">⭐⭐⭐⭐⭐</div>
+        <p class="review-text">"The yoga classes are amazing. Neha ma'am is an excellent teacher. Clean facilities and great atmosphere."</p>
+        <div class="review-author"><div class="review-avatar">SK</div><div><div class="review-name">Simran Kaur</div><div class="review-role">Member since 2024</div></div></div>
+      </div>
+      <div class="review-card fade-up">
+        <div class="review-stars">⭐⭐⭐⭐⭐</div>
+        <p class="review-text">"Lost 15kgs in 4 months with their guidance. Vikram sir is the best trainer. Affordable plans too!"</p>
+        <div class="review-author"><div class="review-avatar">RM</div><div><div class="review-name">Rahul Mishra</div><div class="review-role">Member since 2024</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-content fade-up">
+    <h2>READY TO TRANSFORM?</h2>
+    <p>Start your fitness journey today. First session FREE! Message us on WhatsApp or call to book your trial.</p>
+    <div class="cta-buttons">
+      <a href="https://wa.me/{{whatsapp}}?text=Hi%2C%20I%20want%20to%20join%20Iron%20Temple%20Gym.%20Can%20I%20get%20a%20free%20trial%3F" class="btn-primary">🏋️ Join via WhatsApp</a>
+      <a href="tel:{{phone}}" class="btn-secondary">📞 Call Now</a>
+    </div>
+  </div>
+</section>
+
+<!-- Map -->
+<section class="map-section">
+  <div class="map-container">
+    <div class="map-overlay">
+      <span>📍</span>
+      <p>{{address}}</p>
+      <a href="https://maps.google.com/?q={{address}}" class="btn-primary" style="font-size:.85rem;padding:.6rem 1.5rem;animation:none" target="_blank">Open in Google Maps</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-links">
+    <a href="#plans">Plans</a><a href="#facilities">Facilities</a><a href="#trainers">Trainers</a><a href="#schedule">Schedule</a><a href="#reviews">Reviews</a>
+  </div>
+  <p class="footer-brand">⚡ Website by <a href="https://sherusites.com" target="_blank">SheruSites</a> — Apna bhi banwao</p>
+</footer>
+
+<a href="https://wa.me/{{whatsapp}}?text=Hi%2C%20I%20want%20to%20join%20Iron%20Temple%20Gym" class="whatsapp-fab" target="_blank">💬</a>
+
+<script>
+const nav=document.getElementById('navbar');
+window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>50)});
+function toggleMenu(){document.getElementById('mobileMenu').classList.toggle('active');document.body.style.overflow=document.getElementById('mobileMenu').classList.contains('active')?'hidden':''}
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}})},{threshold:0.1,rootMargin:'0px 0px -50px 0px'});
+document.querySelectorAll('.fade-up').forEach(el=>observer.observe(el));
+// Animated lines
+(function(){const c=document.getElementById('heroLines');for(let i=0;i<8;i++){const l=document.createElement('div');l.className='hero-line';l.style.left=(10+i*12)+'%';l.style.animationDelay=(i*1.5)+'s';l.style.animationDuration=(6+Math.random()*4)+'s';c.appendChild(l)}})();
+</script>
+</body>
+</html>

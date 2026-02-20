@@ -8,6 +8,7 @@ import { BusinessInfo, detectCategory, generateSlug, generateSite } from './site
 import { getOrCreateUser, saveUser, createSiteData, getSiteData, saveSiteData, addMenuItem, removeMenuItem, updatePrice, addService, updateTimings, setOffer, clearOffer, setOpenStatus, listUserSites, SiteData } from './data-store.ts';
 import { generateContent } from './ai-content.ts';
 import { renderSite } from './template-renderer.ts';
+import { agentHandle } from './site-agent.ts';
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
@@ -52,6 +53,33 @@ export function setBaseUrl(url: string) {
 
 function getSession(phone: string): Session {
   if (!sessions.has(phone)) {
+    // Check if user has existing sites — restore session
+    const user = getOrCreateUser(phone);
+    if (user.sites.length > 0) {
+      const activeSite = user.activeSite || user.sites[user.sites.length - 1];
+      const siteData = getSiteData(activeSite);
+      if (siteData) {
+        sessions.set(phone, {
+          state: 'complete',
+          phone,
+          data: {
+            slug: activeSite,
+            businessName: siteData.businessName,
+            category: siteData.category,
+            phone: siteData.phone,
+            whatsapp: siteData.whatsapp,
+            address: siteData.address,
+            timings: siteData.timings,
+          },
+          slug: activeSite,
+          siteUrl: `${BASE_URL}/site/${activeSite}`,
+          createdAt: Date.now(),
+          paid: siteData.plan === 'premium',
+        });
+        console.log(`[Session] Restored ${phone} → ${siteData.businessName}`);
+        return sessions.get(phone)!;
+      }
+    }
     sessions.set(phone, {
       state: 'idle',
       phone,
@@ -341,16 +369,29 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         ]};
       }
 
-      // Default response in complete state
+      // 🤖 AGENT MODE — route everything else through AI agent
+      // Natural language: "paneer tikka add karo ₹220", "sab prices 10% badha do", 
+      // "kal chhuti hai", "timing 9 se 9 karo", etc.
+      if (session.slug) {
+        try {
+          const agentReply = await agentHandle(phone, msg, session.slug);
+          return { replies: [agentReply] };
+        } catch (err: any) {
+          console.error('[Agent] Error:', err.message);
+          // Fallback to default
+        }
+      }
+
+      // Fallback if agent fails
       return { replies: [
         `🌐 *${session.data.businessName}*\n` +
         `🔗 ${session.siteUrl}\n\n` +
-        `Commands:\n` +
-        `• *edit* — Change something\n` +
-        `• *upgrade* — Get custom domain (₹999/yr)\n` +
-        `• *share* — Share website\n` +
-        `• *new/naya* — Create another website\n` +
-        `• *help* — All commands`
+        `Seedha batao kya karna hai! Jaise:\n` +
+        `• "Paneer Tikka add karo ₹220"\n` +
+        `• "Sab prices 10% badha do"\n` +
+        `• "Kal chhuti hai"\n` +
+        `• "Weekend offer lagao 20% off"\n\n` +
+        `Ya type karo: *edit* | *upgrade* | *share* | *new*`
       ]};
     }
 

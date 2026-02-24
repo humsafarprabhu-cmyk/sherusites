@@ -68,6 +68,11 @@ const webhookLimiter = rateLimit({
   max: 100,
 });
 
+// ─── STATIC FILES ────────────────────────────────────────────────────────────
+
+const PUBLIC_DIR = path.join(__dirname, 'public');
+app.use(express.static(PUBLIC_DIR));
+
 // ─── HEALTH ──────────────────────────────────────────────────────────────────
 
 app.get('/health', (_req, res) => {

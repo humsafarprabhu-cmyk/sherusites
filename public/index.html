@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsWebsite — WhatsApp pe 2 minute mein website banao | ₹999/year</title>
+  <meta name="description" content="India's first WhatsApp-based website builder for small businesses. Send Hi → Answer 5 questions → Your professional website is LIVE. No app, no coding, no laptop needed.">
+  <meta property="og:title" content="WhatsWebsite — WhatsApp pe website banao">
+  <meta property="og:description" content="2 minute mein professional website. Sirf WhatsApp se. ₹999/year with custom domain.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://whatswebsite.com">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --green: #25D366;
+      --green-dark: #128C7E;
+      --purple: #6366f1;
+      --bg: #030712;
+      --card: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.06);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 16px 24px;
+      backdrop-filter: blur(20px);
+      background: rgba(3,7,18,0.8);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo { font-size: 20px; font-weight: 800; }
+    .logo span { color: var(--green); }
+    .nav-cta {
+      background: var(--green);
+      color: #000;
+      padding: 10px 24px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    .nav-cta:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(37,211,102,0.3); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(37,211,102,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-content { max-width: 800px; position: relative; }
+    .badge {
+      display: inline-block;
+      background: rgba(37,211,102,0.1);
+      border: 1px solid rgba(37,211,102,0.2);
+      color: var(--green);
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: clamp(36px, 7vw, 72px);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      letter-spacing: -1px;
+    }
+    h1 .highlight {
+      background: linear-gradient(135deg, var(--green), #4ade80);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      font-size: clamp(16px, 2.5vw, 20px);
+      color: var(--muted);
+      margin-bottom: 40px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--green);
+      color: #000;
+      padding: 18px 40px;
+      border-radius: 60px;
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: 800;
+      transition: all 0.3s;
+      box-shadow: 0 4px 30px rgba(37,211,102,0.3);
+    }
+    .hero-cta:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 40px rgba(37,211,102,0.4);
+    }
+    .hero-cta svg { width: 24px; height: 24px; }
+    .hero-note {
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* ── STATS ── */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      padding: 40px 24px;
+      flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat-num { font-size: 36px; font-weight: 900; color: var(--green); }
+    .stat-label { font-size: 14px; color: var(--muted); }
+
+    /* ── HOW IT WORKS ── */
+    .section {
+      padding: 80px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section-title {
+      text-align: center;
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .section-sub {
+      text-align: center;
+      color: var(--muted);
+      font-size: 16px;
+      margin-bottom: 60px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+    }
+    .step {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      text-align: center;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .step:hover { border-color: rgba(37,211,102,0.3); transform: translateY(-4px); }
+    .step-num {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 20px;
+      color: #000;
+      margin: 0 auto 16px;
+    }
+    .step-icon { font-size: 40px; margin-bottom: 12px; }
+    .step h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .step p { font-size: 14px; color: var(--muted); }
+
+    /* ── DEMO CHAT ── */
+    .demo-section {
+      padding: 80px 24px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .chat-window {
+      background: #0b141a;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .chat-header {
+      background: #1f2c34;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .chat-avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .chat-name { font-weight: 600; font-size: 15px; }
+    .chat-status { font-size: 12px; color: var(--muted); }
+    .chat-body { padding: 20px; min-height: 300px; }
+    .msg {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: msgIn 0.3s ease forwards;
+    }
+    .msg-user {
+      background: #005c4b;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+    .msg-bot {
+      background: #1f2c34;
+      border-bottom-left-radius: 4px;
+    }
+    @keyframes msgIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .msg:nth-child(1) { animation-delay: 0.5s; }
+    .msg:nth-child(2) { animation-delay: 1.5s; }
+    .msg:nth-child(3) { animation-delay: 3s; }
+    .msg:nth-child(4) { animation-delay: 4s; }
+    .msg:nth-child(5) { animation-delay: 5.5s; }
+    .msg:nth-child(6) { animation-delay: 7s; }
+
+    /* ── TEMPLATES ── */
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+    }
+    .template-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 16px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .template-card:hover { border-color: rgba(37,211,102,0.3); transform: scale(1.05); }
+    .template-icon { font-size: 36px; margin-bottom: 8px; }
+    .template-name { font-size: 13px; font-weight: 600; }
+
+    /* ── PRICING ── */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .price-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .price-card.featured {
+      border-color: var(--green);
+      background: rgba(37,211,102,0.03);
+      position: relative;
+    }
+    .price-card.featured::before {
+      content: '⭐ MOST POPULAR';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--green);
+      color: #000;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 16px;
+      border-radius: 50px;
+    }
+    .price-card h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .price-amount { font-size: 48px; font-weight: 900; margin: 16px 0 4px; }
+    .price-amount span { font-size: 16px; color: var(--muted); font-weight: 400; }
+    .price-period { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+    .price-features { list-style: none; text-align: left; margin-bottom: 28px; }
+    .price-features li {
+      padding: 8px 0;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .price-features li::before { content: '✓'; color: var(--green); font-weight: 700; }
+    .price-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .price-btn-free {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .price-btn-paid {
+      background: var(--green);
+      color: #000;
+      box-shadow: 0 4px 20px rgba(37,211,102,0.3);
+    }
+    .price-btn:hover { transform: translateY(-2px); }
+
+    /* ── FEATURES ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .feature {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+    }
+    .feature-icon { font-size: 28px; margin-bottom: 12px; }
+    .feature h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .feature p { font-size: 13px; color: var(--muted); }
+
+    /* ── FAQ ── */
+    .faq-list { max-width: 700px; margin: 0 auto; }
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+    }
+    .faq-q {
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .faq-a {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 10px;
+      display: none;
+      line-height: 1.7;
+    }
+    .faq-item.open .faq-a { display: block; }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); }
+    .faq-arrow { transition: transform 0.3s; font-size: 12px; }
+
+    /* ── FINAL CTA ── */
+    .final-cta {
+      text-align: center;
+      padding: 100px 24px;
+      position: relative;
+    }
+    .final-cta::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(37,211,102,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    footer a { color: var(--green); text-decoration: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .stats { gap: 24px; }
+      .stat-num { font-size: 28px; }
+      nav { padding: 12px 16px; }
+      .nav-cta { padding: 8px 16px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Whats<span>Website</span>.com</div>
+  <a href="https://wa.me/919876543210?text=Hi" class="nav-cta">📱 Start Free</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="badge">🇮🇳 Made for Indian Small Businesses</div>
+    <h1>WhatsApp pe<br><span class="highlight">2 minute mein</span><br>website banao</h1>
+    <p class="hero-sub">No app download. No coding. No laptop needed.<br>Sirf WhatsApp pe "Hi" bhejo — baaki hum sambhaal lenge.</p>
+    <a href="https://wa.me/919876543210?text=Hi" class="hero-cta">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      WhatsApp pe "Hi" bhejo
+    </a>
+    <p class="hero-note">Free hai. Credit card nahi chahiye. 30 seconds mein shuru.</p>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-num">2 min</div><div class="stat-label">Website ready</div></div>
+  <div class="stat"><div class="stat-num">8</div><div class="stat-label">Business templates</div></div>
+  <div class="stat"><div class="stat-num">₹0</div><div class="stat-label">Free forever plan</div></div>
+  <div class="stat"><div class="stat-num">0</div><div class="stat-label">Coding needed</div></div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <h2 class="section-title">Kaise kaam karta hai?</h2>
+  <p class="section-sub">3 simple steps. Bas WhatsApp chahiye.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-icon">📱</div>
+      <h3>"Hi" bhejo WhatsApp pe</h3>
+      <p>Hamara bot aapse 5 simple questions puchega — business name, type, phone, address, timings</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-icon">🤖</div>
+      <h3>AI website banayega</h3>
+      <p>Aapke business ke liye professional website automatically generate hogi with menu, services, contact</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-icon">🌐</div>
+      <h3>Website LIVE!</h3>
+      <p>Share karo customers ke saath. Edit bhi WhatsApp se — "Paneer Tikka add karo ₹220"</p>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO CHAT -->
+<section class="demo-section">
+  <h2 class="section-title" style="font-size: 28px; margin-bottom: 24px;">Live Demo</h2>
+  <div class="chat-window">
+    <div class="chat-header">
+      <div class="chat-avatar">🌐</div>
+      <div>
+        <div class="chat-name">WhatsWebsite</div>
+        <div class="chat-status">online</div>
+      </div>
+    </div>
+    <div class="chat-body">
+      <div class="msg msg-user">Hi</div>
+      <div class="msg msg-bot">🙏 Namaste! SheruSites mein swagat hai!<br><br>Aapka business type batao:<br>1️⃣ Restaurant<br>2️⃣ Store<br>3️⃣ Salon<br>4️⃣ Tutor</div>
+      <div class="msg msg-user">1</div>
+      <div class="msg msg-bot">Aapke business ka naam batao? 👇</div>
+      <div class="msg msg-user">Sharma Ji Ka Dhaba</div>
+      <div class="msg msg-bot">🎉 Website READY!<br><br>🔗 whatswebsite.com/site/sharma-ji-ka-dhaba<br><br>✅ WhatsApp button<br>✅ Call button<br>✅ Google Maps<br>✅ Mobile responsive</div>
+    </div>
+  </div>
+</section>
+
+<!-- TEMPLATES -->
+<section class="section">
+  <h2 class="section-title">Har business ke liye template</h2>
+  <p class="section-sub">8 professionally designed templates</p>
+  <div class="templates-grid">
+    <div class="template-card"><div class="template-icon">🍽️</div><div class="template-name">Restaurant</div></div>
+    <div class="template-card"><div class="template-icon">🏪</div><div class="template-name">Kirana Store</div></div>
+    <div class="template-card"><div class="template-icon">💇</div><div class="template-name">Salon</div></div>
+    <div class="template-card"><div class="template-icon">📚</div><div class="template-name">Coaching</div></div>
+    <div class="template-card"><div class="template-icon">🏥</div><div class="template-name">Clinic</div></div>
+    <div class="template-card"><div class="template-icon">💪</div><div class="template-name">Gym</div></div>
+    <div class="template-card"><div class="template-icon">📸</div><div class="template-name">Photographer</div></div>
+    <div class="template-card"><div class="template-icon">🔧</div><div class="template-name">Service</div></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section">
+  <h2 class="section-title">Sab kuch included</h2>
+  <p class="section-sub">Har website mein ye features free milte hain</p>
+  <div class="features-grid">
+    <div class="feature">
+      <div class="feature-icon">📱</div>
+      <h3>WhatsApp Button</h3>
+      <p>Customers ek tap mein WhatsApp pe message kar sakte hain</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">📞</div>
+      <h3>Click-to-Call</h3>
+      <p>Phone number pe tap karo, seedha call lag jayegi</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">📍</div>
+      <h3>Google Maps</h3>
+      <p>Aapki dukaan ka location map pe dikhega</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">📋</div>
+      <h3>Menu / Services</h3>
+      <p>AI automatically menu ya services list generate karta hai</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">✏️</div>
+      <h3>WhatsApp se Edit</h3>
+      <p>"Paneer Tikka add karo ₹220" — bus itna likhna hai</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">📱</div>
+      <h3>Mobile Responsive</h3>
+      <p>Phone, tablet, laptop — har jagah perfect dikhta hai</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🎉</div>
+      <h3>Offers & Specials</h3>
+      <p>"20% off lagao" — offer banner instantly live</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <h3>Super Fast</h3>
+      <p>Lightweight design — 1 second mein load hota hai</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section">
+  <h2 class="section-title">Simple pricing</h2>
+  <p class="section-sub">Start free. Upgrade jab business badhe.</p>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <h3>🆓 Free</h3>
+      <div class="price-amount">₹0</div>
+      <div class="price-period">forever free</div>
+      <ul class="price-features">
+        <li>Professional website</li>
+        <li>WhatsApp + Call buttons</li>
+        <li>AI-generated content</li>
+        <li>WhatsApp se editing</li>
+        <li>whatswebsite.com/your-shop URL</li>
+        <li>SheruSites branding</li>
+      </ul>
+      <a href="https://wa.me/919876543210?text=Hi" class="price-btn price-btn-free">Start Free →</a>
+    </div>
+    <div class="price-card featured">
+      <h3>⭐ Premium</h3>
+      <div class="price-amount">₹999<span>/year</span></div>
+      <div class="price-period">~₹83/month — cheaper than chai!</div>
+      <ul class="price-features">
+        <li>Everything in Free</li>
+        <li>Custom .in domain</li>
+        <li>No branding</li>
+        <li>Google Business setup</li>
+        <li>Priority support</li>
+        <li>SSL certificate</li>
+      </ul>
+      <a href="https://wa.me/919876543210?text=Hi%20I%20want%20Premium" class="price-btn price-btn-paid">Get Premium →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section">
+  <h2 class="section-title">FAQ</h2>
+  <p class="section-sub">Common questions</p>
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-q">Kya mujhe coding aani chahiye? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Bilkul nahi! Sirf WhatsApp pe message karna aana chahiye. Baaki sab automatic hota hai. Agar aap WhatsApp chala sakte ho, toh website bana sakte ho.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Laptop ya computer chahiye? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Nahi. Sab kuch phone se hota hai. Website banana, edit karna, manage karna — sab WhatsApp se.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Website kitni der mein ready hoti hai? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">2 minute! Aap "Hi" bhejte ho, 5 questions ka answer dete ho, aur website LIVE. Itna fast koi aur nahi banata.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Free plan mein kya limitations hain? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Free mein sab kuch milta hai — professional website, WhatsApp button, call button, maps, menu. Bas URL whatswebsite.com/your-shop hoga aur "Powered by SheruSites" badge hoga. Premium mein custom domain milta hai.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Kya baad mein edit kar sakte hain? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Haan! WhatsApp pe seedha likh do — "Paneer Tikka add karo ₹220", "timing 9 se 9 karo", "kal chhuti hai". Website turant update ho jayegi.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Custom domain kaise milega? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Premium plan (₹999/year) lene pe hum aapke liye .in domain register karenge aur 30 minute mein live kar denge. Jaise: sharmajikadhhaba.in</div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <h2 style="font-size: clamp(28px, 5vw, 48px); font-weight: 900; margin-bottom: 16px;">Ready hai?</h2>
+  <p style="color: var(--muted); font-size: 18px; margin-bottom: 32px;">2 minute mein aapka professional website live.</p>
+  <a href="https://wa.me/919876543210?text=Hi" class="hero-cta">
+    <svg viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Abhi shuru karo — Free hai!
+  </a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 WhatsWebsite.com — Made with 🦁 in India</p>
+  <p style="margin-top:8px">
+    <a href="https://wa.me/919876543210">WhatsApp</a> · 
+    <a href="mailto:support@whatswebsite.com">Email</a>
+  </p>
+</footer>
+
+<script>
+  // FAQ toggle
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => q.parentElement.classList.toggle('open'));
+  });
+
+  // Intersection observer for chat animation replay
+  const chatBody = document.querySelector('.chat-body');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        chatBody.querySelectorAll('.msg').forEach(m => {
+          m.style.animation = 'none';
+          m.offsetHeight; // trigger reflow
+          m.style.animation = '';
+        });
+      }
+    });
+  }, { threshold: 0.5 });
+  observer.observe(chatBody);
+</script>
+
+</body>
+</html>

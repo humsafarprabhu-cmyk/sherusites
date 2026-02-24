@@ -105,6 +105,22 @@ app.get('/site/:slug/images/:filename', (req, res) => {
   }
 });
 
+// Gallery page
+app.get('/site/:slug/gallery', async (req, res) => {
+  try {
+    const dataPath = path.join(SITES_DIR, req.params.slug, 'data.json');
+    if (!fs.existsSync(dataPath)) return res.status(404).send('Site not found');
+    const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+    const { renderGalleryPage } = await import('./bot/template-renderer.ts');
+    const galleryHtml = renderGalleryPage(data);
+    res.setHeader('Content-Type', 'text/html');
+    res.send(galleryHtml);
+  } catch (err: any) {
+    console.error('[Gallery] Error:', err.message);
+    res.status(500).send('Error loading gallery');
+  }
+});
+
 app.get('/site/:slug', (req, res) => {
   const sitePath = path.join(SITES_DIR, req.params.slug, 'index.html');
   if (fs.existsSync(sitePath)) {

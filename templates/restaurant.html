@@ -534,6 +534,7 @@ document.querySelectorAll('.fade-up').forEach(function(el){observer.observe(el)}
 (function(){
   var el = document.getElementById('gallery-grid');
   var photos = SITE.photos || [];
+  var MAX_SHOW = 6;
   var gradients = [
     ['#f59e0b','#dc2626'],['#f97316','#eab308'],['#ef4444','#f59e0b'],
     ['#eab308','#f97316'],['#dc2626','#f59e0b'],['#f97316','#ef4444']
@@ -541,12 +542,21 @@ document.querySelectorAll('.fade-up').forEach(function(el){observer.observe(el)}
   var emojis = ['🍛','🫓','🍗','🥘','🍨','🥤'];
   
   if (photos.length > 0) {
-    el.innerHTML = photos.map(function(photo, i){
+    var show = photos.slice(0, MAX_SHOW);
+    var remaining = photos.length - MAX_SHOW;
+    el.innerHTML = show.map(function(photo, i){
       return '<div class="gallery-item fade-up" style="--i:'+i+'">'+
         '<img src="'+photo.url+'" alt="'+(photo.caption||SITE.businessName)+'" loading="lazy"></div>';
     }).join('');
+    // "View All" card if more than 6
+    if (remaining > 0) {
+      el.innerHTML += '<a href="'+window.location.pathname+'/gallery" class="gallery-item fade-up" style="--i:'+MAX_SHOW+';text-decoration:none">'+
+        '<div class="gallery-bg" style="background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(239,68,68,0.2))">'+
+        '<div style="text-align:center;color:#f5f5f5"><div style="font-size:2rem;margin-bottom:.5rem">📸</div>'+
+        '<div style="font-size:1.5rem;font-weight:700">+'+remaining+'</div>'+
+        '<div style="font-size:.8rem;color:#a3a3a3;margin-top:.25rem">View All Photos</div></div></div></a>';
+    }
   } else {
-    // Show beautiful gradient placeholders + upload CTA
     el.innerHTML = gradients.map(function(g, i){
       return '<div class="gallery-item fade-up" style="--i:'+i+'">'+
         '<div class="gallery-bg" style="background:linear-gradient(135deg,'+g[0]+','+g[1]+')">'+emojis[i]+'</div></div>';

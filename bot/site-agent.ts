@@ -227,6 +227,40 @@ function executeActions(slug: string, actions: AgentAction[]): string[] {
           results.push(`🚗 Delivery: ${siteData.delivery ? 'ON' : 'OFF'}${siteData.deliveryArea ? ` (${siteData.deliveryArea})` : ''}`);
           break;
         }
+        case 'delete_photo': {
+          if (!siteData.photos || siteData.photos.length === 0) {
+            results.push('❌ Koi photo nahi hai abhi');
+            break;
+          }
+          const photoIdx = (params.index || 1) - 1;
+          if (photoIdx < 0 || photoIdx >= siteData.photos.length) {
+            results.push(`❌ Photo #${params.index} nahi hai. Total: ${siteData.photos.length} photos`);
+          } else {
+            const removed = siteData.photos.splice(photoIdx, 1)[0];
+            // Delete file too
+            try {
+              const photoPath = require('path').join(process.cwd(), removed.url.replace(/^\//, ''));
+              if (require('fs').existsSync(photoPath)) require('fs').unlinkSync(photoPath);
+            } catch {}
+            results.push(`✅ Photo #${params.index} delete ho gayi (${siteData.photos.length} remaining)`);
+          }
+          break;
+        }
+        case 'delete_all_photos': {
+          const count = siteData.photos?.length || 0;
+          // Delete files
+          if (siteData.photos) {
+            for (const p of siteData.photos) {
+              try {
+                const photoPath = require('path').join(process.cwd(), p.url.replace(/^\//, ''));
+                if (require('fs').existsSync(photoPath)) require('fs').unlinkSync(photoPath);
+              } catch {}
+            }
+          }
+          siteData.photos = [];
+          results.push(`✅ Sab ${count} photos delete ho gayi`);
+          break;
+        }
         case 'no_action': {
           // Agent decided no website change needed — just conversation
           break;
@@ -299,6 +333,8 @@ Available actions:
 - set_map_location: {lat, lng}
 - update_map_address: {address}
 - set_delivery: {enabled, area?}
+- delete_photo: {index} (1-based, e.g. "delete 3rd photo" → index:3)
+- delete_all_photos: {}
 - no_action: {} (when just chatting, no website change needed)
 
 ## Response Format:
@@ -406,7 +442,15 @@ Plan: ${data.plan}
     });
   }
 
-  ctx += `\nPhotos: ${data.photos?.length || 0} images on website\n`;
+  if (data.photos && data.photos.length > 0) {
+    ctx += `\nPhotos (${data.photos.length}):\n`;
+    data.photos.forEach((p: any, i: number) => {
+      ctx += `  #${i + 1}: ${p.type || 'gallery'} — ${p.caption || 'no caption'}\n`;
+    });
+    ctx += `Gallery page: /site/${data.slug}/gallery\n`;
+  } else {
+    ctx += `\nPhotos: 0 (no images yet)\n`;
+  }
   ctx += `Delivery: ${data.delivery ? 'Yes' + (data.deliveryArea ? ` (${data.deliveryArea})` : '') : 'Not set'}\n`;
 
   if (data.menu && data.menu.length > 0) {

@@ -642,6 +642,12 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
     }
 
     case 'editing': {
+      // Photo uploaded while editing
+      if (msg === '__PHOTO_UPLOADED__' || lower === '__photo_uploaded__') {
+        const sData = getSiteData(session.slug || '');
+        const count = sData?.photos?.length || 0;
+        return { replies: [`📸 Photo #${count} added to gallery! ✅\n\n🔗 ${BASE_URL}/site/${session.slug}/gallery`] };
+      }
       const slug = session.slug;
       if (!slug) {
         session.state = 'idle';

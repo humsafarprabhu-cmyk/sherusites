@@ -16,6 +16,182 @@ interface AIContent {
   packages?: ServiceItem[];
   plans?: ServiceItem[];
   subjects?: ServiceItem[];
+  reviews?: { author: string; text: string; rating: number; date: string }[];
+  todaySpecial?: { name: string; description: string; price: string; oldPrice?: string };
+}
+
+// ─── AI IMAGE GENERATION ─────────────────────────────────────────────────────
+
+const IMAGE_PROMPTS: Record<string, { hero: string; gallery: string[] }> = {
+  restaurant: {
+    hero: 'A warm, inviting Indian restaurant interior with soft golden lighting, wooden tables, traditional decor, plates of colorful Indian food on table, cozy ambiance, professional food photography style, warm tones, no text',
+    gallery: [
+      'Delicious butter chicken in a copper bowl with naan bread, garnished with cream and cilantro, Indian restaurant table setting, warm lighting, top-down food photography',
+      'A plate of crispy tandoori chicken with lemon wedges and mint chutney, smoky presentation, dark moody food photography',
+      'Colorful Indian thali with rice, dal, curry, roti, pickle, papad, raita on a steel plate, overhead shot, vibrant colors',
+      'Fresh naan bread being pulled from tandoor clay oven, golden and puffy, dramatic lighting, close-up',
+      'Tall glass of mango lassi with saffron garnish, condensation drops, Indian restaurant background, product photography',
+      'Indian biryani in a copper handi with raita and salan on the side, steam rising, warm golden lighting',
+    ]
+  },
+  salon: {
+    hero: 'Modern Indian beauty salon interior with mirrors, professional lighting, elegant chairs, flowers, clean and luxurious ambiance, warm tones, no text',
+    gallery: [
+      'Professional hairstylist cutting hair in a modern salon, mirror reflection, warm lighting',
+      'Woman getting a facial treatment, relaxing spa environment, clean aesthetic',
+      'Close-up of beautiful bridal makeup with jewelry, Indian bride, warm golden tones',
+      'Mehndi henna design on hands, intricate patterns, beautiful detail shot',
+      'Hair spa treatment with steamer, relaxing atmosphere, professional setting',
+      'Salon tools arranged aesthetically - scissors, combs, brushes, products, flat lay',
+    ]
+  },
+  store: {
+    hero: 'A well-organized modern Indian grocery store interior with colorful products on shelves, clean aisles, warm lighting, inviting atmosphere, no text',
+    gallery: [
+      'Colorful Indian spices in bowls and jars, turmeric, chili, cumin, arranged beautifully, overhead shot',
+      'Fresh vegetables and fruits display in an Indian store, vibrant colors, neat arrangement',
+      'Bags of rice, dal, and flour neatly stacked on shelves, well-organized grocery store',
+      'Snacks and namkeen variety in a store display, colorful packets, Indian brands',
+      'Dairy products section - milk, curd, paneer, ghee, butter arranged neatly',
+      'A shopkeeper handing over a grocery bag to a smiling customer, warm interaction',
+    ]
+  },
+  tutor: {
+    hero: 'A bright modern Indian coaching center classroom with a whiteboard, desks, books, students studying, inspirational atmosphere, warm lighting, no text',
+    gallery: [
+      'Teacher explaining math on whiteboard to attentive students, Indian classroom setting',
+      'Student studying with books and notebook, focused, warm desk lamp lighting',
+      'Stack of colorful textbooks and notebooks, educational setup, clean aesthetic',
+      'Group of Indian students discussing and studying together, collaborative learning',
+      'Digital tablet with educational content, modern learning tools, clean setup',
+      'Trophy shelf and certificates on wall, achievement display, motivational setting',
+    ]
+  },
+  clinic: {
+    hero: 'A clean modern Indian medical clinic interior with white walls, comfortable seating, reception desk, professional healthcare environment, calming blue-white tones, no text',
+    gallery: [
+      'Doctor consulting with patient across desk, professional medical setting, warm interaction',
+      'Clean medical examination room with modern equipment, organized and sterile',
+      'Stethoscope and medical instruments on desk, professional healthcare flat lay',
+      'Pharmacy counter with neatly organized medicines on shelves',
+      'Digital health monitoring equipment, modern diagnostics, clean aesthetic',
+      'Waiting area with comfortable seats and health magazines, calming environment',
+    ]
+  },
+  gym: {
+    hero: 'A modern Indian gym interior with weights, machines, mirrors, motivational environment, dramatic lighting, energetic atmosphere, no text',
+    gallery: [
+      'Row of dumbbells on rack in gym, dramatic lighting, fitness aesthetic',
+      'Person doing deadlift with proper form, gym environment, powerful shot',
+      'Yoga class in session, peaceful studio with natural light, group fitness',
+      'Treadmills and cardio machines in a modern gym, clean and spacious',
+      'Protein shake and gym equipment flat lay, fitness lifestyle',
+      'Group zumba or crossfit class in action, energetic atmosphere',
+    ]
+  },
+  photographer: {
+    hero: 'A professional photography studio with camera equipment, softbox lights, backdrop, clean modern setup, creative atmosphere, no text',
+    gallery: [
+      'Professional camera with lens on tripod, golden hour lighting, bokeh background',
+      'Wedding photography setup with couple silhouette, dramatic sunset',
+      'Portrait photography with softbox lighting in studio, professional setup',
+      'Flat lay of photography equipment - camera body, lenses, memory cards, laptop',
+      'Photographer shooting outdoor portrait in golden light, behind the scenes',
+      'Photo editing on large monitor, color grading, professional workspace',
+    ]
+  },
+  service: {
+    hero: 'A professional Indian home service technician with toolkit, clean uniform, ready to work, modern home background, trustworthy appearance, no text',
+    gallery: [
+      'Electrician working on wiring with proper tools, professional and safe',
+      'Plumber fixing pipes under sink, professional toolkit visible',
+      'AC technician servicing split AC unit, professional maintenance',
+      'Clean organized toolkit with various tools, flat lay on workbench',
+      'Happy homeowner with technician after completed repair, satisfaction',
+      'Modern home appliance installation, clean and professional work',
+    ]
+  },
+};
+
+export async function generateImages(
+  category: string,
+  businessName: string,
+  type: 'hero' | 'gallery',
+  count: number = 1
+): Promise<string[]> {
+  if (!OPENAI_KEY) {
+    console.log('[AI-IMG] No API key');
+    return [];
+  }
+
+  const prompts = IMAGE_PROMPTS[category] || IMAGE_PROMPTS['restaurant'];
+  const promptList = type === 'hero' ? [prompts.hero] : prompts.gallery.slice(0, count);
+  const urls: string[] = [];
+
+  for (const prompt of promptList) {
+    try {
+      const res = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENAI_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'dall-e-3',
+          prompt: `${prompt}. For business: ${businessName}. Photorealistic, high quality, 4K.`,
+          n: 1,
+          size: type === 'hero' ? '1792x1024' : '1024x1024',
+          quality: 'standard',
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error('[AI-IMG] Error:', res.status, JSON.stringify(err));
+        continue;
+      }
+
+      const data = await res.json();
+      const url = data.data?.[0]?.url;
+      if (url) urls.push(url);
+      
+      // Small delay to avoid rate limits
+      if (promptList.length > 1) await new Promise(r => setTimeout(r, 1000));
+    } catch (err: any) {
+      console.error('[AI-IMG] Error:', err.message);
+    }
+  }
+
+  console.log(`[AI-IMG] Generated ${urls.length}/${promptList.length} images for ${businessName} (${type})`);
+  return urls;
+}
+
+// Download image and save locally
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __ai_dirname = path.dirname(fileURLToPath(import.meta.url));
+const SITES_DIR = path.join(__ai_dirname, '..', 'sites');
+
+export async function downloadAndSaveImage(url: string, slug: string, filename: string): Promise<string> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+    
+    const buffer = Buffer.from(await res.arrayBuffer());
+    const imgDir = path.join(SITES_DIR, slug, 'images');
+    if (!fs.existsSync(imgDir)) fs.mkdirSync(imgDir, { recursive: true });
+    
+    const filePath = path.join(imgDir, filename);
+    fs.writeFileSync(filePath, buffer);
+    
+    // Return relative URL for the site
+    return `/site/${slug}/images/${filename}`;
+  } catch (err: any) {
+    console.error('[AI-IMG] Download error:', err.message);
+    return '';
+  }
 }
 
 const CATEGORY_PROMPTS: Record<string, string> = {
@@ -107,7 +283,7 @@ export async function generateContent(
           },
           {
             role: 'user',
-            content: `Business: "${businessName}" in ${address}. Category: ${category}.${extraInfo ? `\nExtra info: ${extraInfo}` : ''}\n\n${prompt}\n\nOutput JSON with keys: tagline, about, ${getContentKey(category)}`
+            content: `Business: "${businessName}" in ${address}. Category: ${category}.${extraInfo ? `\nExtra info: ${extraInfo}` : ''}\n\n${prompt}\n\nAlso generate:\n- reviews: 3 realistic Google-style reviews [{author (Indian name), text (1-2 sentences), rating (4-5), date ("2 weeks ago" etc)}]\n- todaySpecial: one special item {name, description, price as "₹XX", oldPrice as "₹XX" (higher)}\n\nOutput JSON with keys: tagline, about, ${getContentKey(category)}, reviews, todaySpecial`
           }
         ],
         max_tokens: 1500,
@@ -156,6 +332,12 @@ function getDefaultContent(category: string, name: string): AIContent {
     restaurant: {
       tagline: `${name} — Ghar jaisa khana, apno wali mehak`,
       about: `${name} has been serving authentic flavors with love. Fresh ingredients, traditional recipes, and a warm welcome awaits you.`,
+      reviews: [
+        { author: 'Rajesh Kumar', text: 'Best food in the area! We come here every weekend with family. Taste is always consistent.', rating: 5, date: '2 weeks ago' },
+        { author: 'Priya Sharma', text: 'Ordered on WhatsApp, food came hot and fresh. Dal makhani was amazing!', rating: 5, date: '1 month ago' },
+        { author: 'Amit Verma', text: 'Great thali at this price. My office team orders every Friday. Highly recommend!', rating: 4, date: '3 weeks ago' },
+      ],
+      todaySpecial: { name: 'Special Thali', description: 'Complete meal — curry, dal, rice, 2 roti, raita, salad & sweet', price: '₹199', oldPrice: '₹299' },
       menu: [
         { name: 'Butter Chicken', price: '₹280', category: 'Main Course', description: 'Creamy tomato gravy with tender chicken', popular: true },
         { name: 'Dal Makhani', price: '₹180', category: 'Main Course', description: 'Slow-cooked black lentils in butter cream', popular: true },

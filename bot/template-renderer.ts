@@ -41,7 +41,13 @@ export function renderSite(data: SiteData): string {
     '{{phone}}': data.phone,
     '{{whatsapp}}': data.whatsapp,
     '{{address}}': data.address,
+    '{{mapUrl}}': data.mapUrl || `https://www.google.com/maps/search/${encodeURIComponent(data.address)}`,
+    '{{mapQuery}}': data.lat && data.lng ? `${data.lat},${data.lng}` : encodeURIComponent(data.address),
+    '{{lat}}': data.lat || '',
+    '{{lng}}': data.lng || '',
     '{{timings}}': data.timings,
+    '{{siteUrl}}': `https://whatswebsite.com/site/${data.slug}`,
+    '{{categoryBadge}}': getCategoryBadge(data.category),
     '{{about}}': data.about,
     '{{ownerName}}': data.ownerName || '',
     '{{experience}}': data.experience || '',
@@ -95,17 +101,23 @@ function injectDynamicContent(html: string, data: SiteData): string {
   const contentKey = getContentKey(data.category);
   const items = (data as any)[contentKey] as any[] | undefined;
   
-  if (!items || items.length === 0) return html;
+  // Always inject site data for client-side rendering
   
   // Generate items HTML
   // The templates have default items; we try to replace them
   // For now, we inject a data attribute that JS can read
   const jsonData = JSON.stringify({
+    businessName: data.businessName,
+    whatsapp: data.whatsapp,
+    phone: data.phone,
     menu: data.menu,
     services: data.services,
     packages: data.packages,
     plans: data.plans,
     subjects: data.subjects,
+    photos: data.photos,
+    reviews: (data as any).reviews || [],
+    todaySpecial: (data as any).todaySpecial || null,
   });
   
   // Inject data into the page so dynamic rendering can pick it up
@@ -157,6 +169,20 @@ function getContentKey(category: string): string {
     service: 'services',
   };
   return keys[category] || 'services';
+}
+
+function getCategoryBadge(category: string): string {
+  const badges: Record<string, string> = {
+    restaurant: '🍛 Restaurant',
+    store: '🏪 Store',
+    salon: '💇 Salon & Beauty',
+    tutor: '📚 Education',
+    clinic: '🏥 Healthcare',
+    gym: '💪 Fitness',
+    photographer: '📸 Photography',
+    service: '🔧 Services',
+  };
+  return badges[category] || '🏪 Business';
 }
 
 function escapeRegex(str: string): string {

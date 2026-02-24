@@ -91,6 +91,20 @@ app.get('/health', (_req, res) => {
 
 // ─── SERVE GENERATED SITES ──────────────────────────────────────────────────
 
+// Serve site images
+app.get('/site/:slug/images/:filename', (req, res) => {
+  const imgPath = path.join(SITES_DIR, req.params.slug, 'images', req.params.filename);
+  if (fs.existsSync(imgPath)) {
+    const ext = path.extname(imgPath).toLowerCase();
+    const mime: Record<string, string> = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp' };
+    res.setHeader('Content-Type', mime[ext] || 'image/jpeg');
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+    res.sendFile(imgPath);
+  } else {
+    res.status(404).send('Image not found');
+  }
+});
+
 app.get('/site/:slug', (req, res) => {
   const sitePath = path.join(SITES_DIR, req.params.slug, 'index.html');
   if (fs.existsSync(sitePath)) {
@@ -268,7 +282,31 @@ app.post('/api/webhook', webhookLimiter, async (req, res) => {
                    message.interactive?.list_reply?.id ||
                    message.interactive?.list_reply?.title || '';
           }
-          else if (message.type === 'image') text = message.image?.caption || '[photo]';
+          else if (message.type === 'location') {
+            const loc = message.location;
+            const lat = loc?.latitude;
+            const lng = loc?.longitude;
+            const locName = loc?.name || '';
+            const locAddr = loc?.address || '';
+            // Build address from location metadata + coords
+            const addrParts = [locName, locAddr].filter(Boolean).join(', ');
+            text = addrParts || `📍 ${lat}, ${lng}`;
+            // Pass coordinates as metadata prefix
+            text = `__LOC__${lat}__${lng}__${text}`;
+          }
+          else if (message.type === 'image') {
+            // Download image from WhatsApp and save to site gallery
+            const imageId = message.image?.id;
+            const caption = message.image?.caption || '';
+            if (imageId) {
+              try {
+                await handleWhatsAppImage(phone, imageId, caption);
+              } catch (imgErr: any) {
+                console.error('[Image] Error:', imgErr.message);
+              }
+            }
+            text = caption || '__PHOTO_UPLOADED__';
+          }
           else text = `[${message.type}]`;
           if (!text) continue;
           console.log(`[WhatsApp] ${phone}: ${text}`);
@@ -297,6 +335,55 @@ app.post('/api/chat', chatLimiter, async (req, res) => {
 });
 
 // ─── META GRAPH API ─────────────────────────────────────────────────────────
+
+// ─── WHATSAPP IMAGE HANDLER ──────────────────────────────────────────────────
+
+async function handleWhatsAppImage(phone: string, mediaId: string, caption: string) {
+  // Get media URL from WhatsApp
+  const mediaRes = await fetch(`${GRAPH_API}/${mediaId}`, {
+    headers: { 'Authorization': `Bearer ${ACCESS_TOKEN}` },
+  });
+  if (!mediaRes.ok) throw new Error(`Media fetch failed: ${mediaRes.status}`);
+  const mediaData = await mediaRes.json();
+  const mediaUrl = mediaData.url;
+  
+  // Download actual image
+  const imgRes = await fetch(mediaUrl, {
+    headers: { 'Authorization': `Bearer ${ACCESS_TOKEN}` },
+  });
+  if (!imgRes.ok) throw new Error(`Image download failed: ${imgRes.status}`);
+  const buffer = Buffer.from(await imgRes.arrayBuffer());
+  
+  // Find user's active site
+  const { getOrCreateUser, getSiteData, saveSiteData } = await import('./bot/db.ts');
+  const { renderSite } = await import('./bot/template-renderer.ts');
+  const user = getOrCreateUser(phone);
+  const slug = user.active_site;
+  if (!slug) {
+    console.log('[Image] No active site for', phone);
+    return;
+  }
+  
+  // Save image
+  const imgDir = path.join(SITES_DIR, slug, 'images');
+  if (!fs.existsSync(imgDir)) fs.mkdirSync(imgDir, { recursive: true });
+  const filename = `upload-${Date.now()}.jpg`;
+  fs.writeFileSync(path.join(imgDir, filename), buffer);
+  
+  // Update site data
+  const siteData = getSiteData(slug);
+  if (siteData) {
+    if (!siteData.photos) siteData.photos = [];
+    siteData.photos.push({
+      url: `/site/${slug}/images/${filename}`,
+      caption: caption || siteData.businessName,
+      type: 'gallery',
+    });
+    saveSiteData(siteData, phone);
+    renderSite(siteData);
+    console.log(`[Image] Saved ${filename} for ${slug} (${siteData.photos.length} total)`);
+  }
+}
 
 async function sendWhatsAppMessage(to: string, messageObj: any) {
   if (!ACCESS_TOKEN || !PHONE_NUMBER_ID) {
@@ -350,7 +437,7 @@ async function sendBotResponse(to: string, response: any) {
         type: 'list',
         body: { text: reply.body },
         action: {
-          button: reply.buttonText || 'Choose',
+          button: (reply.buttonText || 'Choose').substring(0, 20),
           sections: reply.sections
         }
       });

@@ -167,6 +167,66 @@ function executeActions(slug: string, actions: AgentAction[]): string[] {
           }
           break;
         }
+        case 'add_review': {
+          if (!siteData.reviews) siteData.reviews = [];
+          siteData.reviews.push({
+            author: params.author || 'Customer',
+            text: params.text,
+            rating: params.rating || 5,
+            date: params.date || 'Just now',
+          });
+          results.push(`⭐ Review added from ${params.author || 'Customer'}`);
+          break;
+        }
+        case 'remove_review': {
+          if (!siteData.reviews) break;
+          const idx = siteData.reviews.findIndex((r: any) => r.author.toLowerCase().includes((params.author || '').toLowerCase()));
+          if (idx >= 0) {
+            siteData.reviews.splice(idx, 1);
+            results.push(`✅ Review removed`);
+          } else {
+            results.push(`❌ Review nahi mila`);
+          }
+          break;
+        }
+        case 'set_today_special': {
+          siteData.todaySpecial = {
+            name: params.name,
+            description: params.description || '',
+            price: params.price,
+            oldPrice: params.oldPrice,
+          };
+          results.push(`🔥 Today's Special: ${params.name} — ${params.price}`);
+          break;
+        }
+        case 'clear_today_special': {
+          siteData.todaySpecial = undefined;
+          results.push(`✅ Today's special hata diya`);
+          break;
+        }
+        case 'update_business_name': {
+          siteData.businessName = params.name;
+          results.push(`✅ Business name: "${params.name}"`);
+          break;
+        }
+        case 'set_map_location': {
+          (siteData as any).lat = params.lat;
+          (siteData as any).lng = params.lng;
+          (siteData as any).mapUrl = `https://www.google.com/maps?q=${params.lat},${params.lng}`;
+          results.push(`📍 Map location updated`);
+          break;
+        }
+        case 'update_map_address': {
+          siteData.address = params.address;
+          results.push(`📍 Address & map updated: ${params.address}`);
+          break;
+        }
+        case 'set_delivery': {
+          siteData.delivery = params.enabled !== false;
+          siteData.deliveryArea = params.area || '';
+          results.push(`🚗 Delivery: ${siteData.delivery ? 'ON' : 'OFF'}${siteData.deliveryArea ? ` (${siteData.deliveryArea})` : ''}`);
+          break;
+        }
         case 'no_action': {
           // Agent decided no website change needed — just conversation
           break;
@@ -231,6 +291,14 @@ Available actions:
 - update_address: {address}
 - update_phone: {phone}
 - mark_popular: {name}
+- add_review: {author, text, rating (1-5), date?}
+- remove_review: {author}
+- set_today_special: {name, description?, price, oldPrice?}
+- clear_today_special: {}
+- update_business_name: {name}
+- set_map_location: {lat, lng}
+- update_map_address: {address}
+- set_delivery: {enabled, area?}
 - no_action: {} (when just chatting, no website change needed)
 
 ## Response Format:
@@ -326,6 +394,20 @@ Plan: ${data.plan}
   if (data.activeOffer) {
     ctx += `Active Offer: ${data.activeOffer.text}\n`;
   }
+
+  if (data.todaySpecial) {
+    ctx += `Today's Special: ${data.todaySpecial.name} — ${data.todaySpecial.price}\n`;
+  }
+
+  if (data.reviews && data.reviews.length > 0) {
+    ctx += `\nReviews (${data.reviews.length}):\n`;
+    data.reviews.forEach((r: any) => {
+      ctx += `  - ${r.author} (${r.rating}★): "${r.text}"\n`;
+    });
+  }
+
+  ctx += `\nPhotos: ${data.photos?.length || 0} images on website\n`;
+  ctx += `Delivery: ${data.delivery ? 'Yes' + (data.deliveryArea ? ` (${data.deliveryArea})` : '') : 'Not set'}\n`;
 
   if (data.menu && data.menu.length > 0) {
     ctx += `\nMenu (${data.menu.length} items):\n`;

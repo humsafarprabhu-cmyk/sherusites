@@ -205,6 +205,8 @@ export interface SiteData {
   packages?: any[];
   plans?: any[];
   photos: any[];
+  reviews?: any[];
+  todaySpecial?: { name: string; description?: string; price: string; oldPrice?: string };
   delivery?: boolean;
   deliveryArea?: string;
   emergencyAvailable?: boolean;

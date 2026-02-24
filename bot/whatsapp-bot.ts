@@ -13,7 +13,7 @@ import {
   getSession, saveSession, deleteSession, listUserSites,
   SiteData,
 } from './db.ts';
-import { generateContent } from './ai-content.ts';
+import { generateContent, generateImages, downloadAndSaveImage } from './ai-content.ts';
 import { renderSite } from './template-renderer.ts';
 import { smartRoute } from './smart-router.ts';
 
@@ -154,7 +154,7 @@ function categoryListMsg(): ListMsg {
   return {
     type: 'list',
     body: '🙏 *Namaste! WhatsWebsite mein swagat hai!*\n\nSirf 2 minute mein professional website ready! 🚀\n\nApna business type choose karo 👇',
-    buttonText: '🏪 Business Type Choose Karo',
+    buttonText: '🏪 Choose Category',
     sections: [{
       title: 'Business Categories',
       rows: [
@@ -212,7 +212,7 @@ function welcomeBackMsg(sites: SiteData[]): Reply {
   return {
     type: 'list',
     body: `👋 *Welcome back!*\n\nAapke ${sites.length} websites hain. Kaunsa edit karna hai?`,
-    buttonText: '🏪 Website Choose Karo',
+    buttonText: '🏪 Choose Website',
     sections: [
       {
         title: 'Your Websites',
@@ -309,6 +309,10 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
     }
 
     case 'complete': {
+      // Photo uploaded — confirm
+      if (msg === '__PHOTO_UPLOADED__' || lower === '__photo_uploaded__') {
+        return { replies: [`📸 Photo saved to your website gallery! ✅\n\n🔗 ${session.siteUrl || BASE_URL + '/site/' + session.slug}`] };
+      }
       // "Hi" from existing user — show welcome back with options
       if (lower.match(/^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru|website|site)$/)) {
         const sites = listUserSites(phone);
@@ -455,7 +459,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
           type: 'buttons',
           body: `🏪 *${trimmed}* — bahut accha naam!\n\n📱 Aapka phone number *${senderPhone}* use kare website pe?\n(Ye customers ko dikhega)`,
           buttons: [
-            { id: `usephone_${senderPhone}`, title: `✅ Haan ${senderPhone}` },
+            { id: `usephone_${senderPhone}`, title: `✅ Haan yahi karo` },
             { id: 'usephone_new', title: '📱 Dusra Number' },
           ]
         }]};
@@ -467,6 +471,11 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
     }
 
     case 'awaiting_phone': {
+      // Restart if user sends greeting
+      if (lower.match(/^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru|website|site|reset|restart|naya|new)$/)) {
+        deleteSession(phone);
+        return handleMessage(phone, message);
+      }
       // Handle button callbacks
       if (lower.startsWith('usephone_') && lower !== 'usephone_new') {
         const num = lower.replace('usephone_', '');
@@ -475,7 +484,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         session.state = 'awaiting_address';
         persistSession(phone, session);
         return { replies: [
-          `📱 Phone: *${num}* ✅\n\nAb apna *address* bhejo? 📍\n(Jaise: "MG Road, near SBI Bank, Indore")`
+          `📱 Phone: *${num}* ✅\n\nAb apna *address* bhejo ya 📍 *location pin* share karo!\n(Type karo ya WhatsApp location bhejo)`
         ]};
       }
       
@@ -492,29 +501,72 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       session.state = 'awaiting_address';
       persistSession(phone, session);
       return { replies: [
-        `📱 Phone: *${cleaned.slice(-10)}* ✅\n\nAb apna *address* bhejo? 📍\n(Jaise: "MG Road, near SBI Bank, Indore")`
+        `📱 Phone: *${cleaned.slice(-10)}* ✅\n\nAb apna *address* bhejo ya 📍 *location pin* share karo!\n(Type karo ya WhatsApp location bhejo)`
       ]};
     }
 
     case 'awaiting_address': {
-      session.data.address = msg;
+      if (lower.match(/^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru|website|site|reset|restart|naya|new)$/)) {
+        deleteSession(phone);
+        return handleMessage(phone, message);
+      }
+      // Handle location pin from WhatsApp
+      if (msg.startsWith('__LOC__')) {
+        const parts = msg.split('__');
+        const lat = parts[2];
+        const lng = parts[3];
+        const locAddress = parts.slice(4).join('__') || `${lat}, ${lng}`;
+        session.data.address = locAddress;
+        session.data.lat = lat;
+        session.data.lng = lng;
+        session.data.mapUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+      } else {
+        session.data.address = msg;
+      }
       session.state = 'awaiting_timings';
       persistSession(phone, session);
+      const savedAddr = session.data.address;
+      const mapNote = session.data.mapUrl ? `\n🗺️ Google Maps link bhi save ho gaya!` : '';
       return { replies: [{
-        type: 'buttons',
-        body: `📍 Address saved! ✅\n\n*Business timings* batao? ⏰`,
-        buttons: [
-          { id: 'timing_default', title: '🕐 10AM - 9PM' },
-          { id: 'timing_custom', title: '✏️ Custom Timing' },
-        ]
+        type: 'list',
+        body: `📍 *${savedAddr}* ✅${mapNote}\n\n*Business timings* choose karo ⏰`,
+        buttonText: '⏰ Timing Choose',
+        sections: [{
+          title: 'Common Timings',
+          rows: [
+            { id: 'timing_default', title: '🕐 10AM - 9PM', description: 'Most shops & businesses' },
+            { id: 'timing_morning', title: '🌅 6AM - 12PM', description: 'Dairy, gym, yoga, morning clinic' },
+            { id: 'timing_early', title: '🌤️ 8AM - 6PM', description: 'Office, clinic, school' },
+            { id: 'timing_afternoon', title: '☀️ 12PM - 8PM', description: 'Salon, tutor, afternoon shift' },
+            { id: 'timing_evening', title: '🌙 5PM - 11PM', description: 'Restaurant, dhaba, night cafe' },
+            { id: 'timing_late', title: '🌃 11AM - 11PM', description: 'Late opener, pub, lounge' },
+            { id: 'timing_split', title: '🔄 Split Hours', description: '9AM-1PM + 5PM-9PM (lunch break)' },
+            { id: 'timing_24x7', title: '🔥 24x7 Open', description: 'Always open!' },
+            { id: 'timing_custom', title: '✏️ Custom Timing', description: 'Apna timing type karo' },
+          ]
+        }]
       }]};
     }
 
     case 'awaiting_timings': {
-      if (lower === 'timing_default' || lower === 'skip') {
-        session.data.timings = '10:00 AM - 9:00 PM';
+      if (lower.match(/^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru|website|site|reset|restart|naya|new)$/)) {
+        deleteSession(phone);
+        return handleMessage(phone, message);
+      }
+      const timingMap: Record<string, string> = {
+        'timing_default': '10:00 AM - 9:00 PM',
+        'timing_morning': '6:00 AM - 12:00 PM',
+        'timing_afternoon': '12:00 PM - 8:00 PM',
+        'timing_evening': '5:00 PM - 11:00 PM',
+        'timing_early': '8:00 AM - 6:00 PM',
+        'timing_late': '11:00 AM - 11:00 PM',
+        'timing_24x7': '24 Hours (Open All Day)',
+        'timing_split': '9:00 AM - 1:00 PM, 5:00 PM - 9:00 PM',
+      };
+      if (timingMap[lower]) {
+        session.data.timings = timingMap[lower];
       } else if (lower === 'timing_custom') {
-        return { replies: ['⏰ Apna timing batao (jaise: "9 AM - 8 PM" ya "subah 10 se raat 9"):'] };
+        return { replies: ['⏰ Apna timing type karo:\n(Jaise: "9 AM - 8 PM" ya "subah 10 se raat 9")'] };
       } else {
         session.data.timings = msg;
       }
@@ -547,9 +599,16 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         if (aiContent.packages) siteData.packages = aiContent.packages;
         if (aiContent.plans) siteData.plans = aiContent.plans;
         if (aiContent.subjects) siteData.subjects = aiContent.subjects;
+        if (aiContent.reviews) siteData.reviews = aiContent.reviews;
+        if (aiContent.todaySpecial) siteData.todaySpecial = aiContent.todaySpecial;
         saveSiteData(siteData, phone);
 
         renderSite(siteData);
+
+        // Generate AI images in background (don't block site creation)
+        generateAIImages(slug, category, session.data.businessName!, phone).catch(err => {
+          console.error('[AI-IMG] Background gen error:', err.message);
+        });
 
         const user = getOrCreateUser(phone);
         const sites = user.sites || [];
@@ -834,6 +893,43 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       session.state = 'idle';
       persistSession(phone, session);
       return handleMessage(phone, message); // Re-process as idle
+    }
+  }
+}
+
+// ─── AI IMAGE GENERATION (BACKGROUND) ────────────────────────────────────────
+
+async function generateAIImages(slug: string, category: string, businessName: string, phone: string) {
+  console.log(`[AI-IMG] Starting image generation for ${slug}...`);
+  
+  // Generate hero image
+  const heroUrls = await generateImages(category, businessName, 'hero', 1);
+  const photos: any[] = [];
+  
+  if (heroUrls.length > 0) {
+    const localUrl = await downloadAndSaveImage(heroUrls[0], slug, 'hero.jpg');
+    if (localUrl) {
+      photos.push({ url: localUrl, caption: businessName, type: 'hero' });
+    }
+  }
+  
+  // Generate gallery images (up to 4 to save costs)
+  const galleryUrls = await generateImages(category, businessName, 'gallery', 4);
+  for (let i = 0; i < galleryUrls.length; i++) {
+    const localUrl = await downloadAndSaveImage(galleryUrls[i], slug, `gallery-${i + 1}.jpg`);
+    if (localUrl) {
+      photos.push({ url: localUrl, caption: `${businessName} gallery`, type: 'gallery' });
+    }
+  }
+  
+  if (photos.length > 0) {
+    // Update site data with photos
+    const siteData = getSiteData(slug);
+    if (siteData) {
+      siteData.photos = [...(siteData.photos || []), ...photos];
+      saveSiteData(siteData, phone);
+      renderSite(siteData);
+      console.log(`[AI-IMG] ${photos.length} images saved for ${slug}`);
     }
   }
 }

@@ -4,7 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{businessName}} — {{tagline}}</title>
+<meta name="description" content="{{businessName}} — {{tagline}}. {{about}} Order on WhatsApp or call {{phone}}. {{address}}">
+<meta property="og:title" content="{{businessName}} — {{tagline}}">
+<meta property="og:description" content="{{about}}">
+<meta property="og:type" content="restaurant">
+<meta property="og:url" content="{{siteUrl}}">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "{{businessName}}",
+  "description": "{{tagline}}",
+  "telephone": "+91{{phone}}",
+  "address": "{{address}}",
+  "openingHours": "{{timings}}",
+  "url": "{{siteUrl}}"
+}
+</script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -20,7 +39,6 @@ h1,h2,h3,h4{font-family:var(--font-heading);font-weight:700;line-height:1.2}
 a{text-decoration:none;color:inherit}
 img{max-width:100%;display:block}
 
-/* Scrollbar */
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--primary);border-radius:3px}
@@ -28,14 +46,11 @@ img{max-width:100%;display:block}
 /* Animations */
 .fade-up{opacity:0;transform:translateY(40px);transition:opacity .7s ease,transform .7s ease}
 .fade-up.visible{opacity:1;transform:translateY(0)}
-.fade-left{opacity:0;transform:translateX(-40px);transition:opacity .7s ease,transform .7s ease}
-.fade-left.visible{opacity:1;transform:translateX(0)}
-.fade-right{opacity:0;transform:translateX(40px);transition:opacity .7s ease,transform .7s ease}
-.fade-right.visible{opacity:1;transform:translateX(0)}
+.stagger{transition-delay:calc(var(--i,0) * 0.1s)}
 
 /* Nav */
 .nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:1rem 1.5rem;transition:all .3s ease;display:flex;align-items:center;justify-content:space-between}
-.nav.scrolled{background:rgba(15,15,15,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--glass-border);padding:.75rem 1.5rem}
+.nav.scrolled{background:rgba(15,15,15,0.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--glass-border);padding:.75rem 1.5rem}
 .nav-brand{font-family:var(--font-heading);font-size:1.25rem;font-weight:700;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .nav-links{display:flex;gap:1.5rem;align-items:center}
 .nav-links a{font-size:.875rem;font-weight:500;color:var(--text-muted);transition:color .3s}
@@ -46,7 +61,6 @@ img{max-width:100%;display:block}
 .mobile-menu.active{display:flex}
 .mobile-menu a{font-size:1.5rem;font-family:var(--font-heading);color:var(--text);transition:color .3s}
 .mobile-menu a:hover{color:var(--primary)}
-
 @media(max-width:768px){
   .nav-links{display:none}
   .nav-toggle{display:flex}
@@ -55,6 +69,8 @@ img{max-width:100%;display:block}
 /* Hero */
 .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:6rem 1.5rem 4rem}
 .hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,#1a0a00 0%,#2d1200 30%,#1a0500 60%,#0f0f0f 100%);z-index:0}
+.hero-bg.has-image{background-size:cover;background-position:center}
+.hero-bg.has-image::before{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.4) 50%,rgba(15,15,15,1) 100%)}
 .hero-bg::before{content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;background:radial-gradient(circle,rgba(245,158,11,0.15) 0%,transparent 60%);animation:heroGlow 8s ease-in-out infinite alternate}
 .hero-bg::after{content:'';position:absolute;bottom:-30%;left:-30%;width:80%;height:80%;background:radial-gradient(circle,rgba(239,68,68,0.1) 0%,transparent 60%);animation:heroGlow 10s ease-in-out infinite alternate-reverse}
 @keyframes heroGlow{0%{transform:translate(0,0) scale(1)}100%{transform:translate(30px,20px) scale(1.1)}}
@@ -64,6 +80,10 @@ img{max-width:100%;display:block}
 .hero h1 span{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .hero p{font-size:1.125rem;color:var(--text-muted);margin-bottom:2.5rem;max-width:500px;margin-left:auto;margin-right:auto}
 .hero-buttons{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.hero-stats{display:flex;gap:2.5rem;justify-content:center;margin-top:3rem;flex-wrap:wrap}
+.hero-stat{text-align:center}
+.hero-stat-num{font-size:1.75rem;font-weight:700;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-stat-label{font-size:.75rem;color:var(--text-muted);margin-top:.25rem}
 
 /* Buttons */
 .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.875rem 2rem;border-radius:50px;font-weight:600;font-size:.95rem;transition:all .3s ease;cursor:pointer;border:none;font-family:var(--font-body)}
@@ -82,12 +102,23 @@ section{padding:5rem 1.5rem}
 .section-subtitle{color:var(--text-muted);font-size:1.05rem;max-width:550px}
 .section-header{text-align:center;margin-bottom:3.5rem}
 
+/* About */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
+@media(max-width:768px){.about-grid{grid-template-columns:1fr}}
+.about-text p{color:var(--text-muted);font-size:1rem;line-height:1.8;margin-bottom:1.5rem}
+.about-highlights{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.about-highlight{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-sm);padding:1.25rem;text-align:center;backdrop-filter:blur(10px)}
+.about-highlight .icon{font-size:1.75rem;margin-bottom:.5rem}
+.about-highlight h4{font-family:var(--font-body);font-size:.85rem;font-weight:600}
+.about-highlight p{font-size:.75rem;color:var(--text-muted);margin-top:.25rem}
+
 /* Specials */
 .specials-card{background:var(--gradient-soft);border:1px solid rgba(245,158,11,0.15);border-radius:var(--radius);padding:2.5rem;position:relative;overflow:hidden}
 .specials-card::before{content:'🔥';position:absolute;top:1.5rem;right:1.5rem;font-size:2.5rem}
 .specials-card h3{font-size:1.75rem;margin-bottom:.5rem}
 .specials-card .price{font-size:2rem;font-weight:700;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:.75rem 0}
 .specials-card p{color:var(--text-muted);margin-bottom:1.5rem}
+.no-special{text-align:center;padding:2rem;color:var(--text-muted)}
 
 /* Menu */
 .menu-tabs{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-bottom:3rem}
@@ -99,21 +130,25 @@ section{padding:5rem 1.5rem}
 .menu-item-info h4{font-family:var(--font-body);font-size:.95rem;font-weight:600;margin-bottom:.25rem}
 .menu-item-info p{font-size:.8rem;color:var(--text-muted)}
 .menu-item-price{font-weight:700;color:var(--primary);white-space:nowrap;font-size:1rem}
-.menu-category{display:none}
-.menu-category.active{display:grid}
 .veg-badge{display:inline-block;width:14px;height:14px;border:1.5px solid #22c55e;border-radius:2px;position:relative;margin-right:.35rem;vertical-align:middle}
 .veg-badge::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:6px;height:6px;border-radius:50%;background:#22c55e}
 .nonveg-badge{display:inline-block;width:14px;height:14px;border:1.5px solid #ef4444;border-radius:2px;position:relative;margin-right:.35rem;vertical-align:middle}
 .nonveg-badge::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:7px solid #ef4444}
+.popular-tag{display:inline-block;background:rgba(245,158,11,0.2);color:var(--primary);padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:600;margin-left:.5rem;vertical-align:middle}
+.menu-empty{text-align:center;padding:3rem;color:var(--text-muted);grid-column:1/-1}
 
 /* Gallery */
 .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
 @media(max-width:600px){.gallery-grid{grid-template-columns:repeat(2,1fr)}}
 .gallery-item{aspect-ratio:1;border-radius:var(--radius-sm);overflow:hidden;position:relative;cursor:pointer}
+.gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.gallery-item:hover img{transform:scale(1.1)}
 .gallery-item .gallery-bg{width:100%;height:100%;transition:transform .5s ease;display:flex;align-items:center;justify-content:center;font-size:2.5rem}
 .gallery-item:hover .gallery-bg{transform:scale(1.1)}
 .gallery-item::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5),transparent);opacity:0;transition:opacity .3s}
 .gallery-item:hover::after{opacity:1}
+.gallery-upload-cta{grid-column:1/-1;text-align:center;padding:2rem;background:var(--glass);border:2px dashed var(--glass-border);border-radius:var(--radius);color:var(--text-muted)}
+.gallery-upload-cta a{color:var(--primary);font-weight:600}
 
 /* Reviews */
 .reviews-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem}
@@ -123,6 +158,7 @@ section{padding:5rem 1.5rem}
 .review-text{color:var(--text-muted);font-size:.925rem;line-height:1.7;margin-bottom:1.25rem;font-style:italic}
 .review-author{font-weight:600;font-size:.9rem}
 .review-date{font-size:.75rem;color:var(--text-muted)}
+.review-cta{text-align:center;margin-top:2rem;padding:2rem;background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius)}
 
 /* Timings */
 .timings-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:2.5rem;backdrop-filter:blur(10px);max-width:500px;margin:0 auto}
@@ -130,25 +166,25 @@ section{padding:5rem 1.5rem}
 .timing-row:last-child{border:none}
 .timing-day{font-weight:500}
 .timing-hours{color:var(--primary);font-weight:600}
-.timing-closed{color:#ef4444}
+.timing-single{text-align:center;font-size:1.25rem;font-weight:600;color:var(--primary);padding:1.5rem}
+.timing-single .icon{font-size:2rem;margin-bottom:.75rem}
 
 /* Contact */
-.contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem}
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem}
 .contact-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:2rem;text-align:center;backdrop-filter:blur(10px);transition:all .3s}
 .contact-card:hover{border-color:rgba(245,158,11,0.2);transform:translateY(-4px)}
 .contact-icon{font-size:2.5rem;margin-bottom:1rem}
 .contact-card h3{font-family:var(--font-body);font-size:1rem;font-weight:600;margin-bottom:.5rem}
 .contact-card p{color:var(--text-muted);font-size:.875rem}
-.map-container{border-radius:var(--radius);overflow:hidden;margin-top:2rem;height:300px;background:var(--surface);display:flex;align-items:center;justify-content:center;border:1px solid var(--glass-border)}
-.map-container iframe{width:100%;height:100%;border:none}
-.map-placeholder{color:var(--text-muted);text-align:center}
+.map-container{border-radius:var(--radius);overflow:hidden;margin-top:2rem;height:300px;border:1px solid var(--glass-border)}
+.map-container iframe{width:100%;height:100%;border:none;filter:invert(90%) hue-rotate(180deg) brightness(0.9) contrast(1.1)}
 
 /* Footer */
 .footer{padding:3rem 1.5rem;border-top:1px solid var(--glass-border);text-align:center}
 .footer-brand{font-family:var(--font-heading);font-size:1.5rem;margin-bottom:.5rem;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .footer-address{color:var(--text-muted);font-size:.875rem;margin-bottom:1.5rem}
-.footer-sherusites{color:var(--text-muted);font-size:.8rem;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--glass-border)}
-.footer-sherusites a{color:var(--primary);font-weight:600}
+.footer-powered{color:var(--text-muted);font-size:.75rem;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--glass-border)}
+.footer-powered a{color:var(--primary);font-weight:600}
 
 /* WhatsApp Float */
 .whatsapp-float{position:fixed;bottom:1.5rem;right:1.5rem;z-index:900;width:60px;height:60px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,0.4);cursor:pointer;transition:transform .3s;animation:waPulse 2s infinite}
@@ -160,6 +196,11 @@ section{padding:5rem 1.5rem}
 .particles{position:absolute;inset:0;overflow:hidden;z-index:0}
 .particle{position:absolute;border-radius:50%;background:var(--primary);opacity:.15;animation:float linear infinite}
 @keyframes float{0%{transform:translateY(100vh) rotate(0deg);opacity:0}10%{opacity:.15}90%{opacity:.15}100%{transform:translateY(-10vh) rotate(720deg);opacity:0}}
+
+/* Order CTA Strip */
+.order-strip{background:var(--gradient);padding:1rem 1.5rem;text-align:center;position:relative;overflow:hidden}
+.order-strip p{color:#fff;font-weight:600;font-size:1rem}
+.order-strip a{color:#fff;text-decoration:underline}
 </style>
 </head>
 <body>
@@ -168,7 +209,7 @@ section{padding:5rem 1.5rem}
 <nav class="nav" id="nav">
   <a href="#" class="nav-brand">{{businessName}}</a>
   <div class="nav-links">
-    <a href="#specials">Specials</a>
+    <a href="#about">About</a>
     <a href="#menu">Menu</a>
     <a href="#gallery">Gallery</a>
     <a href="#reviews">Reviews</a>
@@ -182,7 +223,7 @@ section{padding:5rem 1.5rem}
 
 <!-- Mobile Menu -->
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#specials" onclick="toggleMenu()">Specials</a>
+  <a href="#about" onclick="toggleMenu()">About</a>
   <a href="#menu" onclick="toggleMenu()">Menu</a>
   <a href="#gallery" onclick="toggleMenu()">Gallery</a>
   <a href="#reviews" onclick="toggleMenu()">Reviews</a>
@@ -196,12 +237,38 @@ section{padding:5rem 1.5rem}
     <div class="particles" id="particles"></div>
   </div>
   <div class="hero-content fade-up">
-    <div class="hero-badge">🍛 Authentic North Indian</div>
-    <h1><span>Sharma Ji Ka</span><br>Dhaba</h1>
-    <p>{{tagline}} — Ghar jaisa khana, apno wali mehak. Serving love on a plate since 1995.</p>
+    <div class="hero-badge">{{categoryBadge}}</div>
+    <h1><span>{{businessName}}</span></h1>
+    <p>{{tagline}}</p>
     <div class="hero-buttons">
-      <a href="https://wa.me/{{whatsapp}}?text=Hi! I'd like to place an order" class="btn btn-whatsapp">💬 Order on WhatsApp</a>
+      <a href="https://wa.me/{{whatsapp}}?text=Hi!%20I'd%20like%20to%20place%20an%20order%20from%20{{businessName}}" class="btn btn-whatsapp">💬 Order on WhatsApp</a>
       <a href="tel:{{phone}}" class="btn btn-outline">📞 Call to Order</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-num" id="stat-items">0+</div><div class="hero-stat-label">Menu Items</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">⭐ 4.8</div><div class="hero-stat-label">Customer Rating</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">{{timings}}</div><div class="hero-stat-label">Open Today</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- About -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="fade-up">
+        <div class="section-label">🏪 About Us</div>
+        <h2 class="section-title">{{businessName}}</h2>
+        <div class="about-text">
+          <p>{{about}}</p>
+        </div>
+      </div>
+      <div class="about-highlights fade-up">
+        <div class="about-highlight"><div class="icon">📍</div><h4>Location</h4><p>{{address}}</p></div>
+        <div class="about-highlight"><div class="icon">⏰</div><h4>Timings</h4><p>{{timings}}</p></div>
+        <div class="about-highlight"><div class="icon">📞</div><h4>Call Us</h4><p>{{phone}}</p></div>
+        <div class="about-highlight"><div class="icon">💬</div><h4>WhatsApp</h4><p>Tap to order</p></div>
+      </div>
     </div>
   </div>
 </section>
@@ -211,14 +278,11 @@ section{padding:5rem 1.5rem}
   <div class="container">
     <div class="section-header fade-up">
       <div class="section-label">🔥 Today's Special</div>
-      <h2 class="section-title">Aaj Ka Dhamaka</h2>
-      <p class="section-subtitle">Chef's special dish — limited quantity, unlimited taste!</p>
+      <h2 class="section-title">Aaj Ka Khaas</h2>
+      <p class="section-subtitle">Chef's special — limited quantity, unlimited taste!</p>
     </div>
-    <div class="specials-card fade-up">
-      <h3>Butter Chicken Thali</h3>
-      <p>Creamy butter chicken, dal makhani, jeera rice, 2 butter naan, raita, salad & gulab jamun</p>
-      <div class="price">₹249 <span style="font-size:1rem;text-decoration:line-through;opacity:.5">₹349</span></div>
-      <a href="https://wa.me/{{whatsapp}}?text=Hi! I want to order Today's Special - Butter Chicken Thali" class="btn btn-primary">Order Now →</a>
+    <div id="specials-container" class="fade-up">
+      <!-- Populated by JS from __SITE_DATA__ -->
     </div>
   </div>
 </section>
@@ -229,47 +293,14 @@ section{padding:5rem 1.5rem}
     <div class="section-header fade-up">
       <div class="section-label">📋 Our Menu</div>
       <h2 class="section-title">Swad Ka Safar</h2>
-      <p class="section-subtitle">From classic starters to heavenly mains — every dish tells a story</p>
+      <p class="section-subtitle">Every dish made with love, served with pride</p>
     </div>
-    <div class="menu-tabs fade-up">
-      <button class="menu-tab active" onclick="switchMenu('starters')">🍢 Starters</button>
-      <button class="menu-tab" onclick="switchMenu('main')">🍛 Main Course</button>
-      <button class="menu-tab" onclick="switchMenu('breads')">🫓 Breads</button>
-      <button class="menu-tab" onclick="switchMenu('drinks')">🥤 Drinks</button>
+    <div class="menu-tabs fade-up" id="menu-tabs">
+      <!-- Tabs generated by JS from actual menu categories -->
     </div>
-
-    <div class="menu-category active menu-grid" id="menu-starters">
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="veg-badge"></span>Paneer Tikka</h4><p>Marinated cottage cheese grilled in tandoor</p></div><div class="menu-item-price">₹199</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="nonveg-badge"></span>Chicken Tikka</h4><p>Smoky tandoori chicken pieces</p></div><div class="menu-item-price">₹229</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="veg-badge"></span>Aloo Tikki</h4><p>Crispy potato patties with chutneys</p></div><div class="menu-item-price">₹99</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="nonveg-badge"></span>Fish Amritsari</h4><p>Batter-fried fish with masala</p></div><div class="menu-item-price">₹249</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="veg-badge"></span>Dahi Kebab</h4><p>Creamy hung curd kebabs</p></div><div class="menu-item-price">₹149</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="nonveg-badge"></span>Seekh Kebab</h4><p>Minced mutton skewers from tandoor</p></div><div class="menu-item-price">₹269</div></div>
-    </div>
-
-    <div class="menu-category menu-grid" id="menu-main">
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="nonveg-badge"></span>Butter Chicken</h4><p>Creamy tomato-based curry, our signature</p></div><div class="menu-item-price">₹279</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="veg-badge"></span>Dal Makhani</h4><p>Slow-cooked black lentils with butter</p></div><div class="menu-item-price">₹189</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="veg-badge"></span>Paneer Butter Masala</h4><p>Rich & creamy paneer curry</p></div><div class="menu-item-price">₹219</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="nonveg-badge"></span>Mutton Rogan Josh</h4><p>Kashmiri style spiced mutton</p></div><div class="menu-item-price">₹329</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="veg-badge"></span>Chole Bhature</h4><p>Spiced chickpeas with fried bread</p></div><div class="menu-item-price">₹149</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="nonveg-badge"></span>Egg Curry</h4><p>Boiled eggs in onion-tomato gravy</p></div><div class="menu-item-price">₹159</div></div>
-    </div>
-
-    <div class="menu-category menu-grid" id="menu-breads">
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="veg-badge"></span>Butter Naan</h4><p>Tandoor-baked with butter</p></div><div class="menu-item-price">₹40</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="veg-badge"></span>Garlic Naan</h4><p>Loaded with fresh garlic</p></div><div class="menu-item-price">₹50</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="veg-badge"></span>Tandoori Roti</h4><p>Whole wheat bread from tandoor</p></div><div class="menu-item-price">₹25</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="veg-badge"></span>Laccha Paratha</h4><p>Layered flaky paratha</p></div><div class="menu-item-price">₹45</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="veg-badge"></span>Stuffed Kulcha</h4><p>Paneer or aloo stuffed</p></div><div class="menu-item-price">₹60</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="veg-badge"></span>Missi Roti</h4><p>Gram flour flatbread</p></div><div class="menu-item-price">₹35</div></div>
-    </div>
-
-    <div class="menu-category menu-grid" id="menu-drinks">
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="veg-badge"></span>Lassi (Sweet/Salt)</h4><p>Fresh churned yogurt drink</p></div><div class="menu-item-price">₹69</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="veg-badge"></span>Masala Chaas</h4><p>Spiced buttermilk</p></div><div class="menu-item-price">₹49</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="veg-badge"></span>Fresh Lime Soda</h4><p>Sweet or salt</p></div><div class="menu-item-price">₹59</div></div>
-      <div class="menu-item fade-up"><div class="menu-item-info"><h4><span class="veg-badge"></span>Mango Lassi</h4><p>Seasonal mango yogurt shake</p></div><div class="menu-item-price">₹89</div></div>
+    <div class="menu-grid" id="menu-grid">
+      <!-- Menu items populated by JS -->
+      <div class="menu-empty fade-up">📋 Menu coming soon! WhatsApp pe order karo.</div>
     </div>
   </div>
 </section>
@@ -282,13 +313,8 @@ section{padding:5rem 1.5rem}
       <h2 class="section-title">Nazar Ka Swad</h2>
       <p class="section-subtitle">A feast for the eyes before the plate arrives</p>
     </div>
-    <div class="gallery-grid">
-      <div class="gallery-item fade-up"><div class="gallery-bg" style="background:linear-gradient(135deg,#f59e0b,#dc2626)">🍛</div></div>
-      <div class="gallery-item fade-up"><div class="gallery-bg" style="background:linear-gradient(135deg,#f97316,#eab308)">🫓</div></div>
-      <div class="gallery-item fade-up"><div class="gallery-bg" style="background:linear-gradient(135deg,#ef4444,#f59e0b)">🍗</div></div>
-      <div class="gallery-item fade-up"><div class="gallery-bg" style="background:linear-gradient(135deg,#eab308,#f97316)">🥘</div></div>
-      <div class="gallery-item fade-up"><div class="gallery-bg" style="background:linear-gradient(135deg,#dc2626,#f59e0b)">🍨</div></div>
-      <div class="gallery-item fade-up"><div class="gallery-bg" style="background:linear-gradient(135deg,#f97316,#ef4444)">🥤</div></div>
+    <div class="gallery-grid" id="gallery-grid">
+      <!-- Photos populated by JS, fallback gradient placeholders -->
     </div>
   </div>
 </section>
@@ -299,27 +325,14 @@ section{padding:5rem 1.5rem}
     <div class="section-header fade-up">
       <div class="section-label">⭐ Reviews</div>
       <h2 class="section-title">Kya Kehte Hain Log</h2>
-      <p class="section-subtitle">Don't take our word — hear from our regulars</p>
+      <p class="section-subtitle">Hear from our happy customers</p>
     </div>
-    <div class="reviews-grid">
-      <div class="review-card fade-up">
-        <div class="review-stars">★★★★★</div>
-        <p class="review-text">"Best butter chicken in the area! Sharma ji's dhaba is our family's go-to place every weekend. The taste is consistently amazing."</p>
-        <div class="review-author">Rajesh Kumar</div>
-        <div class="review-date">Regular since 2019</div>
-      </div>
-      <div class="review-card fade-up">
-        <div class="review-stars">★★★★★</div>
-        <p class="review-text">"Ordered via WhatsApp and the food arrived hot and fresh! The dal makhani reminded me of my mom's cooking. Highly recommend!"</p>
-        <div class="review-author">Priya Sharma</div>
-        <div class="review-date">2 weeks ago</div>
-      </div>
-      <div class="review-card fade-up">
-        <div class="review-stars">★★★★☆</div>
-        <p class="review-text">"Amazing thali at this price! The quantity is generous and the taste is authentic Punjabi. My office team orders here every Friday."</p>
-        <div class="review-author">Amit Verma</div>
-        <div class="review-date">1 month ago</div>
-      </div>
+    <div class="reviews-grid" id="reviews-grid">
+      <!-- Reviews populated by JS -->
+    </div>
+    <div class="review-cta fade-up">
+      <p style="font-size:1.1rem;margin-bottom:.75rem">😋 Aapko khana pasand aaya?</p>
+      <a href="https://wa.me/{{whatsapp}}?text=Hi!%20I%20want%20to%20leave%20a%20review" class="btn btn-primary" style="font-size:.85rem">⭐ Leave a Review</a>
     </div>
   </div>
 </section>
@@ -332,10 +345,11 @@ section{padding:5rem 1.5rem}
       <h2 class="section-title">Kab Milenge?</h2>
     </div>
     <div class="timings-card fade-up">
-      <div class="timing-row"><span class="timing-day">Monday – Friday</span><span class="timing-hours">11:00 AM – 11:00 PM</span></div>
-      <div class="timing-row"><span class="timing-day">Saturday</span><span class="timing-hours">11:00 AM – 11:30 PM</span></div>
-      <div class="timing-row"><span class="timing-day">Sunday</span><span class="timing-hours">10:00 AM – 11:00 PM</span></div>
-      <div class="timing-row"><span class="timing-day">Public Holidays</span><span class="timing-hours">10:00 AM – 11:00 PM</span></div>
+      <div class="timing-single">
+        <div class="icon">🕐</div>
+        <div>{{timings}}</div>
+        <div style="font-size:.8rem;color:var(--text-muted);margin-top:.5rem;font-weight:400" id="open-status"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -345,87 +359,241 @@ section{padding:5rem 1.5rem}
   <div class="container">
     <div class="section-header fade-up">
       <div class="section-label">📍 Contact</div>
-      <h2 class="section-title">Aa Jao, Mil Ke Khayenge!</h2>
+      <h2 class="section-title">Mil Ke Khayenge!</h2>
     </div>
     <div class="contact-grid">
-      <a href="https://wa.me/{{whatsapp}}?text=Hi! I'd like to place an order from Sharma Ji Ka Dhaba" class="contact-card fade-up">
+      <a href="https://wa.me/{{whatsapp}}?text=Hi!%20I'd%20like%20to%20order%20from%20{{businessName}}" class="contact-card fade-up">
         <div class="contact-icon">💬</div>
         <h3>WhatsApp Order</h3>
-        <p>Tap to order directly on WhatsApp — fast & easy!</p>
+        <p>Tap to order — fast & easy!</p>
       </a>
       <a href="tel:{{phone}}" class="contact-card fade-up">
         <div class="contact-icon">📞</div>
         <h3>Call Us</h3>
         <p>{{phone}}</p>
       </a>
-      <div class="contact-card fade-up">
+      <a href="{{mapUrl}}" target="_blank" rel="noopener" class="contact-card fade-up">
         <div class="contact-icon">📍</div>
         <h3>Visit Us</h3>
         <p>{{address}}</p>
-      </div>
+      </a>
+      <a href="https://wa.me/{{whatsapp}}?text=Hi!%20I%20have%20a%20question" class="contact-card fade-up">
+        <div class="contact-icon">❓</div>
+        <h3>Questions?</h3>
+        <p>Message us anytime!</p>
+      </a>
     </div>
-    <div class="map-container fade-up">
-      <div class="map-placeholder">
-        <p style="font-size:2rem;margin-bottom:.5rem">🗺️</p>
-        <p>Google Maps will appear here</p>
-        <p style="font-size:.75rem;margin-top:.25rem">{{mapEmbed}}</p>
-      </div>
+    <div class="map-container fade-up" id="map-container">
+      <iframe src="https://maps.google.com/maps?q={{mapQuery}}&output=embed&z=15" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Location Map"></iframe>
     </div>
   </div>
 </section>
 
+<!-- Order CTA Strip -->
+<div class="order-strip fade-up">
+  <p>🍛 Hungry? <a href="https://wa.me/{{whatsapp}}?text=Hi!%20Menu%20dikhao">Order on WhatsApp</a> — fast delivery!</p>
+</div>
+
 <!-- Footer -->
 <footer class="footer">
-  <div class="footer-brand">Sharma Ji Ka Dhaba</div>
-  <div class="footer-address">{{address}}</div>
+  <div class="footer-brand">{{businessName}}</div>
+  <div class="footer-address">{{address}} · {{phone}}</div>
   <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
     <a href="https://wa.me/{{whatsapp}}" class="btn btn-whatsapp" style="padding:.6rem 1.5rem;font-size:.85rem">💬 WhatsApp</a>
     <a href="tel:{{phone}}" class="btn btn-outline" style="padding:.6rem 1.5rem;font-size:.85rem">📞 Call</a>
+    <a href="{{mapUrl}}" target="_blank" class="btn btn-outline" style="padding:.6rem 1.5rem;font-size:.85rem">📍 Directions</a>
   </div>
-  <div class="footer-sherusites">⚡ Website by <a href="https://sherusites.com">SheruSites</a> — Apna bhi banwao</div>
+  <div class="footer-powered">⚡ Website by <a href="https://whatswebsite.com">WhatsWebsite</a> — WhatsApp pe banwao apni bhi!</div>
 </footer>
 
 <!-- WhatsApp Float -->
-<a href="https://wa.me/{{whatsapp}}?text=Hi! I'd like to order from Sharma Ji Ka Dhaba" class="whatsapp-float" aria-label="WhatsApp">
+<a href="https://wa.me/{{whatsapp}}?text=Hi!%20I'd%20like%20to%20order%20from%20{{businessName}}" class="whatsapp-float" aria-label="WhatsApp">
   <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
 
 <script>
+// Site data injected by server
+var SITE = window.__SITE_DATA__ || {};
+
+// Apply hero image if available
+(function(){
+  var photos = SITE.photos || [];
+  var hero = photos.find(function(p){ return p.type === 'hero'; });
+  if (hero) {
+    var bg = document.querySelector('.hero-bg');
+    bg.style.backgroundImage = 'url(' + hero.url + ')';
+    bg.classList.add('has-image');
+  }
+})();
+
 // Nav scroll
-const nav=document.getElementById('nav');
-window.addEventListener('scroll',()=>{nav.classList.toggle('scrolled',window.scrollY>50)});
+var nav=document.getElementById('nav');
+window.addEventListener('scroll',function(){nav.classList.toggle('scrolled',window.scrollY>50)});
 
 // Mobile menu
-function toggleMenu(){
-  const m=document.getElementById('mobileMenu');
-  m.classList.toggle('active');
-}
-
-// Menu tabs
-function switchMenu(cat){
-  document.querySelectorAll('.menu-category').forEach(c=>c.classList.remove('active'));
-  document.querySelectorAll('.menu-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('menu-'+cat).classList.add('active');
-  event.target.classList.add('active');
-  // Re-observe new items
-  document.querySelectorAll('#menu-'+cat+' .fade-up').forEach(el=>observer.observe(el));
-}
+function toggleMenu(){document.getElementById('mobileMenu').classList.toggle('active')}
 
 // Scroll animations
-const observer=new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}});
+var observer=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}});
 },{threshold:0.1,rootMargin:'0px 0px -50px 0px'});
-document.querySelectorAll('.fade-up,.fade-left,.fade-right').forEach(el=>observer.observe(el));
+document.querySelectorAll('.fade-up').forEach(function(el){observer.observe(el)});
 
 // Particles
 (function(){
-  const c=document.getElementById('particles');
-  for(let i=0;i<15;i++){
-    const p=document.createElement('div');
+  var c=document.getElementById('particles');
+  for(var i=0;i<15;i++){
+    var p=document.createElement('div');
     p.className='particle';
-    const s=Math.random()*4+2;
-    p.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;animation-duration:${Math.random()*15+10}s;animation-delay:${Math.random()*10}s;`;
+    var s=Math.random()*4+2;
+    p.style.cssText='width:'+s+'px;height:'+s+'px;left:'+Math.random()*100+'%;animation-duration:'+(Math.random()*15+10)+'s;animation-delay:'+(Math.random()*10)+'s;';
     c.appendChild(p);
+  }
+})();
+
+// ─── MENU RENDERING ─────────────────────────────────────────────
+(function(){
+  var menu = SITE.menu || [];
+  if (!menu.length) return;
+  
+  // Group by category
+  var categories = {};
+  var catOrder = [];
+  menu.forEach(function(item){
+    var cat = item.category || 'Menu';
+    if (!categories[cat]) { categories[cat] = []; catOrder.push(cat); }
+    categories[cat].push(item);
+  });
+  
+  // If no explicit categories, show all in one grid
+  var tabsEl = document.getElementById('menu-tabs');
+  var gridEl = document.getElementById('menu-grid');
+  gridEl.innerHTML = '';
+  
+  // Update stat
+  document.getElementById('stat-items').textContent = menu.length + '+';
+  
+  if (catOrder.length <= 1) {
+    // No tabs needed
+    tabsEl.style.display = 'none';
+    menu.forEach(function(item, i){
+      gridEl.innerHTML += menuItemHtml(item, i);
+    });
+  } else {
+    // Render tabs
+    tabsEl.innerHTML = catOrder.map(function(cat, i){
+      return '<button class="menu-tab'+(i===0?' active':'')+'" data-cat="'+cat+'">'+cat+'</button>';
+    }).join('');
+    
+    // Render first category
+    renderMenuCat(categories[catOrder[0]]);
+    
+    // Tab click handlers
+    tabsEl.querySelectorAll('.menu-tab').forEach(function(tab){
+      tab.addEventListener('click', function(){
+        tabsEl.querySelectorAll('.menu-tab').forEach(function(t){t.classList.remove('active')});
+        tab.classList.add('active');
+        renderMenuCat(categories[tab.dataset.cat]);
+      });
+    });
+  }
+  
+  function renderMenuCat(items){
+    gridEl.innerHTML = '';
+    items.forEach(function(item, i){ gridEl.innerHTML += menuItemHtml(item, i); });
+    gridEl.querySelectorAll('.fade-up').forEach(function(el){observer.observe(el)});
+  }
+  
+  function menuItemHtml(item, i){
+    var badge = item.veg === false ? '<span class="nonveg-badge"></span>' : '<span class="veg-badge"></span>';
+    var pop = item.popular ? '<span class="popular-tag">⭐ Popular</span>' : '';
+    var desc = item.description ? '<p>'+item.description+'</p>' : '';
+    return '<div class="menu-item fade-up" style="--i:'+i+'">'+
+      '<div class="menu-item-info"><h4>'+badge+item.name+pop+'</h4>'+desc+'</div>'+
+      '<div class="menu-item-price">'+item.price+'</div></div>';
+  }
+})();
+
+// ─── TODAY'S SPECIAL ────────────────────────────────────────────
+(function(){
+  var el = document.getElementById('specials-container');
+  var special = SITE.todaySpecial;
+  if (!special || !special.name) {
+    el.innerHTML = '<div class="no-special">🍛 Today\'s special coming soon! WhatsApp pe poochho.</div>';
+    return;
+  }
+  var oldPrice = special.oldPrice ? '<span style="font-size:1rem;text-decoration:line-through;opacity:.5">'+special.oldPrice+'</span>' : '';
+  el.innerHTML = '<div class="specials-card">'+
+    '<h3>'+special.name+'</h3>'+
+    (special.description ? '<p>'+special.description+'</p>' : '')+
+    '<div class="price">'+special.price+' '+oldPrice+'</div>'+
+    '<a href="https://wa.me/'+SITE.whatsapp+'?text=Hi!%20I%20want%20to%20order%20Today\'s%20Special%20-%20'+encodeURIComponent(special.name)+'" class="btn btn-primary">Order Now →</a></div>';
+})();
+
+// ─── GALLERY ────────────────────────────────────────────────────
+(function(){
+  var el = document.getElementById('gallery-grid');
+  var photos = SITE.photos || [];
+  var gradients = [
+    ['#f59e0b','#dc2626'],['#f97316','#eab308'],['#ef4444','#f59e0b'],
+    ['#eab308','#f97316'],['#dc2626','#f59e0b'],['#f97316','#ef4444']
+  ];
+  var emojis = ['🍛','🫓','🍗','🥘','🍨','🥤'];
+  
+  if (photos.length > 0) {
+    el.innerHTML = photos.map(function(photo, i){
+      return '<div class="gallery-item fade-up" style="--i:'+i+'">'+
+        '<img src="'+photo.url+'" alt="'+(photo.caption||SITE.businessName)+'" loading="lazy"></div>';
+    }).join('');
+  } else {
+    // Show beautiful gradient placeholders + upload CTA
+    el.innerHTML = gradients.map(function(g, i){
+      return '<div class="gallery-item fade-up" style="--i:'+i+'">'+
+        '<div class="gallery-bg" style="background:linear-gradient(135deg,'+g[0]+','+g[1]+')">'+emojis[i]+'</div></div>';
+    }).join('') + '<div class="gallery-upload-cta fade-up">📸 Apni photos add karo! <a href="https://wa.me/'+SITE.whatsapp+'?text=Hi!%20I%20want%20to%20add%20photos%20to%20my%20website">WhatsApp pe bhejo</a></div>';
+  }
+  el.querySelectorAll('.fade-up').forEach(function(e){observer.observe(e)});
+})();
+
+// ─── REVIEWS ────────────────────────────────────────────────────
+(function(){
+  var el = document.getElementById('reviews-grid');
+  var reviews = SITE.reviews || [];
+  
+  if (reviews.length === 0) {
+    // Show placeholder with CTA
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-muted)">'+
+      '<p style="font-size:2rem;margin-bottom:1rem">⭐</p>'+
+      '<p>Abhi tak koi review nahi. Pehle ban jaiye!</p></div>';
+    return;
+  }
+  
+  el.innerHTML = reviews.map(function(r, i){
+    var stars = '';
+    for(var s=0;s<(r.rating||5);s++) stars += '★';
+    for(var s=(r.rating||5);s<5;s++) stars += '☆';
+    return '<div class="review-card fade-up" style="--i:'+i+'">'+
+      '<div class="review-stars">'+stars+'</div>'+
+      '<p class="review-text">"'+r.text+'"</p>'+
+      '<div class="review-author">'+r.author+'</div>'+
+      (r.date ? '<div class="review-date">'+r.date+'</div>' : '')+
+      '</div>';
+  }).join('');
+  el.querySelectorAll('.fade-up').forEach(function(e){observer.observe(e)});
+})();
+
+// ─── OPEN STATUS ────────────────────────────────────────────────
+(function(){
+  var el = document.getElementById('open-status');
+  var now = new Date();
+  var hour = now.getHours();
+  // Simple heuristic based on common timings
+  if (hour >= 8 && hour < 22) {
+    el.innerHTML = '🟢 Abhi open hai!';
+    el.style.color = '#22c55e';
+  } else {
+    el.innerHTML = '🔴 Abhi band hai';
+    el.style.color = '#ef4444';
   }
 })();
 </script>

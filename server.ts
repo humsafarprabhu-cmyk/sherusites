@@ -13,11 +13,13 @@ import rateLimit from 'express-rate-limit';
 import { handleMessage, setBaseUrl, getBaseUrl } from './bot/whatsapp-bot.ts';
 import { createOrder, verifyPayment, markPaid, getPaymentPageHTML } from './bot/payment.ts';
 import { listAllSites, getSiteData, saveSiteData } from './bot/db.ts';
+import { provisionDomain, sendTelegramAlert } from './bot/domain.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.set('trust proxy', 1); // Trust Cloudflare
 
 const PORT = process.env.PORT || 4000;
 const VERIFY_TOKEN = process.env.META_VERIFY_TOKEN || 'sherusites_verify_2026';
@@ -166,10 +168,29 @@ app.post('/api/payment/verify', payLimiter, (req, res) => {
 
     console.log(`[Payment] ✅ ${slug} upgraded to premium! Payment: ${razorpay_payment_id}`);
 
-    // Send WhatsApp confirmation if possible
+    // Send WhatsApp confirmation
     const site = getSiteData(slug);
-    if (site && ACCESS_TOKEN && PHONE_NUMBER_ID) {
-      sendTextMessage(site.phone, `🎉 *Payment Successful!*\n\n✅ ${site.businessName} is now PREMIUM!\n💳 Payment ID: ${razorpay_payment_id}\n\nYour custom domain will be set up within 30 minutes.\n\nThank you for choosing SheruSites! 🦁`);
+    if (site) {
+      if (ACCESS_TOKEN && PHONE_NUMBER_ID) {
+        sendTextMessage(site.phone, `🎉 *Payment Successful!*\n\n✅ ${site.businessName} is now PREMIUM!\n💳 Payment ID: ${razorpay_payment_id}\n\nYour custom domain is being set up. We'll message you when it's live!\n\nThank you for choosing SheruSites! 🦁`);
+      }
+
+      // Auto-provision domain
+      provisionDomain(slug, site.businessName, site.phone).then(result => {
+        if (result.success && result.domain) {
+          site.customDomain = result.domain;
+          saveSiteData(site);
+          if (ACCESS_TOKEN && PHONE_NUMBER_ID) {
+            sendTextMessage(site.phone, `🌐 *Your domain is LIVE!*\n\n✨ ${result.domain}\n\nAb aapke customers ${result.domain} pe jaake aapka website dekh sakte hain! 🚀`);
+          }
+        } else {
+          // Alert Abhi for manual intervention
+          sendTelegramAlert(`⚠️ Auto-domain failed for ${site.businessName} (${slug})\nPayment: ${razorpay_payment_id}\nError: ${result.error}\n\n👉 Register manually and update DB`);
+        }
+      }).catch(err => {
+        console.error('[Domain] Provision error:', err.message);
+        sendTelegramAlert(`⚠️ Domain provisioning crashed for ${slug}: ${err.message}`);
+      });
     }
 
     res.json({ success: true, paymentId: razorpay_payment_id });

@@ -261,13 +261,19 @@ app.post('/api/webhook', webhookLimiter, async (req, res) => {
           const phone = message.from;
           let text = '';
           if (message.type === 'text') text = message.text?.body || '';
-          else if (message.type === 'interactive') text = message.interactive?.button_reply?.title || message.interactive?.list_reply?.title || '';
+          else if (message.type === 'interactive') {
+            // Use button ID for reliable matching, fallback to title
+            text = message.interactive?.button_reply?.id || 
+                   message.interactive?.button_reply?.title || 
+                   message.interactive?.list_reply?.id ||
+                   message.interactive?.list_reply?.title || '';
+          }
           else if (message.type === 'image') text = message.image?.caption || '[photo]';
           else text = `[${message.type}]`;
           if (!text) continue;
           console.log(`[WhatsApp] ${phone}: ${text}`);
           const response = await handleMessage(phone, text);
-          for (const reply of response.replies) await sendTextMessage(phone, reply);
+          await sendBotResponse(phone, response);
         }
       }
     }
@@ -292,16 +298,17 @@ app.post('/api/chat', chatLimiter, async (req, res) => {
 
 // ─── META GRAPH API ─────────────────────────────────────────────────────────
 
-async function sendTextMessage(to: string, text: string) {
+async function sendWhatsAppMessage(to: string, messageObj: any) {
   if (!ACCESS_TOKEN || !PHONE_NUMBER_ID) {
-    console.log(`[Meta] Would send to ${to}: ${text.substring(0, 80)}...`);
+    console.log(`[Meta] Would send to ${to}:`, JSON.stringify(messageObj).substring(0, 100));
     return;
   }
   try {
+    const payload = { messaging_product: 'whatsapp', to, ...messageObj };
     const res = await fetch(`${GRAPH_API}/${PHONE_NUMBER_ID}/messages`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${ACCESS_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messaging_product: 'whatsapp', to, type: 'text', text: { body: text } }),
+      body: JSON.stringify(payload),
     });
     if (!res.ok) {
       const err = await res.json();
@@ -311,6 +318,43 @@ async function sendTextMessage(to: string, text: string) {
     }
   } catch (err: any) {
     console.error('[Meta] Send error:', err.message);
+  }
+}
+
+async function sendTextMessage(to: string, text: string) {
+  await sendWhatsAppMessage(to, { type: 'text', text: { body: text } });
+}
+
+async function sendInteractiveMessage(to: string, interactive: any) {
+  await sendWhatsAppMessage(to, { type: 'interactive', interactive });
+}
+
+// Helper: send a BotResponse (text or interactive)
+async function sendBotResponse(to: string, response: any) {
+  for (const reply of response.replies || []) {
+    if (typeof reply === 'string') {
+      await sendTextMessage(to, reply);
+    } else if (reply.type === 'buttons') {
+      await sendInteractiveMessage(to, {
+        type: 'button',
+        body: { text: reply.body },
+        action: {
+          buttons: reply.buttons.map((b: any, i: number) => ({
+            type: 'reply',
+            reply: { id: b.id || `btn_${i}`, title: b.title.substring(0, 20) }
+          }))
+        }
+      });
+    } else if (reply.type === 'list') {
+      await sendInteractiveMessage(to, {
+        type: 'list',
+        body: { text: reply.body },
+        action: {
+          button: reply.buttonText || 'Choose',
+          sections: reply.sections
+        }
+      });
+    }
   }
 }
 

@@ -1,13 +1,16 @@
 /**
- * SheruSites WhatsApp Bot — Build websites for small businesses via chat
- * Now backed by SQLite for persistent sessions
+ * SheruSites WhatsApp Bot v2.1
+ * - Interactive buttons & lists
+ * - "Hi" → edit or create new
+ * - Auto-detect phone from sender
+ * - List all user websites
  */
 
 import { generateSlug } from './site-generator.ts';
 import {
   getOrCreateUser, saveUser, getUser,
   getSiteData, saveSiteData, createSiteData, generateUniqueSlug,
-  getSession, saveSession, deleteSession,
+  getSession, saveSession, deleteSession, listUserSites,
   SiteData,
 } from './db.ts';
 import { generateContent } from './ai-content.ts';
@@ -16,9 +19,23 @@ import { smartRoute } from './smart-router.ts';
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 
+interface ButtonMsg {
+  type: 'buttons';
+  body: string;
+  buttons: { id: string; title: string }[];
+}
+
+interface ListMsg {
+  type: 'list';
+  body: string;
+  buttonText: string;
+  sections: { title: string; rows: { id: string; title: string; description?: string }[] }[];
+}
+
+type Reply = string | ButtonMsg | ListMsg;
+
 interface BotResponse {
-  replies: string[];
-  media?: { url: string; type: string; filename?: string }[];
+  replies: Reply[];
 }
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
@@ -29,24 +46,39 @@ export function setBaseUrl(url: string) {
   BASE_URL = url;
   console.log('[SheruSites] Base URL:', url);
 }
-
 export function getBaseUrl(): string { return BASE_URL; }
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
-function detectCategory(input: string): string {
+const CATEGORY_DISPLAY: Record<string, string> = {
+  restaurant: '🍽️ Restaurant / Dhaba',
+  store: '🏪 Kirana Store',
+  salon: '💇 Salon / Parlour',
+  tutor: '📚 Tutor / Coaching',
+  clinic: '🏥 Doctor / Clinic',
+  gym: '💪 Gym / Fitness',
+  photographer: '📸 Photographer',
+  service: '🔧 Service Provider',
+};
+
+const CATEGORY_NUMBERS: Record<string, string> = {
+  '1': 'restaurant', '2': 'store', '3': 'salon', '4': 'tutor',
+  '5': 'clinic', '6': 'gym', '7': 'photographer', '8': 'service',
+};
+
+function detectCategory(input: string): string | null {
   const lower = input.toLowerCase();
   const keywords: Record<string, string[]> = {
     restaurant: ['restaurant', 'dhaba', 'cafe', 'hotel', 'khana', 'food', 'biryani', 'thali', 'bakery', 'sweet', 'mithai'],
-    store: ['store', 'shop', 'dukan', 'kirana', 'grocery', 'general', 'supermarket', 'medical', 'chemist', 'pharmacy'],
-    salon: ['salon', 'parlour', 'parlor', 'beauty', 'barber', 'nai', 'hair', 'spa', 'makeup', 'bridal'],
-    tutor: ['tutor', 'coaching', 'teacher', 'classes', 'tuition', 'padhai', 'academy', 'institute'],
-    clinic: ['doctor', 'clinic', 'hospital', 'dentist', 'dr', 'physician', 'pathology', 'lab'],
+    store: ['store', 'shop', 'dukan', 'kirana', 'grocery', 'general', 'supermarket', 'medical', 'chemist'],
+    salon: ['salon', 'parlour', 'parlor', 'beauty', 'barber', 'nai', 'hair', 'spa', 'makeup'],
+    tutor: ['tutor', 'coaching', 'teacher', 'classes', 'tuition', 'padhai', 'academy'],
+    clinic: ['doctor', 'clinic', 'hospital', 'dentist', 'dr', 'physician'],
     gym: ['gym', 'fitness', 'yoga', 'workout', 'crossfit', 'zumba'],
-    photographer: ['photographer', 'photography', 'studio', 'photo', 'video', 'wedding shoot'],
-    service: ['electrician', 'plumber', 'repair', 'service', 'ac', 'carpenter', 'painter', 'pest', 'cleaning'],
+    photographer: ['photographer', 'photography', 'studio', 'photo', 'video'],
+    service: ['electrician', 'plumber', 'repair', 'service', 'ac', 'carpenter', 'painter'],
   };
-  let best = 'restaurant', bestScore = 0;
+  let best: string | null = null, bestScore = 0;
   for (const [cat, kws] of Object.entries(keywords)) {
     let score = 0;
     for (const kw of kws) if (lower.includes(kw)) score += kw.length;
@@ -55,21 +87,11 @@ function detectCategory(input: string): string {
   return best;
 }
 
-const CATEGORY_DISPLAY: Record<string, string> = {
-  restaurant: '🍽️ Restaurant / Dhaba / Cafe',
-  store: '🏪 Kirana / General Store',
-  salon: '💇 Salon / Parlour',
-  tutor: '📚 Tutor / Coaching',
-  clinic: '🏥 Doctor / Clinic',
-  gym: '💪 Gym / Fitness',
-  photographer: '📸 Photographer / Studio',
-  service: '🔧 Electrician / Plumber / Service',
-};
-
-const CATEGORY_NUMBERS: Record<string, string> = {
-  '1': 'restaurant', '2': 'store', '3': 'salon', '4': 'tutor',
-  '5': 'clinic', '6': 'gym', '7': 'photographer', '8': 'service',
-};
+// Extract 10-digit Indian phone from message
+function extractPhone(msg: string): string | null {
+  const match = msg.replace(/[\s\-\+]/g, '').match(/(?:91)?(\d{10})/);
+  return match ? match[1] : null;
+}
 
 // ─── SESSION HELPERS ─────────────────────────────────────────────────────────
 
@@ -115,7 +137,7 @@ function loadSession(phone: string): { state: string; data: any; siteUrl?: strin
   return { state: 'idle', data: {}, paid: false };
 }
 
-function persistSession(phone: string, s: { state: string; data: any; siteUrl?: string; slug?: string; paid: boolean; editMode?: string }) {
+function persistSession(phone: string, s: any) {
   saveSession(phone, {
     state: s.state,
     data: s.data,
@@ -126,6 +148,90 @@ function persistSession(phone: string, s: { state: string; data: any; siteUrl?: 
   });
 }
 
+// ─── CATEGORY LIST MESSAGE ───────────────────────────────────────────────────
+
+function categoryListMsg(): ListMsg {
+  return {
+    type: 'list',
+    body: '🙏 *Namaste! WhatsWebsite mein swagat hai!*\n\nSirf 2 minute mein professional website ready! 🚀\n\nApna business type choose karo 👇',
+    buttonText: '🏪 Business Type Choose Karo',
+    sections: [{
+      title: 'Business Categories',
+      rows: [
+        { id: 'cat_restaurant', title: '🍽️ Restaurant/Dhaba', description: 'Restaurant, Cafe, Dhaba, Hotel, Bakery' },
+        { id: 'cat_store', title: '🏪 Kirana/Store', description: 'Grocery, General Store, Medical' },
+        { id: 'cat_salon', title: '💇 Salon/Parlour', description: 'Beauty Parlour, Barber, Spa' },
+        { id: 'cat_tutor', title: '📚 Tutor/Coaching', description: 'Tuition, Coaching, Academy' },
+        { id: 'cat_clinic', title: '🏥 Doctor/Clinic', description: 'Doctor, Dentist, Hospital' },
+        { id: 'cat_gym', title: '💪 Gym/Fitness', description: 'Gym, Yoga, CrossFit' },
+        { id: 'cat_photographer', title: '📸 Photographer', description: 'Photography, Studio, Video' },
+        { id: 'cat_service', title: '🔧 Service Provider', description: 'Electrician, Plumber, AC Repair' },
+      ]
+    }]
+  };
+}
+
+// ─── EDIT OPTIONS BUTTONS ────────────────────────────────────────────────────
+
+function editOptionsMsg(): ListMsg {
+  return {
+    type: 'list',
+    body: '✏️ *Kya change karna hai?*\n\nNeeche se option choose karo 👇',
+    buttonText: '✏️ Edit Options',
+    sections: [{
+      title: 'Edit Options',
+      rows: [
+        { id: 'edit_add', title: '➕ Add Item/Service', description: 'Naya item ya service add karo' },
+        { id: 'edit_remove', title: '🗑️ Remove Item', description: 'Koi item hatao' },
+        { id: 'edit_price', title: '💰 Change Price', description: 'Price update karo' },
+        { id: 'edit_timing', title: '⏰ Change Timing', description: 'Business hours badlo' },
+        { id: 'edit_offer', title: '🎉 Add Offer', description: 'Special offer lagao' },
+        { id: 'edit_offer_remove', title: '❌ Remove Offer', description: 'Active offer hatao' },
+        { id: 'edit_close', title: '🔒 Temporarily Close', description: 'Band karo (holiday)' },
+        { id: 'edit_open', title: '✅ Reopen', description: 'Wapas khol do' },
+      ]
+    }]
+  };
+}
+
+// ─── WELCOME BACK (existing user) ───────────────────────────────────────────
+
+function welcomeBackMsg(sites: SiteData[]): Reply {
+  if (sites.length === 1) {
+    return {
+      type: 'buttons',
+      body: `👋 *Welcome back!*\n\n🏪 *${sites[0].businessName}*\n🔗 ${BASE_URL}/site/${sites[0].slug}\n\nKya karna hai?`,
+      buttons: [
+        { id: 'wb_edit', title: '✏️ Edit Website' },
+        { id: 'wb_new', title: '🆕 Naya Website' },
+        { id: 'wb_upgrade', title: '⭐ Upgrade' },
+      ]
+    };
+  }
+  // Multiple sites — show list
+  return {
+    type: 'list',
+    body: `👋 *Welcome back!*\n\nAapke ${sites.length} websites hain. Kaunsa edit karna hai?`,
+    buttonText: '🏪 Website Choose Karo',
+    sections: [
+      {
+        title: 'Your Websites',
+        rows: sites.map(s => ({
+          id: `site_${s.slug}`,
+          title: s.businessName.substring(0, 24),
+          description: `${CATEGORY_DISPLAY[s.category] || s.category} • ${s.plan === 'premium' ? '⭐ Premium' : '🆓 Free'}`
+        }))
+      },
+      {
+        title: 'Other',
+        rows: [
+          { id: 'wb_new', title: '🆕 Naya Website Banao', description: 'Create a new website' }
+        ]
+      }
+    ]
+  };
+}
+
 // ─── MAIN HANDLER ────────────────────────────────────────────────────────────
 
 export async function handleMessage(phone: string, message: string): Promise<BotResponse> {
@@ -134,49 +240,202 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
   const session = loadSession(phone);
 
   // Global commands
-  if (lower === 'reset' || lower === 'restart' || lower === 'naya' || lower === 'new') {
+  if (lower === 'reset' || lower === 'restart' || lower === 'naya' || lower === 'new' || lower === 'wb_new') {
     deleteSession(phone);
-    return { replies: ['🔄 Fresh start! Send "Hi" to begin.'] };
+    return { replies: [categoryListMsg()] };
   }
 
   if (lower === 'help' || lower === 'madad') {
-    return { replies: [
-      `🦁 *SheruSites — Help*\n\n` +
-      `Commands:\n• *hi/hello* — Start new website\n• *reset/naya* — Start over\n• *status* — Check your website\n• *edit* — Modify your website\n• *help/madad* — This message\n\nQuestions? WhatsApp us anytime! 🙏`
-    ]};
+    return { replies: [{
+      type: 'buttons',
+      body: `🦁 *WhatsWebsite — Help*\n\nCommands:\n• *hi* — Start / Edit website\n• *edit* — Modify website\n• *upgrade* — Custom domain\n• *share* — Share link\n• *new* — Naya website\n• *status* — Check status\n• *reset* — Start over`,
+      buttons: [
+        { id: 'wb_edit', title: '✏️ Edit' },
+        { id: 'wb_new', title: '🆕 New Website' },
+        { id: 'help_status', title: '📊 Status' },
+      ]
+    }]};
   }
 
-  if (lower === 'status') {
+  if (lower === 'status' || lower === 'help_status') {
     if (session.siteUrl) {
-      return { replies: [
-        `🌐 *Your Website*\n\n📍 ${session.data.businessName}\n🔗 ${session.siteUrl}\n${session.paid ? '✅ Premium (Custom Domain)' : '🆓 Free Plan (SheruSites branding)'}\n\n${!session.paid ? '⭐ Upgrade to ₹999/year for custom domain!\nType "upgrade" to get premium' : ''}`
-      ]};
+      const isPaid = session.paid;
+      return { replies: [{
+        type: 'buttons',
+        body: `🌐 *Your Website*\n\n📍 ${session.data.businessName}\n🔗 ${session.siteUrl}\n${isPaid ? '✅ Premium (Custom Domain)' : '🆓 Free Plan'}`,
+        buttons: isPaid 
+          ? [{ id: 'wb_edit', title: '✏️ Edit' }, { id: 'btn_share', title: '📤 Share' }]
+          : [{ id: 'wb_edit', title: '✏️ Edit' }, { id: 'wb_upgrade', title: '⭐ Upgrade' }, { id: 'btn_share', title: '📤 Share' }]
+      }]};
     }
-    return { replies: ['No website yet! Send "Hi" to create one. 😊'] };
+    return { replies: ['Abhi tak koi website nahi hai. "Hi" bhejo banane ke liye! 😊'] };
   }
 
-  // State machine
+  // ─── STATE MACHINE ─────────────────────────────────────────────────────────
+
   switch (session.state) {
     case 'idle': {
-      // Always show category menu first — don't auto-detect from greetings
+      // Check if user has existing sites
+      const user = getOrCreateUser(phone);
+      const sites = listUserSites(phone);
+      
+      if (sites.length > 0) {
+        // Existing user — show their sites, set to complete for button handling
+        const activeSite = user.active_site || sites[sites.length - 1].slug;
+        const siteData = getSiteData(activeSite);
+        if (siteData) {
+          session.state = 'complete';
+          session.slug = activeSite;
+          session.siteUrl = `${BASE_URL}/site/${activeSite}`;
+          session.data = {
+            slug: activeSite,
+            businessName: siteData.businessName,
+            category: siteData.category,
+            phone: siteData.phone,
+            whatsapp: siteData.whatsapp,
+            address: siteData.address,
+            timings: siteData.timings,
+          };
+          session.paid = siteData.plan === 'premium';
+          persistSession(phone, session);
+        }
+        return { replies: [welcomeBackMsg(sites)] };
+      }
+      
+      // New user — show category list
       session.state = 'awaiting_category';
       persistSession(phone, session);
-      return { replies: [
-        `🙏 *Namaste! SheruSites mein swagat hai!*\n\nSirf 2 minute mein aapka professional website ready! 🚀\n\nAapka business type batao:\n\n1️⃣ 🍽️ Restaurant / Dhaba / Cafe\n2️⃣ 🏪 Kirana / General Store\n3️⃣ 💇 Salon / Parlour\n4️⃣ 📚 Tutor / Coaching\n5️⃣ 🏥 Doctor / Clinic\n6️⃣ 💪 Gym / Fitness\n7️⃣ 📸 Photographer / Studio\n8️⃣ 🔧 Electrician / Plumber\n\nNumber bhejo ya category ka naam likho! 👇`
-      ]};
+      return { replies: [categoryListMsg()] };
+    }
+
+    case 'complete': {
+      // "Hi" from existing user — show welcome back with options
+      if (lower.match(/^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru|website|site)$/)) {
+        const sites = listUserSites(phone);
+        if (sites.length > 0) {
+          return { replies: [welcomeBackMsg(sites)] };
+        }
+      }
+
+      // Handle button callbacks
+      if (lower === 'wb_edit' || lower === 'edit' || lower === 'change' || lower === 'badlo') {
+        session.state = 'editing';
+        session.editMode = undefined;
+        persistSession(phone, session);
+        return { replies: [editOptionsMsg()] };
+      }
+
+      if (lower === 'wb_upgrade' || lower === 'upgrade' || lower === 'premium' || lower === '999' || lower === 'pay') {
+        return { replies: [{
+          type: 'buttons',
+          body: `⭐ *Premium Upgrade — ₹999/year*\n\nAapko milega:\n✨ Custom .in domain\n✨ No branding\n✨ Priority support\n✨ Google Business listing`,
+          buttons: [
+            { id: 'btn_pay', title: '💳 Pay ₹999' },
+            { id: 'btn_later', title: '🔙 Baad Mein' },
+          ]
+        }]};
+      }
+
+      if (lower === 'btn_pay') {
+        return { replies: [`💳 *Payment link:*\n🔗 ${BASE_URL}/pay/${session.slug}\n\nLink pe click karo aur Razorpay se pay karo. Payment ke baad custom domain 30 min mein live! 🚀`] };
+      }
+
+      if (lower === 'btn_later') {
+        return { replies: [{
+          type: 'buttons',
+          body: `👍 Koi baat nahi! Jab bhi chahiye "upgrade" type karo.\n\n🔗 ${session.siteUrl}`,
+          buttons: [
+            { id: 'wb_edit', title: '✏️ Edit Website' },
+            { id: 'btn_share', title: '📤 Share' },
+          ]
+        }]};
+      }
+
+      if (lower === 'share' || lower === 'btn_share') {
+        return { replies: [
+          `📤 *Share your website:*\n\n🔗 ${session.siteUrl}\n\n📋 Copy karke share karo:\n"${session.data.businessName} ka website dekho: ${session.siteUrl}"\n\n🖨️ QR Code print karke dukan mein lagao!`
+        ]};
+      }
+
+      // Site selection from list (multi-site user)
+      if (lower.startsWith('site_')) {
+        const selectedSlug = lower.replace('site_', '');
+        const siteData = getSiteData(selectedSlug);
+        if (siteData) {
+          session.slug = selectedSlug;
+          session.siteUrl = `${BASE_URL}/site/${selectedSlug}`;
+          session.data = {
+            slug: selectedSlug,
+            businessName: siteData.businessName,
+            category: siteData.category,
+            phone: siteData.phone,
+            whatsapp: siteData.whatsapp,
+            address: siteData.address,
+            timings: siteData.timings,
+          };
+          session.paid = siteData.plan === 'premium';
+          persistSession(phone, session);
+          
+          const user = getOrCreateUser(phone);
+          saveUser(phone, { ...user, active_site: selectedSlug });
+
+          return { replies: [{
+            type: 'buttons',
+            body: `✅ *${siteData.businessName}* selected!\n🔗 ${session.siteUrl}\n\nKya karna hai?`,
+            buttons: [
+              { id: 'wb_edit', title: '✏️ Edit' },
+              { id: 'wb_upgrade', title: '⭐ Upgrade' },
+              { id: 'btn_share', title: '📤 Share' },
+            ]
+          }]};
+        }
+      }
+
+      // Natural language via smart router
+      if (session.slug) {
+        try {
+          const reply = await smartRoute(phone, msg, session.slug);
+          return { replies: [reply] };
+        } catch (err: any) {
+          console.error('[Router] Error:', err.message);
+        }
+      }
+
+      return { replies: [{
+        type: 'buttons',
+        body: `🌐 *${session.data.businessName}*\n🔗 ${session.siteUrl}\n\nKya karna hai?`,
+        buttons: [
+          { id: 'wb_edit', title: '✏️ Edit' },
+          { id: 'wb_upgrade', title: '⭐ Upgrade' },
+          { id: 'btn_share', title: '📤 Share' },
+        ]
+      }]};
     }
 
     case 'awaiting_category': {
-      session.data.category = CATEGORY_NUMBERS[msg] || detectCategory(lower);
+      // Handle list selection (cat_restaurant etc)
+      let category: string | null = null;
+      if (lower.startsWith('cat_')) {
+        category = lower.replace('cat_', '');
+      } else if (CATEGORY_NUMBERS[msg]) {
+        category = CATEGORY_NUMBERS[msg];
+      } else {
+        category = detectCategory(lower);
+      }
+      
+      if (!category) {
+        return { replies: [categoryListMsg()] };
+      }
+
+      session.data.category = category;
       session.state = 'awaiting_name';
       persistSession(phone, session);
       return { replies: [
-        `✅ *${CATEGORY_DISPLAY[session.data.category]}*\n\nAb aapke business ka *naam* batao? 👇\n(Jaise: "Sharma Ji Ka Dhaba", "Gupta General Store")`
+        `✅ *${CATEGORY_DISPLAY[category]}*\n\nAb aapke business ka *naam* batao? 👇\n(Jaise: "Sharma Ji Ka Dhaba", "Priya Beauty Parlour")`
       ]};
     }
 
     case 'awaiting_name': {
-      // Validate: reject too short, questions, or obvious non-names
       const trimmed = msg.trim();
       if (trimmed.length < 3) {
         return { replies: ['❌ Naam bahut chhota hai. Apne business ka poora naam batao (jaise: "Sharma Ji Ka Dhaba")'] };
@@ -188,22 +447,52 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       session.data.slug = generateSlug(trimmed);
       session.state = 'awaiting_phone';
       persistSession(phone, session);
+      
+      // Auto-detect phone from sender's WhatsApp number
+      const senderPhone = phone.replace(/^91/, '');
+      if (senderPhone.length === 10) {
+        return { replies: [{
+          type: 'buttons',
+          body: `🏪 *${trimmed}* — bahut accha naam!\n\n📱 Aapka phone number *${senderPhone}* use kare website pe?\n(Ye customers ko dikhega)`,
+          buttons: [
+            { id: `usephone_${senderPhone}`, title: `✅ Haan ${senderPhone}` },
+            { id: 'usephone_new', title: '📱 Dusra Number' },
+          ]
+        }]};
+      }
+      
       return { replies: [
         `🏪 *${trimmed}* — bahut accha naam!\n\nAb apna *phone number* bhejo? 📱\n(Ye website pe dikhega — customers call kar payenge)`
       ]};
     }
 
     case 'awaiting_phone': {
+      // Handle button callbacks
+      if (lower.startsWith('usephone_') && lower !== 'usephone_new') {
+        const num = lower.replace('usephone_', '');
+        session.data.phone = num;
+        session.data.whatsapp = `91${num}`;
+        session.state = 'awaiting_address';
+        persistSession(phone, session);
+        return { replies: [
+          `📱 Phone: *${num}* ✅\n\nAb apna *address* bhejo? 📍\n(Jaise: "MG Road, near SBI Bank, Indore")`
+        ]};
+      }
+      
+      if (lower === 'usephone_new') {
+        return { replies: ['📱 Apna *phone number* bhejo (10 digit):'] };
+      }
+
       const cleaned = msg.replace(/[\s\-\+]/g, '').replace(/^91/, '').replace(/^0/, '');
       if (cleaned.length < 10 || !/^\d+$/.test(cleaned)) {
         return { replies: ['❌ Ye valid phone number nahi lag raha. 10 digit number bhejo (jaise: 9876543210)'] };
       }
-      session.data.phone = cleaned;
-      session.data.whatsapp = `91${cleaned}`;
+      session.data.phone = cleaned.slice(-10);
+      session.data.whatsapp = `91${cleaned.slice(-10)}`;
       session.state = 'awaiting_address';
       persistSession(phone, session);
       return { replies: [
-        `📱 Phone: *${cleaned}* ✅\n\nAb apna *address* bhejo? 📍\n(Jaise: "MG Road, near SBI Bank, Indore")`
+        `📱 Phone: *${cleaned.slice(-10)}* ✅\n\nAb apna *address* bhejo? 📍\n(Jaise: "MG Road, near SBI Bank, Indore")`
       ]};
     }
 
@@ -211,13 +500,25 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       session.data.address = msg;
       session.state = 'awaiting_timings';
       persistSession(phone, session);
-      return { replies: [
-        `📍 Address saved! ✅\n\n*Business timings* batao? ⏰\n(Jaise: "10 AM - 10 PM" ya "skip" to use default)`
-      ]};
+      return { replies: [{
+        type: 'buttons',
+        body: `📍 Address saved! ✅\n\n*Business timings* batao? ⏰`,
+        buttons: [
+          { id: 'timing_default', title: '🕐 10AM - 9PM' },
+          { id: 'timing_custom', title: '✏️ Custom Timing' },
+        ]
+      }]};
     }
 
     case 'awaiting_timings': {
-      if (lower !== 'skip') session.data.timings = msg;
+      if (lower === 'timing_default' || lower === 'skip') {
+        session.data.timings = '10:00 AM - 9:00 PM';
+      } else if (lower === 'timing_custom') {
+        return { replies: ['⏰ Apna timing batao (jaise: "9 AM - 8 PM" ya "subah 10 se raat 9"):'] };
+      } else {
+        session.data.timings = msg;
+      }
+
       session.state = 'generating';
       persistSession(phone, session);
 
@@ -261,9 +562,17 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         session.paid = false;
         persistSession(phone, session);
 
-        const cleanName = session.data.businessName!.toLowerCase().replace(/\s+/g, '-');
         return { replies: [
-          `🎉 *Aapka website READY hai!*\n\n🏪 *${session.data.businessName}*\n🔗 ${session.siteUrl}\n\n✅ WhatsApp button\n✅ Call button\n✅ Google Maps\n✅ Mobile responsive\n✅ Professional design\n\n━━━━━━━━━━━━━━━━━━\n🆓 *FREE Plan:* ${cleanName}.sherusites.in\n   (with SheruSites branding)\n\n⭐ *PREMIUM ₹999/year:*\n   ✨ Custom domain (${session.data.businessName!.toLowerCase().replace(/\s+/g, '')}.in)\n   ✨ No branding\n   ✨ Priority support\n   ✨ Google Business setup\n━━━━━━━━━━━━━━━━━━\n\n"upgrade" type karo premium lene ke liye! 🚀\n"edit" type karo changes ke liye ✏️`
+          `🎉 *Aapka website READY hai!*\n\n🏪 *${session.data.businessName}*\n🔗 ${session.siteUrl}\n\n✅ WhatsApp button\n✅ Call button\n✅ Google Maps\n✅ Mobile responsive\n✅ Professional design`,
+          {
+            type: 'buttons',
+            body: `Ab kya karna hai?`,
+            buttons: [
+              { id: 'wb_edit', title: '✏️ Edit Website' },
+              { id: 'wb_upgrade', title: '⭐ Premium ₹999/yr' },
+              { id: 'btn_share', title: '📤 Share' },
+            ]
+          }
         ]};
       } catch (err: any) {
         session.state = 'awaiting_timings';
@@ -273,66 +582,29 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       }
     }
 
-    case 'complete': {
-      if (lower === 'upgrade' || lower === 'premium' || lower === '999' || lower === 'pay') {
-        return { replies: [
-          `⭐ *Premium Upgrade — ₹999/year*\n\nAapko milega:\n✨ Custom .in domain\n✨ No SheruSites branding\n✨ Priority support\n✨ Google Business listing\n\n💳 *Pay securely:*\n🔗 ${BASE_URL}/pay/${session.slug}\n\nPayment ke baad 30 minute mein custom domain live! 🚀`
-        ]};
-      }
-
-      if (lower === 'edit' || lower === 'change' || lower === 'badlo') {
-        session.state = 'editing';
-        session.editMode = undefined;
-        persistSession(phone, session);
-        return { replies: [
-          `✏️ *Kya change karna hai?*\n\n1️⃣ Menu/Service add karo\n2️⃣ Menu/Service hatao\n3️⃣ Price change karo\n4️⃣ Timing change karo\n5️⃣ Offer lagao\n6️⃣ Offer hatao\n7️⃣ Band karo (temporarily closed)\n8️⃣ Khol do (reopen)\n9️⃣ Kuch aur batao\n\nNumber bhejo ya seedha batao kya change karna hai 👇`
-        ]};
-      }
-
-      if (lower === 'share') {
-        return { replies: [
-          `📤 *Share your website:*\n\n🔗 ${session.siteUrl}\n\n📋 Copy karke share karo:\n"${session.data.businessName} ka website dekho: ${session.siteUrl}"\n\n🖨️ QR Code print karke dukan mein lagao — customers scan karenge!`
-        ]};
-      }
-
-      // Agent mode for natural language
-      if (session.slug) {
-        try {
-          const reply = await smartRoute(phone, msg, session.slug);
-          return { replies: [reply] };
-        } catch (err: any) {
-          console.error('[Router] Error:', err.message);
-        }
-      }
-
-      return { replies: [
-        `🌐 *${session.data.businessName}*\n🔗 ${session.siteUrl}\n\nYe commands try karo:\n\n✏️ *edit* — Menu/service/timing change\n⭐ *upgrade* — Custom domain (₹999/yr)\n📤 *share* — Share link\n🆕 *new* — Naya website banao\n📊 *status* — Website status\n❓ *help* — Sab commands\n\nYa seedha batao:\n• "Haircut add karo 200"\n• "timing 10 se 8 karo"\n• "offer lagao 20% off"`
-      ]};
-    }
-
     case 'editing': {
       const slug = session.slug;
       if (!slug) {
-        session.state = 'complete';
+        session.state = 'idle';
         persistSession(phone, session);
         return { replies: ['Pehle website banao! "Hi" bhejo start karne ke liye.'] };
       }
       const siteData = getSiteData(slug);
       if (!siteData) {
-        session.state = 'complete';
+        session.state = 'idle';
         persistSession(phone, session);
         return { replies: ['Website data nahi mila. "reset" karke dobara banao.'] };
       }
 
-      // Number-based menu options
-      if (msg === '1' || (lower.includes('add') && !session.editMode)) {
+      // List button handlers
+      if (lower === 'edit_add' || msg === '1') {
         session.editMode = 'add_item';
         persistSession(phone, session);
-        return { replies: [`➕ *Naya item add karo*\n\nFormat: *Naam - ₹Price*\nJaise: "Paneer Tikka - ₹220"\n\nMultiple items ek saath bhi bhej sakte ho (ek line mein ek) 👇`] };
+        return { replies: [`➕ *Naya item add karo*\n\nAise likho:\n• "Haircut - 200"\n• "Facial 500"\n• "Hair Spa - ₹800"\n\nMultiple items ek saath bhi bhej sakte ho (ek line mein ek) 👇`] };
       }
 
-      if (msg === '2' || (lower.includes('hatao') && !session.editMode) || (lower.includes('remove') && !session.editMode)) {
-        const items = siteData.menu || siteData.services || siteData.packages || [];
+      if (lower === 'edit_remove' || msg === '2') {
+        const items = siteData.menu || siteData.services || siteData.packages || siteData.subjects || siteData.plans || [];
         if (items.length === 0) {
           session.state = 'complete';
           persistSession(phone, session);
@@ -340,56 +612,92 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         }
         session.editMode = 'remove_item';
         persistSession(phone, session);
+        
+        // Show as list if <= 10 items
+        if (items.length <= 10) {
+          return { replies: [{
+            type: 'list',
+            body: '🗑️ *Kaunsa item hatana hai?*',
+            buttonText: '📋 Items Dekho',
+            sections: [{
+              title: 'Current Items',
+              rows: items.map((item: any, i: number) => ({
+                id: `rm_${i}`,
+                title: item.name.substring(0, 24),
+                description: item.price
+              }))
+            }]
+          }]};
+        }
+        
         const list = items.map((item: any, i: number) => `${i + 1}. ${item.name} — ${item.price}`).join('\n');
         return { replies: [`🗑️ *Kaunsa item hatana hai?*\n\n${list}\n\nNumber bhejo ya naam likho 👇`] };
       }
 
-      if (msg === '3' || (lower.includes('price') && !session.editMode)) {
+      if (lower === 'edit_price' || msg === '3') {
         session.editMode = 'change_price';
         persistSession(phone, session);
         return { replies: [`💰 *Price change karo*\n\nFormat: *Item Name - ₹New Price*\nJaise: "Butter Chicken - ₹300" 👇`] };
       }
 
-      if (msg === '4' || (lower.includes('timing') && !session.editMode)) {
+      if (lower === 'edit_timing' || msg === '4') {
         session.editMode = 'change_timing';
         persistSession(phone, session);
         return { replies: ['⏰ Naye timings batao (jaise: "9 AM - 9 PM") 👇'] };
       }
 
-      if (msg === '5' || (lower.includes('offer') && !lower.includes('hatao') && !session.editMode)) {
+      if (lower === 'edit_offer' || msg === '5') {
         session.editMode = 'add_offer';
         persistSession(phone, session);
-        return { replies: [`🎉 *Offer lagao*\n\nOffer ka text batao:\nJaise: "Flat 20% off on all items this weekend!" 👇`] };
+        return { replies: [`🎉 *Offer lagao*\n\nOffer ka text batao:\nJaise: "Flat 20% off this weekend!" 👇`] };
       }
 
-      if (msg === '6' || lower.includes('offer hatao')) {
+      if (lower === 'edit_offer_remove' || msg === '6' || lower.includes('offer hatao')) {
         siteData.activeOffer = undefined;
         saveSiteData(siteData);
         renderSite(siteData);
         session.state = 'complete';
         session.editMode = undefined;
         persistSession(phone, session);
-        return { replies: ['✅ Offer hata diya! Website updated.\n🔗 ' + session.siteUrl] };
+        return { replies: [{
+          type: 'buttons',
+          body: `✅ Offer hata diya! Website updated.\n🔗 ${session.siteUrl}`,
+          buttons: [
+            { id: 'wb_edit', title: '✏️ More Edits' },
+            { id: 'btn_share', title: '📤 Share' },
+          ]
+        }]};
       }
 
-      if (msg === '7' || lower.includes('band') || lower.includes('close')) {
+      if (lower === 'edit_close' || msg === '7') {
         siteData.isOpen = false;
         saveSiteData(siteData);
         renderSite(siteData);
         session.state = 'complete';
         session.editMode = undefined;
         persistSession(phone, session);
-        return { replies: ['🔒 Website pe "Temporarily Closed" laga diya.\n"khol do" ya "8" bhejo wapas kholne ke liye.'] };
+        return { replies: [{
+          type: 'buttons',
+          body: `🔒 Website pe "Temporarily Closed" laga diya.`,
+          buttons: [{ id: 'edit_open', title: '✅ Wapas Kholo' }]
+        }]};
       }
 
-      if (msg === '8' || lower.includes('khol') || lower.includes('open')) {
+      if (lower === 'edit_open' || msg === '8') {
         siteData.isOpen = true;
         saveSiteData(siteData);
         renderSite(siteData);
         session.state = 'complete';
         session.editMode = undefined;
         persistSession(phone, session);
-        return { replies: ['✅ Website wapas OPEN! 🎉\n🔗 ' + session.siteUrl] };
+        return { replies: [{
+          type: 'buttons',
+          body: `✅ Website wapas OPEN! 🎉\n🔗 ${session.siteUrl}`,
+          buttons: [
+            { id: 'wb_edit', title: '✏️ Edit' },
+            { id: 'btn_share', title: '📤 Share' },
+          ]
+        }]};
       }
 
       // Handle edit sub-modes
@@ -397,8 +705,6 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         const lines = msg.split('\n').filter(l => l.trim());
         let added = 0;
         for (const line of lines) {
-          // Try multiple formats:
-          // "Name - ₹Price" or "Name - Price" or "Name ₹Price" or "Name Price rupees/rs"
           const match = line.match(/^(.+?)\s*[-–]\s*₹?\s*(\d+[\d,]*)/) ||
                         line.match(/^(.+?)\s+₹\s*(\d+[\d,]*)/) ||
                         line.match(/^(.+?)\s+(\d+[\d,]*)\s*(?:rupees?|rs\.?|rupaiye|₹)?$/i);
@@ -408,6 +714,11 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
             if (siteData.menu) siteData.menu.push({ name: itemName, price });
             else if (siteData.services) siteData.services.push({ name: itemName, price });
             else if (siteData.packages) siteData.packages.push({ name: itemName, price });
+            else {
+              // Default to services for new lists
+              siteData.services = siteData.services || [];
+              siteData.services.push({ name: itemName, price });
+            }
             added++;
           }
         }
@@ -417,19 +728,33 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
           session.state = 'complete';
           session.editMode = undefined;
           persistSession(phone, session);
-          return { replies: [`✅ ${added} item${added > 1 ? 's' : ''} add ho gaye! Website updated.\n🔗 ${session.siteUrl}\n\n"edit" for more changes.`] };
+          return { replies: [{
+            type: 'buttons',
+            body: `✅ ${added} item${added > 1 ? 's' : ''} add ho gaye! Website updated.\n🔗 ${session.siteUrl}`,
+            buttons: [
+              { id: 'wb_edit', title: '✏️ More Edits' },
+              { id: 'btn_share', title: '📤 Share' },
+            ]
+          }]};
         }
         return { replies: ['❌ Format samajh nahi aaya.\n\nAise likho:\n• "Haircut - 200"\n• "Facial 500"\n• "Hair Spa - ₹800"\n\nNaam aur price dono hone chahiye 👇'] };
       }
 
       if (session.editMode === 'remove_item') {
-        const items = siteData.menu || siteData.services || siteData.packages || [];
-        const idx = parseInt(msg) - 1;
+        const items = siteData.menu || siteData.services || siteData.packages || siteData.subjects || siteData.plans || [];
         let removed = false;
-        if (idx >= 0 && idx < items.length) { items.splice(idx, 1); removed = true; }
-        else {
-          const found = items.findIndex((i: any) => i.name.toLowerCase().includes(lower));
-          if (found >= 0) { items.splice(found, 1); removed = true; }
+        
+        // Handle list button (rm_0, rm_1, etc.)
+        if (lower.startsWith('rm_')) {
+          const idx = parseInt(lower.replace('rm_', ''));
+          if (idx >= 0 && idx < items.length) { items.splice(idx, 1); removed = true; }
+        } else {
+          const idx = parseInt(msg) - 1;
+          if (idx >= 0 && idx < items.length) { items.splice(idx, 1); removed = true; }
+          else {
+            const found = items.findIndex((i: any) => i.name.toLowerCase().includes(lower));
+            if (found >= 0) { items.splice(found, 1); removed = true; }
+          }
         }
         if (removed) {
           saveSiteData(siteData);
@@ -437,13 +762,21 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
           session.state = 'complete';
           session.editMode = undefined;
           persistSession(phone, session);
-          return { replies: [`✅ Item hata diya! Website updated.\n🔗 ${session.siteUrl}`] };
+          return { replies: [{
+            type: 'buttons',
+            body: `✅ Item hata diya! Website updated.\n🔗 ${session.siteUrl}`,
+            buttons: [
+              { id: 'wb_edit', title: '✏️ More Edits' },
+              { id: 'btn_share', title: '📤 Share' },
+            ]
+          }]};
         }
         return { replies: ['❌ Item nahi mila. Number ya naam dobara bhejo.'] };
       }
 
       if (session.editMode === 'change_price') {
-        const match = msg.match(/^(.+?)\s*[-–]\s*₹?\s*(\d+[\d,]*)/);
+        const match = msg.match(/^(.+?)\s*[-–]\s*₹?\s*(\d+[\d,]*)/) ||
+                      msg.match(/^(.+?)\s+₹?\s*(\d+[\d,]*)\s*$/i);
         if (match) {
           const itemName = match[1].trim();
           const newPrice = '₹' + match[2].replace(/,/g, '');
@@ -456,7 +789,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
             session.state = 'complete';
             session.editMode = undefined;
             persistSession(phone, session);
-            return { replies: [`✅ ${item.name} ka price ${newPrice} ho gaya! Website updated.\n🔗 ${session.siteUrl}`] };
+            return { replies: [`✅ ${item.name} ka price ${newPrice} ho gaya!\n🔗 ${session.siteUrl}`] };
           }
           return { replies: [`❌ "${itemName}" nahi mila. Sahi naam bhejo.`] };
         }
@@ -480,20 +813,27 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         session.state = 'complete';
         session.editMode = undefined;
         persistSession(phone, session);
-        return { replies: [`🎉 Offer live! "${msg}"\n🔗 ${session.siteUrl}\n\n"offer hatao" to remove later.`] };
+        return { replies: [{
+          type: 'buttons',
+          body: `🎉 Offer live! "${msg}"\n🔗 ${session.siteUrl}`,
+          buttons: [
+            { id: 'edit_offer_remove', title: '❌ Offer Hatao' },
+            { id: 'btn_share', title: '📤 Share' },
+          ]
+        }]};
       }
 
       // Fallback
       session.state = 'complete';
       session.editMode = undefined;
       persistSession(phone, session);
-      return { replies: [`Got it! "edit" bhejo aur option choose karo.\n\n🔗 ${session.siteUrl}`] };
+      return { replies: [editOptionsMsg()] };
     }
 
     default: {
       session.state = 'idle';
       persistSession(phone, session);
-      return { replies: ['Kuch samajh nahi aaya 😅 "Hi" bhejo start karne ke liye!'] };
+      return handleMessage(phone, message); // Re-process as idle
     }
   }
 }
@@ -501,8 +841,4 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
 // ─── EXPORTS ─────────────────────────────────────────────────────────────────
 
 export function getSessionInfo(phone: string) { return getSession(phone); }
-export function getAllSessions() {
-  // For backward compat — return a Map-like interface
-  // In production, query DB directly
-  return new Map();
-}
+export function getAllSessions() { return new Map(); }

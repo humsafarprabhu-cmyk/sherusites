@@ -13,8 +13,9 @@ import {
   getSession, saveSession, deleteSession, listUserSites,
   SiteData,
 } from './db.ts';
-import { generateContent, generateImages, downloadAndSaveImage } from './ai-content.ts';
+import { generateContent } from './ai-content.ts';
 import { renderSite } from './template-renderer.ts';
+import { getStockPhotos } from './stock-photos.ts';
 import { smartRoute } from './smart-router.ts';
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
@@ -601,14 +602,12 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         if (aiContent.subjects) siteData.subjects = aiContent.subjects;
         if (aiContent.reviews) siteData.reviews = aiContent.reviews;
         if (aiContent.todaySpecial) siteData.todaySpecial = aiContent.todaySpecial;
+
+        // Assign stock photos (instant, zero cost)
+        siteData.photos = getStockPhotos(category, session.data.businessName!, 6);
+        
         saveSiteData(siteData, phone);
-
         renderSite(siteData);
-
-        // Generate AI images in background (don't block site creation)
-        generateAIImages(slug, category, session.data.businessName!, phone).catch(err => {
-          console.error('[AI-IMG] Background gen error:', err.message);
-        });
 
         const user = getOrCreateUser(phone);
         const sites = user.sites || [];
@@ -899,43 +898,6 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       session.state = 'idle';
       persistSession(phone, session);
       return handleMessage(phone, message); // Re-process as idle
-    }
-  }
-}
-
-// ─── AI IMAGE GENERATION (BACKGROUND) ────────────────────────────────────────
-
-async function generateAIImages(slug: string, category: string, businessName: string, phone: string) {
-  console.log(`[AI-IMG] Starting image generation for ${slug}...`);
-  
-  // Generate hero image
-  const heroUrls = await generateImages(category, businessName, 'hero', 1);
-  const photos: any[] = [];
-  
-  if (heroUrls.length > 0) {
-    const localUrl = await downloadAndSaveImage(heroUrls[0], slug, 'hero.jpg');
-    if (localUrl) {
-      photos.push({ url: localUrl, caption: businessName, type: 'hero' });
-    }
-  }
-  
-  // Generate gallery images (up to 4 to save costs)
-  const galleryUrls = await generateImages(category, businessName, 'gallery', 4);
-  for (let i = 0; i < galleryUrls.length; i++) {
-    const localUrl = await downloadAndSaveImage(galleryUrls[i], slug, `gallery-${i + 1}.jpg`);
-    if (localUrl) {
-      photos.push({ url: localUrl, caption: `${businessName} gallery`, type: 'gallery' });
-    }
-  }
-  
-  if (photos.length > 0) {
-    // Update site data with photos
-    const siteData = getSiteData(slug);
-    if (siteData) {
-      siteData.photos = [...(siteData.photos || []), ...photos];
-      saveSiteData(siteData, phone);
-      renderSite(siteData);
-      console.log(`[AI-IMG] ${photos.length} images saved for ${slug}`);
     }
   }
 }

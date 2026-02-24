@@ -73,7 +73,7 @@ const webhookLimiter = rateLimit({
 // ─── STATIC FILES ────────────────────────────────────────────────────────────
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
-app.use(express.static(PUBLIC_DIR));
+app.use(express.static(PUBLIC_DIR, { maxAge: '30d' }));
 
 // ─── HEALTH ──────────────────────────────────────────────────────────────────
 

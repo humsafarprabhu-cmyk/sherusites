@@ -7,37 +7,14 @@
  * Cost per user: ~₹5-10/month instead of ₹300+/month
  */
 
-import { getSiteData, saveSiteData, SiteData } from './data-store.ts';
+import { getSiteData, saveSiteData, SiteData, getAiCallCount, incrementAiCall } from './db.ts';
 import { renderSite } from './template-renderer.ts';
 import { agentHandle } from './site-agent.ts';
 
 const BASE_URL = process.env.TUNNEL_URL || 'http://localhost:4000';
 
-// Per-user AI call counter (reset daily)
-const aiCallCounts = new Map<string, { count: number; date: string }>();
-
-const FREE_AI_LIMIT = 10; // 10 AI calls per day per user (free tier)
-const PREMIUM_AI_LIMIT = 50; // 50 for premium
-
-function getAiCallCount(phone: string): number {
-  const today = new Date().toISOString().split('T')[0];
-  const entry = aiCallCounts.get(phone);
-  if (!entry || entry.date !== today) {
-    aiCallCounts.set(phone, { count: 0, date: today });
-    return 0;
-  }
-  return entry.count;
-}
-
-function incrementAiCall(phone: string): void {
-  const today = new Date().toISOString().split('T')[0];
-  const entry = aiCallCounts.get(phone);
-  if (!entry || entry.date !== today) {
-    aiCallCounts.set(phone, { count: 1, date: today });
-  } else {
-    entry.count++;
-  }
-}
+const FREE_AI_LIMIT = 10;
+const PREMIUM_AI_LIMIT = 50;
 
 // ─── PATTERN MATCHERS ────────────────────────────────────────────────────────
 

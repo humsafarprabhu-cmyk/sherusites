@@ -1,14 +1,25 @@
 {
   "name": "sherusites",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "npx tsx server.ts",
-    "start": "npx tsx server.ts"
+    "start": "node --import tsx/esm server.ts",
+    "pm2": "pm2 start ecosystem.config.cjs"
   },
   "dependencies": {
+    "better-sqlite3": "^11.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.0.0",
+    "razorpay": "^2.9.6"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }

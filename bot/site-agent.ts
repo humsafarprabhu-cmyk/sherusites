@@ -11,24 +11,17 @@
  * Cost: ~₹0.3-0.5 per interaction (GPT-4o-mini)
  */
 
-import { SiteData, getSiteData, saveSiteData, getOrCreateUser, saveUser, listUserSites } from './data-store.ts';
+import { SiteData, getSiteData, saveSiteData, getOrCreateUser, listUserSites, addChatMessage, getChatHistory } from './db.ts';
 import { renderSite } from './template-renderer.ts';
 
 const OPENAI_KEY = process.env.OPENAI_API_KEY || '';
 
-// Per-user conversation memory (last 10 messages)
-const conversationHistory = new Map<string, { role: string; content: string }[]>();
-
 function getHistory(phone: string): { role: string; content: string }[] {
-  if (!conversationHistory.has(phone)) conversationHistory.set(phone, []);
-  return conversationHistory.get(phone)!;
+  return getChatHistory(phone, 10);
 }
 
 function addToHistory(phone: string, role: string, content: string) {
-  const history = getHistory(phone);
-  history.push({ role, content });
-  // Keep last 10 messages for context
-  if (history.length > 10) history.splice(0, history.length - 10);
+  addChatMessage(phone, role, content);
 }
 
 // ─── AGENT TOOLS ─────────────────────────────────────────────────────────────
@@ -376,4 +369,4 @@ Plan: ${data.plan}
   return ctx;
 }
 
-export { conversationHistory };
+

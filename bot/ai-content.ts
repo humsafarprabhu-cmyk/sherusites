@@ -4,7 +4,7 @@
  * Cost: ~₹0.5 per site (500 tokens)
  */
 
-import { SiteData, MenuItem, ServiceItem } from './data-store.ts';
+import { SiteData, MenuItem, ServiceItem } from './db.ts';
 
 const OPENAI_KEY = process.env.OPENAI_API_KEY || '';
 

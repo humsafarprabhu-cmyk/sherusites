@@ -327,35 +327,208 @@ function getContentKey(category: string): string {
 
 // ─── DEFAULT CONTENT (when no AI available) ──────────────────────────────────
 
+// Randomization helpers for unique fallback content
+function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
+function pickN<T>(arr: T[], n: number): T[] {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, n);
+}
+function randPrice(min: number, max: number, step: number = 10): string {
+  const val = Math.round((min + Math.random() * (max - min)) / step) * step;
+  return `₹${val}`;
+}
+
+const INDIAN_NAMES = [
+  'Rajesh Kumar', 'Priya Sharma', 'Amit Verma', 'Sunita Devi', 'Vikram Singh', 'Neha Gupta',
+  'Ravi Patel', 'Pooja Yadav', 'Suresh Joshi', 'Anita Kumari', 'Deepak Tiwari', 'Meena Agarwal',
+  'Rohit Mishra', 'Kavita Pandey', 'Sanjay Dubey', 'Geeta Chauhan', 'Manoj Srivastava', 'Rekha Bose',
+  'Rahul Saxena', 'Nisha Reddy', 'Arun Nair', 'Divya Iyer', 'Kiran Desai', 'Mohan Pillai',
+];
+
+const REVIEW_TEMPLATES = {
+  restaurant: [
+    `Best food in the area! __NAME__ ka khana hamesha top class hota hai.`,
+    `WhatsApp pe order kiya, garam aur fresh aaya. Bahut tasty!`,
+    `Family ke saath aaye the, sabko bahut pasand aaya. Must visit!`,
+    `Thali bohot acchi hai is price mein. Value for money!`,
+    `Yahan ka special dish try karna mat bhoolna, ekdum mast hai.`,
+    `Office team ke saath aate hain har Friday. Consistent quality!`,
+    `Delivery fast aati hai aur packaging bhi acchi hai.`,
+    `Pure vegetarian options bhi bahut ache hain yahan.`,
+    `Ambiance simple hai par khana 5-star quality ka hai.`,
+    `Jab se discover kiya hai tab se regular customer ban gaye.`,
+  ],
+  salon: [
+    `Amazing haircut! __NAME__ ke staff bahut skilled hain.`,
+    `Bridal makeup karwaya, sabne compliment diya. Best salon!`,
+    `Hair spa ke baad baal ekdum silky smooth ho gaye.`,
+    `Very hygienic and professional. Highly recommend!`,
+    `Threading aur facial dono karwaya, bahut accha experience tha.`,
+    `Rates bhi reasonable hain quality ke hisaab se.`,
+  ],
+  store: [
+    `__NAME__ se groceries lena bahut convenient hai. Sab milta hai!`,
+    `Fresh products milte hain aur rates bhi sahi hain.`,
+    `Home delivery bhi karte hain, bohot helpful hai.`,
+    `Neighbourhood ka best store hai. Trusted quality!`,
+    `WhatsApp pe list bhej do, ready karke rakh dete hain.`,
+  ],
+  tutor: [
+    `Mere bacche ke marks bahut improve hue __NAME__ join karne ke baad.`,
+    `Teachers bahut dedicated hain. Personal attention dete hain.`,
+    `Doubt sessions bohot helpful hain. Highly recommended!`,
+    `Board exam preparation best hai yahan. Results speak!`,
+    `Affordable fees mein quality education milti hai.`,
+  ],
+  clinic: [
+    `__NAME__ mein doctor bahut acche hain. Time pe dekhte hain.`,
+    `Proper diagnosis karte hain, unnecessary medicines nahi dete.`,
+    `Clean clinic with modern facilities. Very professional.`,
+    `Family doctor ban gaye hain humare. Trusted completely.`,
+    `Emergency mein bhi available rehte hain. Best doctor!`,
+  ],
+  gym: [
+    `__NAME__ join karne ke baad 10kg weight loss hua! Amazing trainers.`,
+    `Equipment top-notch hai aur hygiene bhi maintain karte hain.`,
+    `Zumba classes bohot fun hain. Best gym in the area!`,
+    `Personal trainer ne complete transformation karwaya.`,
+    `Timing flexible hai aur staff motivating hai.`,
+  ],
+  photographer: [
+    `__NAME__ ne wedding photos itni achi li! Lifetime memory ban gayi.`,
+    `Pre-wedding shoot was so creative. Loved every frame!`,
+    `Professional hai aur delivery bhi time pe karte hain.`,
+    `Baby photoshoot karwaya, adorable pictures aayi!`,
+    `Editing quality bahut achi hai. Worth every rupee.`,
+  ],
+  service: [
+    `__NAME__ ka kaam bahut accha hai. Time pe aate hain.`,
+    `AC service karwaya, ab ekdum thanda chal raha hai!`,
+    `Fair pricing and honest work. Highly recommend!`,
+    `Emergency mein bhi jaldi aaye. Very reliable.`,
+    `Wiring ka purana kaam tha, naya jaisa bana diya!`,
+  ],
+};
+
+function generateRandomReviews(category: string, businessName: string): any[] {
+  const templates = REVIEW_TEMPLATES[category as keyof typeof REVIEW_TEMPLATES] || REVIEW_TEMPLATES.restaurant;
+  const reviewTexts = pickN(templates, 3);
+  const names = pickN(INDIAN_NAMES, 3);
+  const dates = ['1 week ago', '2 weeks ago', '3 weeks ago', '1 month ago', '2 months ago'];
+  
+  return reviewTexts.map((text, i) => ({
+    author: names[i],
+    text: text.replace(/__NAME__/g, businessName),
+    rating: Math.random() > 0.3 ? 5 : 4,
+    date: pick(dates),
+  }));
+}
+
+function generateRandomMenu(): any[] {
+  const starters = [
+    { name: 'Paneer Tikka', desc: 'Smoky tandoor-grilled cottage cheese', veg: true, min: 150, max: 250 },
+    { name: 'Chicken Tikka', desc: 'Spiced chicken grilled in tandoor', veg: false, min: 180, max: 280 },
+    { name: 'Aloo Tikki', desc: 'Crispy potato patties with chutney', veg: true, min: 60, max: 120 },
+    { name: 'Fish Amritsari', desc: 'Batter-fried fish Punjab style', veg: false, min: 200, max: 300 },
+    { name: 'Dahi Kebab', desc: 'Creamy hung curd kebabs', veg: true, min: 120, max: 180 },
+    { name: 'Seekh Kebab', desc: 'Minced mutton skewers', veg: false, min: 200, max: 300 },
+    { name: 'Hara Bhara Kebab', desc: 'Spinach and pea patties', veg: true, min: 100, max: 160 },
+    { name: 'Mushroom Tikka', desc: 'Tandoor-grilled spiced mushrooms', veg: true, min: 140, max: 220 },
+    { name: 'Chicken 65', desc: 'Spicy deep-fried chicken', veg: false, min: 180, max: 260 },
+    { name: 'Veg Spring Roll', desc: 'Crispy rolls with mixed veggies', veg: true, min: 80, max: 140 },
+  ];
+  const mains = [
+    { name: 'Butter Chicken', desc: 'Creamy tomato gravy with tender chicken', veg: false, min: 220, max: 320 },
+    { name: 'Dal Makhani', desc: 'Slow-cooked black lentils in cream', veg: true, min: 140, max: 220 },
+    { name: 'Paneer Butter Masala', desc: 'Rich creamy paneer curry', veg: true, min: 180, max: 260 },
+    { name: 'Mutton Rogan Josh', desc: 'Kashmiri spiced mutton curry', veg: false, min: 280, max: 380 },
+    { name: 'Chole Bhature', desc: 'Spiced chickpeas with fried bread', veg: true, min: 100, max: 180 },
+    { name: 'Egg Curry', desc: 'Eggs in rich onion-tomato gravy', veg: false, min: 120, max: 180 },
+    { name: 'Palak Paneer', desc: 'Cottage cheese in spinach gravy', veg: true, min: 160, max: 240 },
+    { name: 'Kadai Chicken', desc: 'Chicken with bell peppers & spices', veg: false, min: 220, max: 300 },
+    { name: 'Shahi Paneer', desc: 'Paneer in rich cashew cream gravy', veg: true, min: 180, max: 260 },
+    { name: 'Malai Kofta', desc: 'Stuffed paneer balls in cream sauce', veg: true, min: 180, max: 260 },
+  ];
+  const breads = [
+    { name: 'Butter Naan', desc: 'Tandoor-baked with butter', veg: true, min: 30, max: 60 },
+    { name: 'Garlic Naan', desc: 'Fresh garlic loaded naan', veg: true, min: 40, max: 70 },
+    { name: 'Tandoori Roti', desc: 'Whole wheat from clay oven', veg: true, min: 15, max: 35 },
+    { name: 'Laccha Paratha', desc: 'Layered flaky paratha', veg: true, min: 35, max: 60 },
+    { name: 'Stuffed Kulcha', desc: 'Paneer or aloo stuffed bread', veg: true, min: 50, max: 80 },
+  ];
+  const rice = [
+    { name: 'Jeera Rice', desc: 'Cumin-tempered basmati', veg: true, min: 80, max: 150 },
+    { name: 'Chicken Biryani', desc: 'Aromatic dum biryani', veg: false, min: 180, max: 300 },
+    { name: 'Veg Biryani', desc: 'Mixed vegetable dum biryani', veg: true, min: 140, max: 220 },
+    { name: 'Egg Fried Rice', desc: 'Indo-Chinese style fried rice', veg: false, min: 120, max: 180 },
+  ];
+  const drinks = [
+    { name: 'Sweet Lassi', desc: 'Fresh churned yogurt drink', veg: true, min: 40, max: 80 },
+    { name: 'Mango Lassi', desc: 'Mango yogurt shake', veg: true, min: 60, max: 100 },
+    { name: 'Masala Chaas', desc: 'Spiced buttermilk', veg: true, min: 30, max: 60 },
+    { name: 'Fresh Lime Soda', desc: 'Sweet or salt nimbu paani', veg: true, min: 40, max: 70 },
+    { name: 'Masala Chai', desc: 'Spiced Indian tea with milk', veg: true, min: 20, max: 40 },
+  ];
+  const desserts = [
+    { name: 'Gulab Jamun', desc: 'Sweet milk dumplings in syrup', veg: true, min: 40, max: 80 },
+    { name: 'Rasmalai', desc: 'Soft paneer in sweet milk', veg: true, min: 50, max: 100 },
+    { name: 'Kheer', desc: 'Creamy rice pudding', veg: true, min: 40, max: 80 },
+    { name: 'Jalebi', desc: 'Crispy sweet spirals with rabdi', veg: true, min: 30, max: 60 },
+  ];
+
+  const menu: any[] = [];
+  const addItems = (pool: any[], cat: string, count: number, popularCount: number) => {
+    const selected = pickN(pool, count);
+    selected.forEach((item, i) => {
+      menu.push({
+        name: item.name,
+        price: randPrice(item.min, item.max, 10),
+        category: cat,
+        description: item.desc,
+        popular: i < popularCount,
+        veg: item.veg,
+      });
+    });
+  };
+
+  addItems(starters, 'Starters', 3 + Math.floor(Math.random() * 2), 1);
+  addItems(mains, 'Main Course', 4 + Math.floor(Math.random() * 2), 2);
+  addItems(breads, 'Breads', 3 + Math.floor(Math.random() * 2), 0);
+  addItems(rice, 'Rice', 2 + Math.floor(Math.random() * 2), 1);
+  addItems(drinks, 'Drinks', 2 + Math.floor(Math.random() * 2), 0);
+  addItems(desserts, 'Desserts', 1 + Math.floor(Math.random() * 2), 0);
+
+  return menu;
+}
+
 function getDefaultContent(category: string, name: string): AIContent {
   const defaults: Record<string, AIContent> = {
     restaurant: {
-      tagline: `${name} — Ghar jaisa khana, apno wali mehak`,
-      about: `${name} has been serving authentic flavors with love. Fresh ingredients, traditional recipes, and a warm welcome awaits you.`,
-      reviews: [
-        { author: 'Rajesh Kumar', text: 'Best food in the area! We come here every weekend with family. Taste is always consistent.', rating: 5, date: '2 weeks ago' },
-        { author: 'Priya Sharma', text: 'Ordered on WhatsApp, food came hot and fresh. Dal makhani was amazing!', rating: 5, date: '1 month ago' },
-        { author: 'Amit Verma', text: 'Great thali at this price. My office team orders every Friday. Highly recommend!', rating: 4, date: '3 weeks ago' },
-      ],
-      todaySpecial: { name: 'Special Thali', description: 'Complete meal — curry, dal, rice, 2 roti, raita, salad & sweet', price: '₹199', oldPrice: '₹299' },
-      menu: [
-        { name: 'Butter Chicken', price: '₹280', category: 'Main Course', description: 'Creamy tomato gravy with tender chicken', popular: true },
-        { name: 'Dal Makhani', price: '₹180', category: 'Main Course', description: 'Slow-cooked black lentils in butter cream', popular: true },
-        { name: 'Paneer Tikka', price: '₹220', category: 'Starters', description: 'Smoky tandoor-grilled cottage cheese', popular: true },
-        { name: 'Veg Thali', price: '₹150', category: 'Thali', description: 'Complete meal with 4 dishes, roti, rice, sweet' },
-        { name: 'Non-Veg Thali', price: '₹200', category: 'Thali', description: 'Chicken curry, dal, roti, rice, salad, sweet' },
-        { name: 'Tandoori Roti', price: '₹20', category: 'Breads', description: 'Whole wheat clay oven bread' },
-        { name: 'Butter Naan', price: '₹40', category: 'Breads', description: 'Soft leavened bread with butter' },
-        { name: 'Jeera Rice', price: '₹120', category: 'Rice', description: 'Cumin-tempered basmati rice' },
-        { name: 'Chicken Biryani', price: '₹250', category: 'Rice', description: 'Aromatic basmati with spiced chicken', popular: true },
-        { name: 'Gulab Jamun', price: '₹60', category: 'Desserts', description: 'Sweet milk dumplings in sugar syrup' },
-        { name: 'Lassi', price: '₹60', category: 'Drinks', description: 'Thick sweet yogurt drink' },
-        { name: 'Masala Chai', price: '₹30', category: 'Drinks', description: 'Spiced Indian tea with milk' },
-      ],
+      tagline: pick([
+        `${name} — Ghar jaisa khana, apno wali mehak`,
+        `${name} — Asli swad, asli pyaar`,
+        `${name} — Jahan khana ek parampara hai`,
+        `${name} — Dil se parosein, pyaar se khilayein`,
+        `${name} — Khushbu se bula le, swad se ruk jaaye`,
+      ]),
+      about: pick([
+        `${name} has been serving authentic flavors with love. Fresh ingredients, traditional recipes, and a warm welcome awaits you.`,
+        `Welcome to ${name} — where every dish tells a story. We use the finest ingredients and time-tested recipes to bring you an unforgettable dining experience.`,
+        `${name} is more than a restaurant — it's a family tradition. Our kitchen serves happiness on every plate with recipes passed down through generations.`,
+      ]),
+      reviews: generateRandomReviews('restaurant', name),
+      todaySpecial: pick([
+        { name: 'Special Thali', description: 'Complete meal — curry, dal, rice, 2 roti, raita, salad & sweet', price: randPrice(149, 249), oldPrice: randPrice(249, 349) },
+        { name: 'Butter Chicken Combo', description: 'Butter chicken, jeera rice, 2 butter naan, raita & gulab jamun', price: randPrice(199, 299), oldPrice: randPrice(299, 399) },
+        { name: 'Family Feast', description: '2 curries, dal, rice, 4 roti, papad, salad & 2 desserts', price: randPrice(399, 549), oldPrice: randPrice(549, 699) },
+        { name: 'Biryani Special', description: 'Dum biryani with raita, salan & kebab', price: randPrice(179, 249), oldPrice: randPrice(249, 349) },
+      ]),
+      menu: generateRandomMenu(),
     },
     store: {
       tagline: `${name} — Sab kuch milega, sasta aur accha`,
       about: `${name} is your trusted neighborhood store for all daily essentials. Quality products, fair prices, and home delivery available.`,
+      reviews: generateRandomReviews('store', name),
       services: [
         { name: 'Atta & Flour', price: 'from ₹45/kg', description: 'Wheat flour, besan, maida, sooji' },
         { name: 'Dal & Pulses', price: 'from ₹80/kg', description: 'Toor, moong, chana, masoor dal' },
@@ -372,6 +545,7 @@ function getDefaultContent(category: string, name: string): AIContent {
     salon: {
       tagline: `${name} — Where beauty meets confidence`,
       about: `${name} offers premium grooming and beauty services. Expert stylists, quality products, and a relaxing experience every visit.`,
+      reviews: generateRandomReviews('salon', name),
       services: [
         { name: "Men's Haircut", price: '₹200', duration: '30 min', description: 'Precision cut with styling' },
         { name: 'Beard Trim & Shape', price: '₹100', duration: '15 min', description: 'Clean trim and shaping' },
@@ -392,6 +566,7 @@ function getDefaultContent(category: string, name: string): AIContent {
     tutor: {
       tagline: `${name} — Padhai smart, result best`,
       about: `${name} provides quality coaching with experienced teachers, proven methods, and personal attention. Helping students achieve their best since years.`,
+      reviews: generateRandomReviews('tutor', name),
       subjects: [
         { name: 'Mathematics', price: '₹1500/month', description: 'Algebra, Geometry, Calculus, Statistics', duration: 'Mon/Wed/Fri 4-5:30 PM' },
         { name: 'Science (PCB)', price: '₹1500/month', description: 'Physics, Chemistry, Biology with practicals', duration: 'Tue/Thu/Sat 4-5:30 PM' },
@@ -405,6 +580,7 @@ function getDefaultContent(category: string, name: string): AIContent {
     clinic: {
       tagline: `${name} — Aapki sehat, hamari zimmedari`,
       about: `Providing compassionate healthcare with modern facilities. MBBS, MD with 10+ years experience. We believe in thorough diagnosis and affordable treatment.`,
+      reviews: generateRandomReviews('clinic', name),
       services: [
         { name: 'General Consultation', price: '₹300', description: 'Complete checkup and diagnosis', duration: '15-20 min' },
         { name: 'Follow-up Visit', price: '₹200', description: 'Review and treatment adjustment', duration: '10 min' },
@@ -420,6 +596,7 @@ function getDefaultContent(category: string, name: string): AIContent {
     gym: {
       tagline: `${name} — No excuses, only results`,
       about: `${name} is your fitness destination with state-of-the-art equipment, expert trainers, and a motivating community. Transform your body, transform your life.`,
+      reviews: generateRandomReviews('gym', name),
       plans: [
         { name: 'Monthly', price: '₹999/month', description: 'Full gym access, locker, basic guidance' },
         { name: 'Quarterly', price: '₹2499/3 months', description: 'Full access + diet plan + 2 PT sessions' },
@@ -437,6 +614,7 @@ function getDefaultContent(category: string, name: string): AIContent {
     photographer: {
       tagline: `${name} — Moments frozen, memories forever`,
       about: `${name} captures life's most precious moments. Professional equipment, creative vision, and years of experience in making your memories timeless.`,
+      reviews: generateRandomReviews('photographer', name),
       packages: [
         { name: 'Portrait Session', price: '₹2999', description: '1 hour shoot, 20 edited photos, 5 prints' },
         { name: 'Birthday/Event', price: '₹7999', description: '3 hours coverage, 100+ photos, highlights reel' },
@@ -448,6 +626,7 @@ function getDefaultContent(category: string, name: string): AIContent {
     service: {
       tagline: `${name} — Ek call, sab theek`,
       about: `${name} provides fast, reliable home services at honest prices. Experienced technicians, quality work, and satisfaction guaranteed.`,
+      reviews: generateRandomReviews('service', name),
       services: [
         { name: 'Wiring & Rewiring', price: 'from ₹500', description: 'New wiring, old wire replacement' },
         { name: 'Switch & Socket', price: 'from ₹150', description: 'Install, repair, replacement' },

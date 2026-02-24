@@ -158,18 +158,11 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
   // State machine
   switch (session.state) {
     case 'idle': {
-      if (lower.match(/^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru|website|site)$/)) {
-        session.state = 'awaiting_category';
-        persistSession(phone, session);
-        return { replies: [
-          `🙏 *Namaste! SheruSites mein swagat hai!*\n\nSirf 2 minute mein aapka professional website ready! 🚀\n\nAapka business type batao:\n\n1️⃣ 🍽️ Restaurant / Dhaba / Cafe\n2️⃣ 🏪 Kirana / General Store\n3️⃣ 💇 Salon / Parlour\n4️⃣ 📚 Tutor / Coaching\n5️⃣ 🏥 Doctor / Clinic\n6️⃣ 💪 Gym / Fitness\n7️⃣ 📸 Photographer / Studio\n8️⃣ 🔧 Electrician / Plumber\n\nNumber bhejo ya apne business ke baare mein batao! 👇`
-        ]};
-      }
-      session.state = 'awaiting_name';
-      session.data.category = detectCategory(lower);
+      // Always show category menu first — don't auto-detect from greetings
+      session.state = 'awaiting_category';
       persistSession(phone, session);
       return { replies: [
-        `👋 Welcome to SheruSites!\n\nI detected: *${CATEGORY_DISPLAY[session.data.category]}*\n(Galat hai? "reset" bhejo aur dobara try karo)\n\nAapke business ka *naam* batao? 👇`
+        `🙏 *Namaste! SheruSites mein swagat hai!*\n\nSirf 2 minute mein aapka professional website ready! 🚀\n\nAapka business type batao:\n\n1️⃣ 🍽️ Restaurant / Dhaba / Cafe\n2️⃣ 🏪 Kirana / General Store\n3️⃣ 💇 Salon / Parlour\n4️⃣ 📚 Tutor / Coaching\n5️⃣ 🏥 Doctor / Clinic\n6️⃣ 💪 Gym / Fitness\n7️⃣ 📸 Photographer / Studio\n8️⃣ 🔧 Electrician / Plumber\n\nNumber bhejo ya category ka naam likho! 👇`
       ]};
     }
 
@@ -183,12 +176,20 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
     }
 
     case 'awaiting_name': {
-      session.data.businessName = msg;
-      session.data.slug = generateSlug(msg);
+      // Validate: reject too short, questions, or obvious non-names
+      const trimmed = msg.trim();
+      if (trimmed.length < 3) {
+        return { replies: ['❌ Naam bahut chhota hai. Apne business ka poora naam batao (jaise: "Sharma Ji Ka Dhaba")'] };
+      }
+      if (trimmed.includes('?') || lower.match(/^(kya|kaun|kaise|kyun|kab|kidhar|what|how|why|who|when|where|help|madad|nahi|no|haan|yes|ok|hi|hello|hey)[\s!?.]*$/)) {
+        return { replies: ['🤔 Ye business ka naam nahi lag raha.\n\nApne *business/dukaan ka naam* batao jaise:\n• "Sharma Ji Ka Dhaba"\n• "Priya Beauty Parlour"\n• "Royal Gym & Fitness"'] };
+      }
+      session.data.businessName = trimmed;
+      session.data.slug = generateSlug(trimmed);
       session.state = 'awaiting_phone';
       persistSession(phone, session);
       return { replies: [
-        `🏪 *${msg}* — bahut accha naam!\n\nAb apna *phone number* bhejo? 📱\n(Ye website pe dikhega — customers call kar payenge)`
+        `🏪 *${trimmed}* — bahut accha naam!\n\nAb apna *phone number* bhejo? 📱\n(Ye website pe dikhega — customers call kar payenge)`
       ]};
     }
 
@@ -305,7 +306,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       }
 
       return { replies: [
-        `🌐 *${session.data.businessName}*\n🔗 ${session.siteUrl}\n\nSeedha batao kya karna hai! Jaise:\n• "Paneer Tikka add karo ₹220"\n• "Sab prices 10% badha do"\n• "Kal chhuti hai"\n• "Weekend offer lagao 20% off"\n\nYa type karo: *edit* | *upgrade* | *share* | *new*`
+        `🌐 *${session.data.businessName}*\n🔗 ${session.siteUrl}\n\nYe commands try karo:\n\n✏️ *edit* — Menu/service/timing change\n⭐ *upgrade* — Custom domain (₹999/yr)\n📤 *share* — Share link\n🆕 *new* — Naya website banao\n📊 *status* — Website status\n❓ *help* — Sab commands\n\nYa seedha batao:\n• "Haircut add karo 200"\n• "timing 10 se 8 karo"\n• "offer lagao 20% off"`
       ]};
     }
 
@@ -396,9 +397,13 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         const lines = msg.split('\n').filter(l => l.trim());
         let added = 0;
         for (const line of lines) {
-          const match = line.match(/^(.+?)\s*[-–]\s*₹?\s*(\d+[\d,]*)/);
+          // Try multiple formats:
+          // "Name - ₹Price" or "Name - Price" or "Name ₹Price" or "Name Price rupees/rs"
+          const match = line.match(/^(.+?)\s*[-–]\s*₹?\s*(\d+[\d,]*)/) ||
+                        line.match(/^(.+?)\s+₹\s*(\d+[\d,]*)/) ||
+                        line.match(/^(.+?)\s+(\d+[\d,]*)\s*(?:rupees?|rs\.?|rupaiye|₹)?$/i);
           if (match) {
-            const itemName = match[1].trim();
+            const itemName = match[1].trim().replace(/\s+(?:ka|ki|ke)\s*(?:price|rate|daam)?\s*$/i, '');
             const price = '₹' + match[2].replace(/,/g, '');
             if (siteData.menu) siteData.menu.push({ name: itemName, price });
             else if (siteData.services) siteData.services.push({ name: itemName, price });
@@ -414,7 +419,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
           persistSession(phone, session);
           return { replies: [`✅ ${added} item${added > 1 ? 's' : ''} add ho gaye! Website updated.\n🔗 ${session.siteUrl}\n\n"edit" for more changes.`] };
         }
-        return { replies: ['❌ Format samajh nahi aaya. Try: "Paneer Tikka - ₹220"'] };
+        return { replies: ['❌ Format samajh nahi aaya.\n\nAise likho:\n• "Haircut - 200"\n• "Facial 500"\n• "Hair Spa - ₹800"\n\nNaam aur price dono hone chahiye 👇'] };
       }
 
       if (session.editMode === 'remove_item') {

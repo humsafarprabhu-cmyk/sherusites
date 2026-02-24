@@ -30,7 +30,7 @@ export async function createOrder(slug: string): Promise<{ orderId: string; amou
   const order = await getRazorpay().orders.create({
     amount: 99900, // ₹999 in paise
     currency: 'INR',
-    receipt: `sherusites_${slug}_${Date.now()}`,
+    receipt: `ss_${slug.substring(0, 20)}_${Date.now().toString(36)}`,
     notes: {
       slug,
       business: site.businessName,

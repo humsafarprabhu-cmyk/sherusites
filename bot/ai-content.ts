@@ -268,12 +268,16 @@ export async function generateContent(
   const prompt = CATEGORY_PROMPTS[category] || CATEGORY_PROMPTS['restaurant'];
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000); // 8 sec max
+
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENAI_KEY}`,
         'Content-Type': 'application/json',
       },
+      signal: controller.signal,
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
@@ -290,6 +294,7 @@ export async function generateContent(
         temperature: 0.7,
       }),
     });
+    clearTimeout(timeout);
 
     if (!res.ok) {
       console.error('[AI] API error:', res.status);
@@ -306,7 +311,8 @@ export async function generateContent(
     console.log(`[AI] Generated content for ${businessName} (${category})`);
     return parsed;
   } catch (err: any) {
-    console.error('[AI] Error:', err.message);
+    const reason = err.name === 'AbortError' ? 'timeout (8s)' : err.message;
+    console.error(`[AI] Error: ${reason} — using randomized defaults`);
     return getDefaultContent(category, businessName);
   }
 }

@@ -428,6 +428,7 @@ export async function agentHandle(phone: string, message: string, siteSlug: stri
 - MIRROR the user's language: if they write Hindi, reply Hindi. If English, reply English. If Hinglish, reply Hinglish.
 - MIRROR the user's tone: formal user = formal reply. Casual/friendly = casual reply. Professional = professional.
 - ULTRA concise — max 1-2 lines. Just confirm the action, nothing extra.
+- NEVER ask for confirmation. Just DO IT immediately. User said it, that's the confirmation.
 - No emojis overload. 1-2 max per reply.
 
 ## Business Context:
@@ -558,7 +559,9 @@ Always return valid JSON:
       finalReply += '\n\n' + actionResults.join('\n');
       // Add site URL if something changed
       if (parsed.actions?.some(a => a.action !== 'no_action')) {
-        finalReply += `\n\n🔗 ${process.env.TUNNEL_URL || 'http://localhost:4000'}/site/${siteSlug}`;
+        const siteForUrl = getSiteData(siteSlug);
+        const publicUrl = siteForUrl?.customDomain ? `https://${siteForUrl.customDomain}` : `${process.env.TUNNEL_URL || 'https://whatswebsite.com'}/site/${siteSlug}`;
+        finalReply += `\n\n🔗 ${publicUrl}`;
       }
     }
     

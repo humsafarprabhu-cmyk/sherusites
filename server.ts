@@ -412,7 +412,9 @@ app.post('/api/webhook', webhookLimiter, async (req, res) => {
           if (!text) continue;
           console.log(`[WhatsApp] ${phone}: ${text}`);
           const response = await handleMessage(phone, text);
-          await sendBotResponse(phone, response);
+          if (response.replies && response.replies.length > 0) {
+            await sendBotResponse(phone, response);
+          }
         }
       }
     }

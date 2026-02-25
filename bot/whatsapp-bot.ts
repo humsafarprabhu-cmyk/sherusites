@@ -242,7 +242,17 @@ function welcomeBackMsg(sites: any[]): Reply {
 
 // ─── MAIN HANDLER ────────────────────────────────────────────────────────────
 
+const lastMsgTime: Record<string, number> = {};
 export async function handleMessage(phone: string, message: string): Promise<BotResponse> {
+  // Debounce: ignore duplicate messages within 3 seconds
+  const now = Date.now();
+  const key = `${phone}:${message.trim().toLowerCase()}`;
+  if (lastMsgTime[key] && now - lastMsgTime[key] < 3000) {
+    console.log(`[Bot] Debounce: ignoring duplicate "${message.trim()}" from ${phone}`);
+    return { replies: [] };
+  }
+  lastMsgTime[key] = now;
+
   const msg = message.trim();
   const lower = msg.toLowerCase();
   const session = loadSession(phone);

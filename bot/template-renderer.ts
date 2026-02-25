@@ -313,12 +313,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-he
 
 <div class="g-grid">${photoGrid}</div>
 
-<div class="g-cta">
-  <div class="g-cta-card fade-up">
-    <p>📸 Want to add more photos? Send them on WhatsApp!</p>
-    <a href="https://wa.me/${data.whatsapp}?text=Hi!%20I%20want%20to%20add%20photos%20to%20my%20website">💬 Send Photos on WhatsApp</a>
-  </div>
-</div>
+
 
 <div class="g-footer">⚡ Website by <a href="https://whatswebsite.com">WhatsWebsite</a></div>
 

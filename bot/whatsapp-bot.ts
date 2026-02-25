@@ -212,7 +212,7 @@ function welcomeBackMsg(sites: any[]): Reply {
   // Multiple sites — show list
   return {
     type: 'list',
-    body: `👋 *Welcome back!*\n\nAapke ${sites.length} websites hain. Kaunsa edit karna hai?`,
+    body: `👋 *Welcome back!*\n\nAapke ${sites.length} websites hain.\nNaya website banana hai ya kaunsa edit karna hai?`,
     buttonText: '🏪 Choose Website',
     sections: [
       {

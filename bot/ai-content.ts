@@ -208,6 +208,52 @@ export async function downloadAndSaveImage(url: string, slug: string, filename: 
   }
 }
 
+// Fetch photos from Unsplash by search query (free, no API key needed)
+export async function fetchUnsplashPhotos(query: string, count: number = 1, size: 'w=1400' | 'w=600' = 'w=600'): Promise<string[]> {
+  try {
+    const res = await fetch(`https://unsplash.com/napi/search/photos?query=${encodeURIComponent(query)}&per_page=${count}&orientation=landscape`, {
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.results || []).slice(0, count).map((p: any) => p.urls?.regular || p.urls?.small || '').filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+// Smart photo assignment: use AI-generated queries to find relevant Unsplash photos
+export async function getSmartPhotos(
+  heroQuery: string | undefined,
+  galleryQueries: string[] | undefined,
+  slug: string
+): Promise<{hero: string | null, gallery: string[]}> {
+  const result = { hero: null as string | null, gallery: [] as string[] };
+
+  // Hero
+  if (heroQuery) {
+    const urls = await fetchUnsplashPhotos(heroQuery, 1, 'w=1400');
+    if (urls[0]) {
+      const saved = await downloadAndSaveImage(urls[0], slug, 'hero-unsplash.jpg');
+      if (saved) result.hero = saved;
+    }
+  }
+
+  // Gallery — one photo per query
+  if (galleryQueries?.length) {
+    for (let i = 0; i < Math.min(galleryQueries.length, 6); i++) {
+      const urls = await fetchUnsplashPhotos(galleryQueries[i], 1, 'w=600');
+      if (urls[0]) {
+        const saved = await downloadAndSaveImage(urls[0], slug, `gallery-${i+1}.jpg`);
+        if (saved) result.gallery.push(saved);
+      }
+    }
+  }
+
+  return result;
+}
+
 const CATEGORY_PROMPTS: Record<string, string> = {
   restaurant: `Generate for an Indian restaurant/dhaba:
 - tagline (short, catchy, Hindi-English mix OK. DO NOT include the business name — just the slogan)
@@ -312,7 +358,7 @@ Generate menu/services that MATCH what this specific business would actually off
           },
           {
             role: 'user',
-            content: `Business: "${businessName}" in ${address}. Category: ${category}.${extraInfo ? `\nExtra info: ${extraInfo}` : ''}\n\n${prompt}\n\nAlso generate:\n- reviews: 3 realistic Google-style reviews [{author (Indian name), text (1-2 sentences), rating (4-5), date ("2 weeks ago" etc)}]\n- todaySpecial: one special item {name, description, price as "₹XX", oldPrice as "₹XX" (higher)}\n\nOutput JSON with keys: tagline, about, ${getContentKey(category)}, reviews, todaySpecial`
+            content: `Business: "${businessName}" in ${address}. Category: ${category}.${extraInfo ? `\nExtra info: ${extraInfo}` : ''}\n\n${prompt}\n\nAlso generate:\n- reviews: 3 realistic Google-style reviews [{author (Indian name), text (1-2 sentences), rating (4-5), date ("2 weeks ago" etc)}]\n- todaySpecial: one special item {name, description, price as "₹XX", oldPrice as "₹XX" (higher)}\n- heroPhotoQuery: one Unsplash search query (2-4 words) for a perfect hero background photo for THIS specific business (e.g. "north indian thali food" or "luxury hair salon interior" or "electronics store display")\n- galleryPhotoQueries: array of 6 Unsplash search queries for gallery photos matching what this business actually does\n\nOutput JSON with keys: tagline, about, ${getContentKey(category)}, reviews, todaySpecial, heroPhotoQuery, galleryPhotoQueries`
           }
         ],
         max_tokens: 1500,

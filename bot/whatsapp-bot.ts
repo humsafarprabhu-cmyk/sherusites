@@ -12,7 +12,7 @@ import {
   getSiteData, saveSiteData, createSiteData, generateUniqueSlug,
   getSession, saveSession, deleteSession, listUserSites,
 } from './db.ts';
-import { generateContent, generateImages, downloadAndSaveImage } from './ai-content.ts';
+import { generateContent, generateImages, downloadAndSaveImage, getSmartPhotos } from './ai-content.ts';
 import { renderSite } from './template-renderer.ts';
 import { smartRoute } from './smart-router.ts';
 
@@ -804,6 +804,21 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         if (session.data.galleryPhotos?.length) {
           for (const url of session.data.galleryPhotos) {
             siteData.photos.push({ url: movePhoto(url), caption: session.data.businessName || '', type: 'gallery' as any });
+          }
+        }
+
+        // Smart photos: if user didn't upload, fetch relevant Unsplash photos
+        if (!siteData.photos.length && (aiContent.heroPhotoQuery || aiContent.galleryPhotoQueries)) {
+          try {
+            const smartPhotos = await getSmartPhotos(aiContent.heroPhotoQuery, aiContent.galleryPhotoQueries, slug);
+            if (smartPhotos.hero) {
+              siteData.photos.push({ url: smartPhotos.hero, caption: session.data.businessName || '', type: 'hero' as any });
+            }
+            for (const url of smartPhotos.gallery) {
+              siteData.photos.push({ url, caption: session.data.businessName || '', type: 'gallery' as any });
+            }
+          } catch (e: any) {
+            console.error('[SmartPhotos] Error:', e.message);
           }
         }
 

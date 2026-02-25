@@ -836,7 +836,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
 
         return { replies: [{
           type: 'buttons',
-          body: `🎉 *Aapka website READY hai!*\n\n🏪 *${session.data.businessName}*\n🔗 ${getPublicUrl(session.slug!)}\n\n✅ WhatsApp button\n✅ Call button\n✅ Google Maps\n✅ Mobile responsive\n✅ Professional design`,
+          body: `👏 *Badhai ho! Aapka website ban gaya!*\n\n🏪 *${session.data.businessName}*\n🔗 ${getPublicUrl(session.slug!)}\n\n✅ WhatsApp button\n✅ Call button\n✅ Google Maps\n✅ Mobile responsive\n✅ Professional design\n\n⭐ *Premium loge toh apna domain milega!*\n_jaise: ${session.data.businessName.toLowerCase().replace(/\s+/g, '')}.in_`,
           buttons: [
             { id: 'wb_edit', title: '✏️ Edit Website' },
             { id: 'wb_upgrade', title: '⭐ Premium ₹1,499/yr' },

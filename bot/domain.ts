@@ -347,6 +347,11 @@ async function waitForDns(domain: string, phone: string): Promise<boolean> {
     const ok = await checkDnsResolves(domain);
     if (ok) {
       await wa(phone, `🎉 *${domain} is LIVE!*\n\nAapka custom domain ready hai! Ab duniya ko dikhao 🌍\n\n🔗 https://${domain}`);
+      // Send share link
+      const { getSiteData: getSD } = await import('./db.ts');
+      const sd = getSD(slug);
+      const shareText = `${sd?.businessName || domain} ka website dekho: https://${domain}`;
+      await wa(phone, `📤 *Share karo:*\n\n👇 Ye link tap karo, contact choose karo, send!\n\nhttps://wa.me/?text=${encodeURIComponent(shareText)}`);
       await sendTelegramAlert(`✅ DNS live: ${domain} (after ${mins} min)`);
       return true;
     }

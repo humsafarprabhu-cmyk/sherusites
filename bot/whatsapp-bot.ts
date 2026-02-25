@@ -340,9 +340,9 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       if (lower === 'wb_upgrade' || lower === 'upgrade' || lower === 'premium' || lower === '999' || lower === 'pay') {
         return { replies: [{
           type: 'buttons',
-          body: `⭐ *Premium Upgrade — ₹999/year*\n\nAapko milega:\n✨ Custom .in domain\n✨ No branding\n✨ Priority support\n✨ Google Business listing`,
+          body: `⭐ *Premium Upgrade — ₹1,499/year*\n\nAapko milega:\n✨ Custom .in domain\n✨ No branding\n✨ Priority support\n✨ Google Business listing`,
           buttons: [
-            { id: 'btn_pay', title: '💳 Pay ₹999' },
+            { id: 'btn_pay', title: '💳 Pay ₹1,499' },
             { id: 'btn_later', title: '🔙 Baad Mein' },
           ]
         }]};
@@ -728,7 +728,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
             body: `Ab kya karna hai?`,
             buttons: [
               { id: 'wb_edit', title: '✏️ Edit Website' },
-              { id: 'wb_upgrade', title: '⭐ Premium ₹999/yr' },
+              { id: 'wb_upgrade', title: '⭐ Premium ₹1,499/yr' },
               { id: 'btn_share', title: '📤 Share' },
             ]
           }

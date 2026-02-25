@@ -330,6 +330,8 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
     session.state = 'idle';
     session.data = {};
     persistSession(phone, session);
+    // Delete debounce key so recursive call isn't blocked
+    delete lastMsgTime[`${phone}:${msg.trim().toLowerCase()}`];
     return handleMessage(phone, msg);
   }
 

@@ -785,25 +785,15 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         session.paid = false;
         persistSession(phone, session);
 
-        const shareText = `${session.data.businessName} ka website dekho: ${session.siteUrl}`;
-        const shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
-        return { replies: [
-          `🎉 *Aapka website READY hai!*\n\n🏪 *${session.data.businessName}*\n🔗 ${session.siteUrl}\n\n✅ WhatsApp button\n✅ Call button\n✅ Google Maps\n✅ Mobile responsive\n✅ Professional design`,
-          {
-            type: 'cta_url',
-            body: `📤 Apne customers ko share karo!`,
-            url: shareUrl,
-            buttonText: '📤 Share Website',
-          },
-          {
-            type: 'buttons',
-            body: `Ab kya karna hai?`,
-            buttons: [
-              { id: 'wb_edit', title: '✏️ Edit Website' },
-              { id: 'wb_upgrade', title: '⭐ Premium ₹1,499/yr' },
-            ]
-          }
-        ]};
+        return { replies: [{
+          type: 'buttons',
+          body: `🎉 *Aapka website READY hai!*\n\n🏪 *${session.data.businessName}*\n🔗 ${session.siteUrl}\n\n✅ WhatsApp button\n✅ Call button\n✅ Google Maps\n✅ Mobile responsive\n✅ Professional design`,
+          buttons: [
+            { id: 'wb_edit', title: '✏️ Edit Website' },
+            { id: 'wb_upgrade', title: '⭐ Premium ₹1,499/yr' },
+            { id: 'btn_share', title: '📤 Share' },
+          ]
+        }]};
       } catch (err: any) {
         session.state = 'awaiting_timings';
         persistSession(phone, session);

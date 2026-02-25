@@ -51,13 +51,17 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
   const results: string[] = [];
   let siteData = getSiteData(slug);
   if (!siteData) return ['Site data not found'];
+  
+  // Helper: get the active items list (menu for restaurants, services for others)
+  const getItems = () => siteData!.menu?.length ? siteData!.menu! : siteData!.services?.length ? siteData!.services! : [];
+  const setItems = (items: any[]) => { if (siteData!.menu?.length) siteData!.menu = items; else siteData!.services = items; };
 
   for (const { action, params } of actions) {
     try {
       switch (action) {
         case 'add_menu_item': {
-          if (!siteData.menu) siteData.menu = [];
-          siteData.menu.push({
+          const addList = siteData.menu?.length ? siteData.menu : (siteData.services || (siteData.services = []));
+          addList.push({
             name: params.name,
             price: params.price,
             category: params.category || '',
@@ -68,10 +72,11 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
           break;
         }
         case 'remove_menu_item': {
-          if (!siteData.menu) break;
-          const idx = siteData.menu.findIndex(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
+          const list = siteData.menu?.length ? siteData.menu : siteData.services?.length ? siteData.services : null;
+          if (!list) break;
+          const idx = list.findIndex(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
           if (idx >= 0) {
-            const removed = siteData.menu.splice(idx, 1)[0];
+            const removed = list.splice(idx, 1)[0];
             results.push(`✅ Removed: ${removed.name}`);
           } else {
             results.push(`❌ "${params.name}" nahi mila menu mein`);
@@ -205,13 +210,9 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
           break;
         }
         case 'mark_popular': {
-          if (siteData.menu) {
-            const item = siteData.menu.find(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
-            if (item) {
-              item.popular = true;
-              results.push(`⭐ ${item.name} marked as popular`);
-            }
-          }
+          const mpItems = getItems();
+          const mpItem = mpItems.find(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
+          if (mpItem) { mpItem.popular = true; results.push(`⭐ ${mpItem.name} marked as popular`); }
           break;
         }
         case 'add_review': {
@@ -275,10 +276,10 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
           break;
         }
         case 'rename_category': {
-          if (!siteData.menu) break;
+          const rcItems = getItems();
           const oldCat = params.old_name?.toLowerCase();
           let renamed = 0;
-          siteData.menu.forEach(m => {
+          rcItems.forEach(m => {
             if ((m.category || '').toLowerCase() === oldCat) { m.category = params.new_name; renamed++; }
           });
           results.push(renamed > 0 ? `✅ "${params.old_name}" → "${params.new_name}" (${renamed} items)` : `❌ "${params.old_name}" nahi mili`);
@@ -292,27 +293,21 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
           break;
         }
         case 'unmark_popular': {
-          if (siteData.menu) {
-            const item = siteData.menu.find(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
-            if (item) { item.popular = false; results.push(`✅ ${item.name} popular tag hataya`); }
-            else results.push(`❌ "${params.name}" nahi mila`);
-          }
+          const upItem = getItems().find(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
+          if (upItem) { upItem.popular = false; results.push(`✅ ${upItem.name} popular tag hataya`); }
+          else results.push(`❌ "${params.name}" nahi mila`);
           break;
         }
         case 'set_veg': {
-          if (siteData.menu) {
-            const item = siteData.menu.find(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
-            if (item) { item.veg = true; results.push(`✅ ${item.name} → 🟢 Veg`); }
-            else results.push(`❌ "${params.name}" nahi mila`);
-          }
+          const svItem = getItems().find(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
+          if (svItem) { svItem.veg = true; results.push(`✅ ${svItem.name} → 🟢 Veg`); }
+          else results.push(`❌ "${params.name}" nahi mila`);
           break;
         }
         case 'set_nonveg': {
-          if (siteData.menu) {
-            const item = siteData.menu.find(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
-            if (item) { item.veg = false; results.push(`✅ ${item.name} → 🔴 Non-Veg`); }
-            else results.push(`❌ "${params.name}" nahi mila`);
-          }
+          const snItem = getItems().find(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
+          if (snItem) { snItem.veg = false; results.push(`✅ ${snItem.name} → 🔴 Non-Veg`); }
+          else results.push(`❌ "${params.name}" nahi mila`);
           break;
         }
         case 'remove_hero': {

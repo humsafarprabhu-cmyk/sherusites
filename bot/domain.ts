@@ -210,7 +210,7 @@ export async function cfAddDnsRecord(zoneId: string, domain: string): Promise<bo
     });
     if (data.success) return true;
     // Record might already exist
-    if (data.errors?.[0]?.code === 81057) return true;
+    if (data.errors?.[0]?.code === 81057 || data.errors?.[0]?.code === 81053) return true;
     console.error('[CF] DNS record failed:', JSON.stringify(data.errors));
     return false;
   } catch (err: any) {

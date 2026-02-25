@@ -386,7 +386,11 @@ export interface SessionRow {
 export function getSession(phone: string): SessionRow | null {
   const row: any = stmts.getSession.get(phone);
   if (!row) return null;
-  return { ...row, data: JSON.parse(row.data || '{}'), paid: !!row.paid };
+  let data = JSON.parse(row.data || '{}');
+  // Handle double-encoded JSON strings
+  if (typeof data === 'string') { try { data = JSON.parse(data); } catch {} }
+  if (typeof data === 'string') data = {};
+  return { ...row, data, paid: !!row.paid };
 }
 
 export function saveSession(phone: string, session: {

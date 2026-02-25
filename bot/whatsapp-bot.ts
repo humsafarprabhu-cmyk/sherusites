@@ -1149,11 +1149,25 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         }]};
       }
 
-      // Fallback
-      session.state = 'complete';
-      session.editMode = undefined;
-      persistSession(phone, session);
-      return { replies: [editOptionsMsg()] };
+      // Fallback — route to AI agent for natural language edits
+      try {
+        const { agentHandle } = await import('./site-agent.ts');
+        const reply = await agentHandle(phone, msg, slug);
+        session.state = 'complete';
+        session.editMode = undefined;
+        persistSession(phone, session);
+        return { replies: [{
+          type: 'buttons',
+          body: reply,
+          buttons: [{ id: 'wb_edit', title: '✏️ More Edits' }, { id: 'btn_share', title: '📤 Share' }]
+        }] };
+      } catch (err: any) {
+        console.error('[Edit AI] Error:', err.message);
+        session.state = 'complete';
+        session.editMode = undefined;
+        persistSession(phone, session);
+        return { replies: [editOptionsMsg()] };
+      }
     }
 
     default: {

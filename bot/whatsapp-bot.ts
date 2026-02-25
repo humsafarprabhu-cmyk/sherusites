@@ -264,13 +264,22 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
   if (lower === 'help' || lower === 'madad') {
     return { replies: [{
       type: 'buttons',
-      body: `🦁 *WhatsWebsite — Help*\n\nCommands:\n• *hi* — Start / Edit website\n• *edit* — Modify website\n• *upgrade* — Custom domain\n• *share* — Share link\n• *new* — Naya website\n• *status* — Check status\n• *reset* — Start over`,
+      body: `🦁 *WhatsWebsite — Help*\n\n• *hi* — Start / Edit website\n• *edit* — Modify website\n• *upgrade* — Custom domain\n• *share* — Share link\n• *new* — Naya website\n• *support* — Talk to us`,
       buttons: [
         { id: 'wb_edit', title: '✏️ Edit' },
         { id: 'wb_new', title: '🆕 New Website' },
-        { id: 'help_status', title: '📊 Status' },
+        { id: 'btn_support', title: '🆘 Support' },
       ]
     }]};
+  }
+
+  if (lower === 'support' || lower === 'btn_support' || lower === 'complaint' || lower === 'problem' || lower === 'issue') {
+    return { replies: [{
+      type: 'cta_url',
+      body: `🆘 *Need help?*\n\nHumse directly baat karo — hum jaldi reply karenge!\n\n⏰ Response time: 1-2 hours`,
+      url: 'https://wa.me/918210329601?text=Hi%2C%20I%20need%20help%20with%20my%20WhatsWebsite',
+      buttonText: '💬 Chat with Support',
+    }] };
   }
 
   if (lower === 'status' || lower === 'help_status') {

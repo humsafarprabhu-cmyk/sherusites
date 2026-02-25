@@ -79,9 +79,32 @@ function matchAddItem(msg: string, lower: string, data: SiteData): PatternResult
 }
 
 // Remove item: "remove Paneer Tikka" or "Paneer Tikka hatao"
+function matchRemoveCategory(msg: string, lower: string, data: SiteData): PatternResult {
+  const m = msg.match(/(?:remove|delete|hatao|hata do|nikalo)\s+(.+?)\s+(?:category|section|group)$/i)
+    || msg.match(/(.+?)\s+(?:category|section|group)\s+(?:remove|delete|hatao|hata do|nikalo)(?:\s+(?:karo|kar|do))?$/i);
+  if (!m) return { matched: false };
+  const catName = m[1].trim().toLowerCase();
+  const allLists = [data.menu, data.services, data.packages, data.plans, data.subjects].filter(Boolean);
+  for (const list of allLists) {
+    const before = list!.length;
+    const filtered = list!.filter(item => (item.category || '').toLowerCase() !== catName);
+    if (filtered.length < before) {
+      list!.length = 0;
+      filtered.forEach(i => list!.push(i));
+      saveSiteData(data);
+      renderSite(data);
+      const removed = before - filtered.length;
+      return { matched: true, changed: true, reply: `✅ *${m[1].trim()}* category hata di! (${removed} items removed)\n\n🔗 ${BASE_URL}/site/${data.slug}` };
+    }
+  }
+  return { matched: true, reply: `❌ "${m[1].trim()}" category nahi mili.` };
+}
+
 function matchRemoveItem(msg: string, lower: string, data: SiteData): PatternResult {
   // Skip if message mentions photo/gallery/hero — let AI agent handle
   if (/photo|gallery|gallary|image|hero|pic/i.test(msg)) return { matched: false };
+  // Skip if message mentions category — let category handler handle
+  if (/category|section|group/i.test(msg)) return { matched: false };
   const patterns = [
     // Suffix first: "Litti chokha delete karo", "samosa hatao", "dal ko nikaal do"
     /(.+?)\s+(?:ko\s+)?(?:hatao|hata do|remove karo|remove kar|remove|delete karo|delete kar|delete|nikalo|nikaal do|nikaal)$/i,
@@ -241,6 +264,7 @@ export async function smartRoute(phone: string, message: string, siteSlug: strin
   // Try all pattern matchers (FREE, no AI cost)
   const matchers = [
     matchAddItem,
+    matchRemoveCategory,
     matchRemoveItem,
     matchPriceChange,
     matchBulkPrice,

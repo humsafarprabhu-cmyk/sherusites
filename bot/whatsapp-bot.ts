@@ -680,11 +680,22 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         if (!session.data.galleryPhotos) session.data.galleryPhotos = [];
         const lastPhoto = session.data.uploadedPhotos?.slice(-1)[0];
         if (lastPhoto) session.data.galleryPhotos.push(lastPhoto.url);
+        // Debounce: set a timestamp, only reply if no more photos in 2s
+        session.data._lastGalleryUpload = Date.now();
         persistSession(phone, session);
         const count = session.data.galleryPhotos.length;
+        // Wait 2s to see if more photos come
+        await new Promise(r => setTimeout(r, 2000));
+        // Re-load session — check if another photo came in
+        const fresh = loadSession(phone);
+        if (fresh.data._lastGalleryUpload > session.data._lastGalleryUpload) {
+          // More photos arrived, skip this response
+          return { replies: [] };
+        }
+        const finalCount = fresh.data.galleryPhotos?.length || count;
         return { replies: [{
           type: 'buttons',
-          body: `✅ Photo ${count} added! Aur bhejo ya Done dabao 👇`,
+          body: `✅ ${finalCount} photo${finalCount > 1 ? 's' : ''} added! Aur bhejo ya Done dabao 👇`,
           buttons: [{ id: 'done_gallery', title: '✅ Done' }]
         }] };
       } else {

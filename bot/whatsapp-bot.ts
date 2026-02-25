@@ -797,13 +797,14 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
           return tempUrl; // fallback
         }
 
+        if (!siteData.photos) siteData.photos = [];
         if (session.data.heroImage) {
-          siteData.heroImage = movePhoto(session.data.heroImage);
+          siteData.photos.push({ url: movePhoto(session.data.heroImage), caption: session.data.businessName || '', type: 'hero' as any });
         }
         if (session.data.galleryPhotos?.length) {
-          siteData.photos = session.data.galleryPhotos.map((url: string) => ({
-            url: movePhoto(url), caption: session.data.businessName || '', type: 'gallery' as const,
-          }));
+          for (const url of session.data.galleryPhotos) {
+            siteData.photos.push({ url: movePhoto(url), caption: session.data.businessName || '', type: 'gallery' as any });
+          }
         }
 
         if (aiContent.menu) siteData.menu = aiContent.menu;

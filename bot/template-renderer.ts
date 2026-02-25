@@ -179,6 +179,12 @@ function injectDynamicContent(html: string, data: SiteData): string {
     todaySpecial: (data as any).todaySpecial || null,
   });
   
+  // Replace static placeholders
+  html = html.replace(/__BUSINESS_NAME__/g, data.businessName || '');
+  html = html.replace(/__TAGLINE__/g, (data as any).tagline || '');
+  html = html.replace(/__ADDRESS__/g, data.address || '');
+  html = html.replace(/__TIMINGS__/g, data.timings || '');
+
   // Inject __SITE_DATA__ before the template's <!-- __INJECT_DATA__ --> marker
   const dataScript = `
   <script>window.__SITE_DATA__ = ${jsonData};</script>`;

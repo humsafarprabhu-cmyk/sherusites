@@ -375,7 +375,7 @@ IMPORTANT: Analyze the business name and location to INTELLIGENTLY infer what th
       ),
       // Call 2: Tagline + about + reviews + todaySpecial (light)
       aiCall(
-        `${biz}\nGenerate for this specific business:\n- tagline (catchy, short, Hindi-English OK, NO business name in tagline)\n- about (2-3 lines)\n- reviews: 3 Google-style [{author (Indian name), text (1-2 lines), rating (4-5), date}]\n- todaySpecial: {name, description, price "₹XX", oldPrice "₹XX"}\nJSON only.`,
+        `${biz}\nGenerate for this specific business:\n- tagline (catchy, short, Hindi-English OK, NO business name in tagline)\n- about (2-3 lines)\n- reviews: 3 Google-style [{author (Indian name), text (1-2 lines), rating (4-5), date}]\n- todaySpecial: {name, description, price "₹XX", oldPrice "₹XX"}${category === 'tutor' ? '\n- stats: 3 impressive stats [{value:"10+",label:"Years Exp"},{value:"500+",label:"Students"},{value:"95%",label:"Results"}] — make realistic for this business' : ''}\nJSON only.`,
         400, 12000
       ),
       // Call 3: Photo queries (lightest)
@@ -394,6 +394,7 @@ IMPORTANT: Analyze the business name and location to INTELLIGENTLY infer what th
       if (metaResult.about) result.about = metaResult.about;
       if (metaResult.reviews?.length) result.reviews = metaResult.reviews;
       if (metaResult.todaySpecial) result.todaySpecial = metaResult.todaySpecial;
+      if (metaResult.stats) result.stats = metaResult.stats;
     }
     if (menuResult?.[contentKey]) {
       result[contentKey] = menuResult[contentKey];

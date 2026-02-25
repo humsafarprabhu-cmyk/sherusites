@@ -204,11 +204,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
 
 <!-- Stats Strip -->
 <div class="stats">
-  <div class="stats-inner" id="statsStrip">
-    <div class="stat-item"><div class="stat-num" id="statYears">10+</div><div class="stat-label">Years Exp</div></div>
-    <div class="stat-item"><div class="stat-num" id="statStudents">500+</div><div class="stat-label">Students</div></div>
-    <div class="stat-item"><div class="stat-num" id="statResults">95%</div><div class="stat-label">Results</div></div>
-  </div>
+  <div class="stats-inner" id="statsStrip"></div>
 </div>
 
 <!-- Trust Strip -->
@@ -356,11 +352,14 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
     $open.querySelector('span').textContent='Admissions Closed';
   }
 
-  // Stats
-  const stats = sec.stats || {};
-  if(stats.years) t('statYears', stats.years);
-  if(stats.students) t('statStudents', stats.students);
-  if(stats.results) t('statResults', stats.results);
+  // Stats (from DB or hide)
+  const stats = D.stats || sec.stats || null;
+  const $ss = document.getElementById('statsStrip');
+  if($ss && stats && stats.length){
+    $ss.innerHTML = stats.map(s => `<div class="stat-item"><div class="stat-num">${s.value}</div><div class="stat-label">${s.label}</div></div>`).join('');
+  } else if($ss){
+    $ss.parentElement.style.display='none';
+  }
 
   // Trust strip
   const trustPills = D.trustBadges || sec.trustBadges || [

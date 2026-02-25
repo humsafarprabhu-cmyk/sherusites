@@ -126,12 +126,12 @@ const stmts = {
     slug, owner_phone, business_name, category, tagline, phone, whatsapp, address, timings, about,
     owner_name, experience, specialization, menu, services, subjects, packages, plans, photos,
     delivery, delivery_area, emergency_available, active_offer, is_open, plan, custom_domain,
-    payment_id, paid_at, created_at, updated_at, today_special, reviews, pending_domain, pending_plan_price
+    payment_id, paid_at, created_at, updated_at, today_special, reviews, pending_domain, pending_plan_price, stats
   ) VALUES (
     @slug, @owner_phone, @business_name, @category, @tagline, @phone, @whatsapp, @address, @timings, @about,
     @owner_name, @experience, @specialization, @menu, @services, @subjects, @packages, @plans, @photos,
     @delivery, @delivery_area, @emergency_available, @active_offer, @is_open, @plan, @custom_domain,
-    @payment_id, @paid_at, @created_at, @updated_at, @today_special, @reviews, @pending_domain, @pending_plan_price
+    @payment_id, @paid_at, @created_at, @updated_at, @today_special, @reviews, @pending_domain, @pending_plan_price, @stats
   )`),
   getUserSites: db.prepare("SELECT * FROM sites WHERE owner_phone = ? ORDER BY CASE WHEN plan='premium' THEN 0 ELSE 1 END, rowid DESC"),
   listAllSites: db.prepare('SELECT slug FROM sites'),
@@ -249,6 +249,7 @@ function rowToSite(row: any): SiteData {
     isOpen: !!row.is_open,
     reviews: JSON.parse(row.reviews || '[]'),
     todaySpecial: row.today_special ? JSON.parse(row.today_special) : null,
+    stats: row.stats ? JSON.parse(row.stats) : null,
     plan: row.plan || 'free',
     customDomain: row.custom_domain,
     pendingDomain: row.pending_domain,
@@ -291,6 +292,7 @@ function siteToRow(data: SiteData, ownerPhone: string) {
     pending_domain: data.pendingDomain || null,
     pending_plan_price: data.pendingPlanPrice || null,
     today_special: data.todaySpecial ? JSON.stringify(data.todaySpecial) : null,
+    stats: data.stats ? JSON.stringify(data.stats) : '[]',
     reviews: JSON.stringify(data.reviews || []),
     payment_id: data.paymentId || null,
     paid_at: data.paidAt || null,

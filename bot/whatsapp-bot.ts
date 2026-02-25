@@ -869,6 +869,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         if (aiContent.subjects) siteData.subjects = aiContent.subjects;
         if (aiContent.reviews) siteData.reviews = aiContent.reviews;
         if (aiContent.todaySpecial) siteData.todaySpecial = aiContent.todaySpecial;
+        if (aiContent.stats) siteData.stats = aiContent.stats;
         saveSiteData(siteData, phone);
 
         renderSite(siteData);

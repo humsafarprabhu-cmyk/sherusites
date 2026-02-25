@@ -345,6 +345,14 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
           results.push(`✅ Owner name: ${params.name}`);
           break;
         }
+        case 'update_stats': {
+          // params.stats = [{value:"10+", label:"Years"}, ...]
+          if (params.stats?.length) {
+            (siteData as any).stats = params.stats;
+            results.push(`✅ Stats updated: ${params.stats.map((s:any) => `${s.value} ${s.label}`).join(', ')}`);
+          }
+          break;
+        }
         case 'delete_photo': {
           if (!siteData.photos || siteData.photos.length === 0) {
             results.push('❌ Koi photo nahi hai abhi');
@@ -470,6 +478,7 @@ BUSINESS INFO:
 - update_timings: {timings}
 - update_owner_name: {name}
 - update_experience: {text}
+- update_stats: {stats: [{value: "10+", label: "Years Exp"}, ...]} — update stats strip (tutor template)
 - update_specialization: {text}
 - set_map_location: {lat, lng}
 - update_map_address: {address}

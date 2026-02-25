@@ -240,15 +240,14 @@ export async function getSmartPhotos(
     }
   }
 
-  // Gallery — one photo per query
+  // Gallery — parallel downloads
   if (galleryQueries?.length) {
-    for (let i = 0; i < Math.min(galleryQueries.length, 6); i++) {
-      const urls = await fetchUnsplashPhotos(galleryQueries[i], 1, 'w=600');
-      if (urls[0]) {
-        const saved = await downloadAndSaveImage(urls[0], slug, `gallery-${i+1}.jpg`);
-        if (saved) result.gallery.push(saved);
-      }
-    }
+    const promises = galleryQueries.slice(0, 6).map(async (q, i) => {
+      const urls = await fetchUnsplashPhotos(q, 1, 'w=600');
+      if (urls[0]) return downloadAndSaveImage(urls[0], slug, `gallery-${i+1}.jpg`);
+      return '';
+    });
+    result.gallery = (await Promise.all(promises)).filter(Boolean);
   }
 
   return result;

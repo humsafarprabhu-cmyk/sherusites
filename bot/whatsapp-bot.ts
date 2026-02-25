@@ -92,6 +92,13 @@ function extractPhone(msg: string): string | null {
   return match ? match[1] : null;
 }
 
+// ─── URL HELPER ──────────────────────────────────────────────────────────────
+function getPublicUrl(slug: string): string {
+  const site = getSiteData(slug);
+  if (site?.customDomain) return `https://${site.customDomain}`;
+  return `${BASE_URL}/site/${slug}`;
+}
+
 // ─── SESSION HELPERS ─────────────────────────────────────────────────────────
 
 function loadSession(phone: string): { state: string; data: any; siteUrl?: string; slug?: string; paid: boolean; editMode?: string } {
@@ -283,11 +290,11 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
   }
 
   if (lower === 'status' || lower === 'help_status') {
-    if (session.siteUrl) {
+    if (session.slug) {
       const isPaid = session.paid;
       return { replies: [{
         type: 'buttons',
-        body: `🌐 *Your Website*\n\n📍 ${session.data.businessName}\n🔗 ${session.siteUrl}\n${isPaid ? '✅ Premium (Custom Domain)' : '🆓 Free Plan'}`,
+        body: `🌐 *Your Website*\n\n📍 ${session.data.businessName}\n🔗 ${getPublicUrl(session.slug!)}\n${isPaid ? '✅ Premium (Custom Domain)' : '🆓 Free Plan'}`,
         buttons: isPaid 
           ? [{ id: 'wb_edit', title: '✏️ Edit' }, { id: 'btn_share', title: '📤 Share' }]
           : [{ id: 'wb_edit', title: '✏️ Edit' }, { id: 'wb_upgrade', title: '⭐ Upgrade' }, { id: 'btn_share', title: '📤 Share' }]
@@ -336,7 +343,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
     case 'complete': {
       // Photo uploaded — confirm
       if (msg === '__PHOTO_UPLOADED__' || lower === '__photo_uploaded__') {
-        return { replies: [`📸 Photo saved to your website gallery! ✅\n\n🔗 ${session.siteUrl || BASE_URL + '/site/' + session.slug}`] };
+        return { replies: [`📸 Photo saved to your website gallery! ✅\n\n🔗 ${getPublicUrl(session.slug!) || BASE_URL + '/site/' + session.slug}`] };
       }
       // "Hi" from existing user — show welcome back with options
       if (lower.match(/^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru|website|site)$/)) {
@@ -399,7 +406,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       if (lower === 'btn_later') {
         return { replies: [{
           type: 'buttons',
-          body: `👍 Koi baat nahi! Jab bhi chahiye "upgrade" type karo.\n\n🔗 ${session.siteUrl}`,
+          body: `👍 Koi baat nahi! Jab bhi chahiye "upgrade" type karo.\n\n🔗 ${getPublicUrl(session.slug!)}`,
           buttons: [
             { id: 'wb_edit', title: '✏️ Edit Website' },
             { id: 'btn_share', title: '📤 Share' },
@@ -408,12 +415,12 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       }
 
       if (lower === 'share' || lower === 'btn_share') {
-        const shareText = `${session.data.businessName} ka website dekho:\n${session.siteUrl}\n\nApna bhi banao — WhatsApp karo: https://wa.me/918210329601`;
+        const shareText = `${session.data.businessName} ka website dekho:\n${getPublicUrl(session.slug!)}\n\nApna bhi banao — WhatsApp karo: https://wa.me/918210329601`;
         const shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
         const isPaid = session.paid;
         const msg = isPaid
-          ? `👏 *Kya baat!* Aapka website ready hai!\n\n🔗 ${session.siteUrl}\n\nShare karo apne customers ke saath 👇`
-          : `👏 *Kya baat!* Aapne apna website bana liya hai!\n\n🔗 ${session.siteUrl}\n\nAbhi aapka apna domain nahi hai — upgrade karke ise apna bana sakte hain! ⭐`;
+          ? `👏 *Kya baat!* Aapka website ready hai!\n\n🔗 ${getPublicUrl(session.slug!)}\n\nShare karo apne customers ke saath 👇`
+          : `👏 *Kya baat!* Aapne apna website bana liya hai!\n\n🔗 ${getPublicUrl(session.slug!)}\n\nAbhi aapka apna domain nahi hai — upgrade karke ise apna bana sakte hain! ⭐`;
         
         if (isPaid) {
           return { replies: [{
@@ -459,7 +466,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
 
           return { replies: [{
             type: 'buttons',
-            body: `✅ *${siteData.businessName}* selected!\n🔗 ${session.paid && siteData.customDomain ? `https://${siteData.customDomain}` : session.siteUrl}\n\nKya karna hai?`,
+            body: `✅ *${siteData.businessName}* selected!\n🔗 ${getPublicUrl(session.slug!)}\n\nKya karna hai?`,
             buttons: session.paid
               ? [{ id: 'wb_edit', title: '✏️ Edit' }, { id: 'btn_share', title: '📤 Share' }]
               : [{ id: 'wb_edit', title: '✏️ Edit' }, { id: 'wb_upgrade', title: '⭐ Upgrade' }, { id: 'btn_share', title: '📤 Share' }]
@@ -471,7 +478,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       if (/^(cat_|wb_|btn_|dom_|edit_|site_|rm_|skip_|done_)/.test(lower)) {
         return { replies: [{
           type: 'buttons',
-          body: `🌐 *${session.data.businessName}*\n🔗 ${session.siteUrl}\n\nKya karna hai?`,
+          body: `🌐 *${session.data.businessName}*\n🔗 ${getPublicUrl(session.slug!)}\n\nKya karna hai?`,
           buttons: [
             { id: 'wb_edit', title: '✏️ Edit Website' },
             ...(session.paid ? [] : [{ id: 'wb_upgrade', title: '⭐ Upgrade' }]),
@@ -492,7 +499,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
 
       return { replies: [{
         type: 'buttons',
-        body: `🌐 *${session.data.businessName}*\n🔗 ${session.siteUrl}\n\nKya karna hai?`,
+        body: `🌐 *${session.data.businessName}*\n🔗 ${getPublicUrl(session.slug!)}\n\nKya karna hai?`,
         buttons: [
           { id: 'wb_edit', title: '✏️ Edit' },
           { id: 'wb_upgrade', title: '⭐ Upgrade' },
@@ -811,7 +818,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
 
         return { replies: [{
           type: 'buttons',
-          body: `🎉 *Aapka website READY hai!*\n\n🏪 *${session.data.businessName}*\n🔗 ${session.siteUrl}\n\n✅ WhatsApp button\n✅ Call button\n✅ Google Maps\n✅ Mobile responsive\n✅ Professional design`,
+          body: `🎉 *Aapka website READY hai!*\n\n🏪 *${session.data.businessName}*\n🔗 ${getPublicUrl(session.slug!)}\n\n✅ WhatsApp button\n✅ Call button\n✅ Google Maps\n✅ Mobile responsive\n✅ Professional design`,
           buttons: [
             { id: 'wb_edit', title: '✏️ Edit Website' },
             { id: 'wb_upgrade', title: '⭐ Premium ₹1,499/yr' },
@@ -920,7 +927,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
           if (sd) renderSite(sd);
           return { replies: [{
             type: 'buttons',
-            body: `✅ Hero photo updated!\n🔗 ${session.siteUrl}`,
+            body: `✅ Hero photo updated!\n🔗 ${getPublicUrl(session.slug!)}`,
             buttons: [{ id: 'wb_edit', title: '✏️ More Edits' }, { id: 'btn_share', title: '📤 Share' }]
           }] };
         }
@@ -977,7 +984,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         renderSite(siteData);
         return { replies: [{
           type: 'buttons',
-          body: `✅ Gallery updated!\n🔗 ${session.siteUrl}`,
+          body: `✅ Gallery updated!\n🔗 ${getPublicUrl(session.slug!)}`,
           buttons: [{ id: 'wb_edit', title: '✏️ More Edits' }, { id: 'btn_share', title: '📤 Share' }]
         }] };
       }
@@ -1047,7 +1054,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         persistSession(phone, session);
         return { replies: [{
           type: 'buttons',
-          body: `✅ Offer hata diya! Website updated.\n🔗 ${session.siteUrl}`,
+          body: `✅ Offer hata diya! Website updated.\n🔗 ${getPublicUrl(session.slug!)}`,
           buttons: [
             { id: 'wb_edit', title: '✏️ More Edits' },
             { id: 'btn_share', title: '📤 Share' },
@@ -1078,7 +1085,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         persistSession(phone, session);
         return { replies: [{
           type: 'buttons',
-          body: `✅ Website wapas OPEN! 🎉\n🔗 ${session.siteUrl}`,
+          body: `✅ Website wapas OPEN! 🎉\n🔗 ${getPublicUrl(session.slug!)}`,
           buttons: [
             { id: 'wb_edit', title: '✏️ Edit' },
             { id: 'btn_share', title: '📤 Share' },
@@ -1116,7 +1123,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
           persistSession(phone, session);
           return { replies: [{
             type: 'buttons',
-            body: `✅ ${added} item${added > 1 ? 's' : ''} add ho gaye! Website updated.\n🔗 ${session.siteUrl}`,
+            body: `✅ ${added} item${added > 1 ? 's' : ''} add ho gaye! Website updated.\n🔗 ${getPublicUrl(session.slug!)}`,
             buttons: [
               { id: 'wb_edit', title: '✏️ More Edits' },
               { id: 'btn_share', title: '📤 Share' },
@@ -1150,7 +1157,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
           persistSession(phone, session);
           return { replies: [{
             type: 'buttons',
-            body: `✅ Item hata diya! Website updated.\n🔗 ${session.siteUrl}`,
+            body: `✅ Item hata diya! Website updated.\n🔗 ${getPublicUrl(session.slug!)}`,
             buttons: [
               { id: 'wb_edit', title: '✏️ More Edits' },
               { id: 'btn_share', title: '📤 Share' },
@@ -1175,7 +1182,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
             session.state = 'complete';
             session.editMode = undefined;
             persistSession(phone, session);
-            return { replies: [`✅ ${item.name} ka price ${newPrice} ho gaya!\n🔗 ${session.siteUrl}`] };
+            return { replies: [`✅ ${item.name} ka price ${newPrice} ho gaya!\n🔗 ${getPublicUrl(session.slug!)}`] };
           }
           return { replies: [`❌ "${itemName}" nahi mila. Sahi naam bhejo.`] };
         }
@@ -1189,7 +1196,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         session.state = 'complete';
         session.editMode = undefined;
         persistSession(phone, session);
-        return { replies: [`✅ Timings updated: ${msg}\n🔗 ${session.siteUrl}`] };
+        return { replies: [`✅ Timings updated: ${msg}\n🔗 ${getPublicUrl(session.slug!)}`] };
       }
 
       if (session.editMode === 'add_offer') {
@@ -1201,7 +1208,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         persistSession(phone, session);
         return { replies: [{
           type: 'buttons',
-          body: `🎉 Offer live! "${msg}"\n🔗 ${session.siteUrl}`,
+          body: `🎉 Offer live! "${msg}"\n🔗 ${getPublicUrl(session.slug!)}`,
           buttons: [
             { id: 'edit_offer_remove', title: '❌ Offer Hatao' },
             { id: 'btn_share', title: '📤 Share' },

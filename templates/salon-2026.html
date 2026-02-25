@@ -39,15 +39,18 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
 .hdr{position:fixed;top:0;left:0;right:0;z-index:100;transition:all .4s var(--ease);padding:16px 20px}
 .hdr.scrolled{background:rgba(255,250,248,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:var(--shadow-s);padding:10px 20px}
 .hdr-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
-.hdr-name{font-family:var(--serif);font-size:1.1rem;color:var(--text);transition:color .35s}
-.hdr .scrolled .hdr-name{color:var(--text)}
-.hdr-b{padding:8px 18px;border-radius:50px;font-size:.78rem;font-weight:600;background:var(--rose);color:#fff;transition:all .25s var(--ease)}
+.hdr-name{font-family:var(--serif);font-size:1.1rem;color:#fff;transition:color .35s}
+.hdr.scrolled .hdr-name{color:var(--text)}
+.hdr-b{padding:8px 18px;border-radius:50px;font-size:.78rem;font-weight:600;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(10px);transition:all .25s var(--ease)}
+.hdr.scrolled .hdr-b{background:var(--rose);color:#fff;border-color:var(--rose)}
 .hdr-b:hover{background:var(--text);transform:translateY(-1px)}
 
 /* === HERO === */
 .hero{position:relative;min-height:90vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:var(--blush)}
-.hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,#2D2226 0%,#4A2C3A 30%,#6B3A52 60%,#2D2226 100%);z-index:0}
-.hero-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(183,110,121,.2),transparent 60%),radial-gradient(ellipse at 70% 30%,rgba(201,169,110,.15),transparent 50%)}
+.hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden}
+.hero-bg img{width:100%;height:100%;object-fit:cover;animation:ken-burns 20s ease-in-out infinite alternate}
+.hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(45,34,38,.75) 0%,rgba(74,44,58,.6) 40%,rgba(45,34,38,.8) 100%);z-index:1}
+@keyframes ken-burns{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.08) translate(-1%,-1%)}}
 .hero-deco{position:absolute;z-index:1;opacity:.06;font-size:12rem;pointer-events:none}
 .hero-deco-1{top:-2rem;right:-2rem;transform:rotate(15deg)}
 .hero-deco-2{bottom:-1rem;left:-2rem;transform:rotate(-20deg)}
@@ -131,6 +134,8 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
 
 /* === LOCATION === */
 .loc-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center;box-shadow:var(--shadow-s)}
+.loc-map{width:100%;height:200px;border-radius:12px;overflow:hidden;margin-bottom:16px;background:var(--blush)}
+.loc-map iframe{width:100%;height:100%;border:0}
 .loc-addr{font-size:.88rem;color:var(--text2);margin-bottom:4px;line-height:1.6}
 .loc-time{font-size:.82rem;color:var(--text3);margin-bottom:16px}
 .loc-btn{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;border-radius:50px;background:var(--blush);color:var(--rose);font-weight:600;font-size:.82rem;border:1px solid var(--border);transition:all .3s var(--ease)}
@@ -176,11 +181,11 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
 
 <!-- Hero -->
 <section class="hero" id="heroSection">
-  <div class="hero-bg"></div>
+  <div class="hero-bg"><img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1400&q=80" alt="" id="heroImg"></div>
   <div class="hero-deco hero-deco-1">✂️</div>
   <div class="hero-deco hero-deco-2">💅</div>
   <div class="hero-content">
-    <div class="hero-badge">✨ Beauty & Wellness</div>
+    <div class="hero-badge" id="heroBadge"></div>
     <div class="hero-open" id="heroOpen"><div class="dot"></div><span>Open Now</span></div>
     <h1 id="heroName">__BUSINESS_NAME__</h1>
     <div class="hero-sub" id="heroTagline">__TAGLINE__</div>
@@ -194,12 +199,7 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
 
 <!-- Trust Strip -->
 <div class="trust">
-  <div class="trust-inner" id="trustStrip">
-    <div class="trust-pill">⭐ 4.8 Rating</div>
-    <div class="trust-pill">💇 1000+ Happy Clients</div>
-    <div class="trust-pill">🏆 5+ Years Experience</div>
-    <div class="trust-pill">💎 Premium Products</div>
-  </div>
+  <div class="trust-inner" id="trustStrip"></div>
 </div>
 
 <!-- Offer -->
@@ -210,10 +210,10 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
 
 <!-- Services -->
 <section class="section" id="services">
-  <div class="sec-hdr fade-up">
-    <div class="sec-eye">our services</div>
-    <h2 class="sec-t">What We Offer</h2>
-    <p class="sec-desc">Professional beauty & grooming services for everyone</p>
+  <div class="sec-hdr fade-up" id="svcHdr">
+    <div class="sec-eye" id="svcEye"></div>
+    <h2 class="sec-t" id="svcTitle"></h2>
+    <p class="sec-desc" id="svcDesc"></p>
   </div>
   <div class="sec-inner">
     <div class="svc-grid" id="svcGrid"></div>
@@ -223,9 +223,9 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
 <!-- Gallery -->
 <section class="section" id="gallerySection" style="background:var(--blush)">
   <div class="sec-hdr fade-up">
-    <div class="sec-eye">our work</div>
-    <h2 class="sec-t">Gallery</h2>
-    <p class="sec-desc">See our transformations and salon vibes</p>
+    <div class="sec-eye" id="galEye"></div>
+    <h2 class="sec-t" id="galTitle"></h2>
+    <p class="sec-desc" id="galDesc"></p>
   </div>
   <div class="sec-inner">
     <div class="gallery-grid" id="galGrid"></div>
@@ -235,8 +235,8 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
 <!-- About -->
 <section class="section" id="aboutSection">
   <div class="sec-hdr fade-up">
-    <div class="sec-eye">about us</div>
-    <h2 class="sec-t">Our Story</h2>
+    <div class="sec-eye" id="aboutEye"></div>
+    <h2 class="sec-t" id="aboutTitle"></h2>
   </div>
   <div class="sec-inner">
     <div class="about-card fade-up" id="aboutCard">
@@ -250,8 +250,8 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
 <!-- Reviews -->
 <section class="section" style="background:var(--blush)" id="reviewSection">
   <div class="sec-hdr fade-up">
-    <div class="sec-eye">reviews</div>
-    <h2 class="sec-t">What Clients Say</h2>
+    <div class="sec-eye" id="revEye"></div>
+    <h2 class="sec-t" id="revTitle"></h2>
   </div>
   <div class="sec-inner">
     <div class="rev-list" id="revList"></div>
@@ -261,11 +261,12 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
 <!-- Location -->
 <section class="section" id="locSection">
   <div class="sec-hdr fade-up">
-    <div class="sec-eye">find us</div>
-    <h2 class="sec-t">Visit Our Salon</h2>
+    <div class="sec-eye" id="locEye"></div>
+    <h2 class="sec-t" id="locTitle"></h2>
   </div>
   <div class="sec-inner">
     <div class="loc-card fade-up">
+      <div class="loc-map" id="locMap"></div>
       <p class="loc-addr" id="locAddr">__ADDRESS__</p>
       <p class="loc-time" id="locTime">__TIMINGS__</p>
       <a class="loc-btn" id="locBtn" href="#">📍 Get Directions</a>
@@ -299,30 +300,30 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
   const phone = D.whatsapp || D.phone || '';
   const waLink = 'https://wa.me/' + phone.replace(/\D/g,'') + '?text=Hi! I want to book an appointment';
   const mapLink = 'https://maps.google.com/?q=' + encodeURIComponent(D.address || '');
+  const cat = D.category || 'salon';
+  const sec = D.sectionContent || {};
+
+  // Helper: set text if element exists
+  function t(id,v){const e=document.getElementById(id);if(e&&v)e.textContent=v;return e}
 
   // Header
-  const $hn = document.getElementById('hdrName');
-  if($hn && D.businessName) $hn.textContent = D.businessName;
+  t('hdrName', D.businessName);
   document.querySelectorAll('#hdrBook,#heroBook,#stickyBook').forEach(el => el.href = waLink);
 
+  // Hero badge
+  t('heroBadge', sec.heroBadge || '✨ ' + (D.businessName || ''));
+
   // Hero
-  const $heroName = document.getElementById('heroName');
-  if($heroName && D.businessName) $heroName.textContent = D.businessName;
-  const $heroTag = document.getElementById('heroTagline');
-  if($heroTag && D.tagline) $heroTag.textContent = D.tagline;
-  const $heroAbout = document.getElementById('heroAbout');
-  if($heroAbout && D.about) $heroAbout.textContent = D.about;
+  t('heroName', D.businessName);
+  t('heroTagline', D.tagline);
+  t('heroAbout', D.about);
 
   // Hero background image
   const photos = D.photos || [];
   const heroPhoto = photos.find(p => p.type === 'hero');
   if(heroPhoto){
-    const heroBg = document.querySelector('.hero-bg');
-    if(heroBg){
-      heroBg.style.background = 'url(' + heroPhoto.url + ') center/cover no-repeat';
-      heroBg.style.filter = 'brightness(0.3)';
-      const after = heroBg.querySelector('::after');
-    }
+    const heroImg = document.getElementById('heroImg');
+    if(heroImg) heroImg.src = heroPhoto.url;
   }
 
   // Open status
@@ -333,15 +334,30 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
     $open.querySelector('span').textContent = 'Closed Now';
   }
 
+  // Trust strip (from DB or defaults)
+  const trustPills = D.trustBadges || sec.trustBadges || [
+    {icon:'⭐',text:'Top Rated'},
+    {icon:'💇',text:'Expert Stylists'},
+    {icon:'🏆',text:'Trusted by Locals'},
+    {icon:'💎',text:'Quality Products'}
+  ];
+  const $ts = document.getElementById('trustStrip');
+  if($ts) $ts.innerHTML = trustPills.map(p => `<div class="trust-pill">${p.icon||''} ${p.text}</div>`).join('');
+
   // Offer
   if(D.activeOffer){
     const $os = document.getElementById('offerSection');
     if($os){
       $os.style.display = 'block';
-      document.getElementById('offerTitle').textContent = D.activeOffer.title || '';
-      document.getElementById('offerDesc').textContent = D.activeOffer.description || '';
+      t('offerTitle', D.activeOffer.title);
+      t('offerDesc', D.activeOffer.description);
     }
   }
+
+  // Services section header
+  t('svcEye', sec.servicesEye || 'our services');
+  t('svcTitle', sec.servicesTitle || 'What We Offer');
+  t('svcDesc', sec.servicesDesc || 'Professional services tailored for you');
 
   // Services
   const services = D.services || D.menu || [];
@@ -362,6 +378,11 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
     `).join('');
   }
 
+  // Gallery section header
+  t('galEye', sec.galleryEye || 'our work');
+  t('galTitle', sec.galleryTitle || 'Gallery');
+  t('galDesc', sec.galleryDesc || 'A glimpse of our work');
+
   // Gallery
   const galPhotos = photos.filter(p => p.type === 'gallery' || !p.type);
   const $gg = document.getElementById('galGrid');
@@ -370,20 +391,26 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
     const show = galPhotos.slice(0,6);
     $gg.innerHTML = show.map((p,i) => `
       <div class="gal-item fade-up" style="transition-delay:${i*80}ms">
-        <img src="${p.url}" alt="${p.caption || 'Salon'}" loading="lazy">
+        <img src="${p.url}" alt="${p.caption || ''}" loading="lazy">
       </div>
     `).join('') + (galPhotos.length > 6 ? `<a class="gal-more fade-up" href="/site/${D.slug}/gallery">See All →</a>` : '');
   } else if($gs){
     $gs.style.display = 'none';
   }
 
+  // About section header
+  t('aboutEye', sec.aboutEye || 'about us');
+  t('aboutTitle', sec.aboutTitle || 'Our Story');
+
   // About
   const $at = document.getElementById('aboutText');
-  if($at) $at.textContent = D.about || 'Your trusted neighbourhood beauty & wellness destination.';
-  const $ao = document.getElementById('aboutOwner');
-  if($ao && D.ownerName) $ao.textContent = '— ' + D.ownerName;
-  const $ae = document.getElementById('aboutExp');
-  if($ae && D.experience) $ae.textContent = D.experience;
+  if($at) $at.textContent = D.about || '';
+  t('aboutOwner', D.ownerName ? '— ' + D.ownerName : '');
+  t('aboutExp', D.experience || '');
+
+  // Reviews section header
+  t('revEye', sec.reviewsEye || 'reviews');
+  t('revTitle', sec.reviewsTitle || 'What Our Clients Say');
 
   // Reviews
   const reviews = D.reviews || [];
@@ -401,9 +428,19 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
     $rs.style.display = 'none';
   }
 
+  // Location section header
+  t('locEye', sec.locationEye || 'find us');
+  t('locTitle', sec.locationTitle || 'Visit Us');
+
+  // Location — map embed
+  const $map = document.getElementById('locMap');
+  if($map && D.address){
+    const q = encodeURIComponent(D.businessName + ', ' + D.address);
+    $map.innerHTML = `<iframe src="https://maps.google.com/maps?q=${q}&output=embed&z=15" allowfullscreen loading="lazy"></iframe>`;
+  }
+
   // Location
-  const $la = document.getElementById('locAddr');
-  if($la && D.address) $la.textContent = D.address;
+  t('locAddr', D.address);
   const $lt = document.getElementById('locTime');
   if($lt && D.timings) $lt.textContent = '🕐 ' + D.timings;
   const $lb = document.getElementById('locBtn');

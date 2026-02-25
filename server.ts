@@ -280,13 +280,24 @@ app.post('/api/webhooks/razorpay', webhookLimiter, (req, res) => {
 });
 
 // Central provisioning trigger — idempotent, safe to call multiple times
+const _provisionLocks = new Set<string>();
+
 async function triggerProvisionIfNeeded(slug: string, paymentId?: string) {
+  // In-memory lock — prevent duplicate concurrent runs
+  if (_provisionLocks.has(slug)) {
+    console.log(`[Provision] ${slug} already in progress, skipping`);
+    return;
+  }
+  _provisionLocks.add(slug);
+
+  try {
   const site = getSiteData(slug);
-  if (!site) return;
+  if (!site) { _provisionLocks.delete(slug); return; }
   
   // Already fully provisioned
   if (site.plan === 'premium' && (site as any).customDomain && !(site as any).pendingDomain) {
     console.log(`[Provision] ${slug} already fully provisioned, skipping`);
+    _provisionLocks.delete(slug);
     return;
   }
 
@@ -323,6 +334,9 @@ async function triggerProvisionIfNeeded(slug: string, paymentId?: string) {
     }
   } else {
     sendTelegramAlert(`⚠️ Payment for ${site.businessName} (${slug}) but NO pending domain.\nPayment: ${paymentId}`);
+  }
+  } finally {
+    _provisionLocks.delete(slug);
   }
 }
 

@@ -103,18 +103,20 @@ export function renderSite(data: SiteData): string {
     html = html.replace('</body>', `${closedHtml}\n</body>`);
   }
   
+  // WhatsApp number — single source of truth
+  const WA_NUMBER = '918210329601';
+  const WA_LINK = `https://wa.me/${WA_NUMBER}?text=Hi%2C%20mujhe%20bhi%20website%20chahiye!`;
+
   // Add promotional footer for free sites
   if (data.plan !== 'premium') {
     const promoFooter = `
-    <div style="position:fixed;bottom:0;left:0;right:0;z-index:10000;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;padding:14px 20px;text-align:center;box-shadow:0 -4px 20px rgba(99,102,241,0.3);font-family:system-ui,sans-serif;">
-      <div style="font-size:15px;font-weight:600;margin-bottom:4px;">🦁 Apna website banao WhatsApp pe!</div>
-      <div style="font-size:13px;opacity:0.9;margin-bottom:8px;">📱 <a href="https://wa.me/918210329601?text=Hi%2C%20mujhe%20bhi%20website%20chahiye!" style="color:white;text-decoration:underline;">+91 82103 29601</a></div>
-      <a href="https://wa.me/918210329601?text=Hi%2C%20mujhe%20bhi%20website%20chahiye!" 
-         style="background:white;color:#6366f1;padding:8px 18px;border-radius:25px;text-decoration:none;font-weight:600;display:inline-block;font-size:14px;">
-        Free Website Banao 🚀
+    <div style="position:fixed;bottom:0;left:0;right:0;z-index:10000;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:white;padding:10px 20px;text-align:center;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">
+      <span style="font-size:13px;opacity:.8;">Free website chahiye?</span>
+      <a href="${WA_LINK}" style="background:#25D366;color:white;padding:6px 16px;border-radius:50px;text-decoration:none;font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:4px;">
+        WhatsApp karo →
       </a>
     </div>
-    <div style="height:80px;"></div>`;
+    <div style="height:46px;"></div>`;
     
     if (html.includes('</div><!-- __PAGE_END__ -->')) {
       html = html.replace('</div><!-- __PAGE_END__ -->', `${promoFooter}\n</div><!-- __PAGE_END__ -->`);
@@ -126,9 +128,8 @@ export function renderSite(data: SiteData): string {
   } else {
     // Premium: subtle "Created by" footer (not fixed, just at bottom)
     const premiumFooter = `
-    <div style="text-align:center;padding:16px 20px;font-family:system-ui,sans-serif;font-size:12px;color:#9CA3AF;border-top:1px solid #F3F4F6;margin-top:20px;">
-      Created by <a href="https://wa.me/918210329601?text=Hi%2C%20mujhe%20bhi%20website%20chahiye!" style="color:#6366f1;text-decoration:none;font-weight:600;">WhatsWebsite</a> 
-      · <a href="https://wa.me/918210329601?text=Hi%2C%20mujhe%20bhi%20website%20chahiye!" style="color:#6366f1;text-decoration:none;">Create yours 📱</a>
+    <div style="text-align:center;padding:16px 20px;font-family:system-ui,sans-serif;font-size:11px;color:#9CA3AF;">
+      Made with <a href="${WA_LINK}" style="color:#6366f1;text-decoration:none;font-weight:500;">WhatsWebsite</a>
     </div>`;
     if (html.includes('</div><!-- __PAGE_END__ -->')) {
       html = html.replace('</div><!-- __PAGE_END__ -->', `${premiumFooter}\n</div><!-- __PAGE_END__ -->`);

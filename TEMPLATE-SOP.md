@@ -266,6 +266,14 @@ Every category must have 6 default Unsplash gallery photos. Defined in the templ
 5. `photo-1476224203421-9ac39bcb3327` — Plating
 6. `photo-1540189549336-e6e99c3679fe` — Fresh Food
 
+**Store:**
+1. `photo-1472851294608-062f824d29cc` — Store
+2. `photo-1555529669-e69e7aa0ba9a` — Shopping
+3. `photo-1604719312566-8912e9227c6a` — Products
+4. `photo-1581783898377-1c85bf937427` — Display
+5. `photo-1556740758-90de374c12ad` — Collection
+6. `photo-1567401893414-76b7b1e5a7a5` — Store Front
+
 > Add new category photos here as templates are built.
 
 ---
@@ -284,3 +292,4 @@ Every category must have 6 default Unsplash gallery photos. Defined in the templ
 | 2026-02-25 | Default gallery photos per category | salon |
 | 2026-02-25 | Fixed 2 broken Unsplash URLs | salon |
 | 2026-02-25 | SOP created | — |
+| 2026-02-25 | Created store-2026.html with product grid + category tabs | store |

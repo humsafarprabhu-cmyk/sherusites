@@ -459,12 +459,10 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
 
           return { replies: [{
             type: 'buttons',
-            body: `✅ *${siteData.businessName}* selected!\n🔗 ${session.siteUrl}\n\nKya karna hai?`,
-            buttons: [
-              { id: 'wb_edit', title: '✏️ Edit' },
-              { id: 'wb_upgrade', title: '⭐ Upgrade' },
-              { id: 'btn_share', title: '📤 Share' },
-            ]
+            body: `✅ *${siteData.businessName}* selected!\n🔗 ${session.paid && siteData.customDomain ? `https://${siteData.customDomain}` : session.siteUrl}\n\nKya karna hai?`,
+            buttons: session.paid
+              ? [{ id: 'wb_edit', title: '✏️ Edit' }, { id: 'btn_share', title: '📤 Share' }]
+              : [{ id: 'wb_edit', title: '✏️ Edit' }, { id: 'wb_upgrade', title: '⭐ Upgrade' }, { id: 'btn_share', title: '📤 Share' }]
           }]};
         }
       }

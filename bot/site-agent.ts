@@ -84,29 +84,30 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
           break;
         }
         case 'reorder_category': {
-          if (!siteData.menu) break;
+          const rcList = getItems();
+          if (!rcList.length) break;
           const targetCat = params.category.toLowerCase();
           const pos = parseInt(params.position) || 1;
-          // Get unique categories in current order
           const catOrder: string[] = [];
-          siteData.menu.forEach(m => { const c = m.category || 'Menu'; if (!catOrder.includes(c)) catOrder.push(c); });
+          rcList.forEach(m => { const c = m.category || 'Menu'; if (!catOrder.includes(c)) catOrder.push(c); });
           const catIdx = catOrder.findIndex(c => c.toLowerCase() === targetCat);
           if (catIdx < 0) { results.push(`❌ "${params.category}" category nahi mili`); break; }
           const [moved] = catOrder.splice(catIdx, 1);
           catOrder.splice(Math.max(0, pos - 1), 0, moved);
-          // Reorder menu items by new category order
           const reordered: any[] = [];
-          catOrder.forEach(c => { siteData.menu!.filter(m => (m.category || 'Menu') === c).forEach(m => reordered.push(m)); });
-          siteData.menu = reordered;
+          catOrder.forEach(c => { rcList.filter(m => (m.category || 'Menu') === c).forEach(m => reordered.push(m)); });
+          setItems(reordered);
           results.push(`✅ "${moved}" ab #${pos} pe hai`);
           break;
         }
         case 'remove_category': {
-          if (!siteData.menu) break;
+          const rmcList = getItems();
+          if (!rmcList.length) break;
           const cat = params.category.toLowerCase();
-          const before = siteData.menu.length;
-          siteData.menu = siteData.menu.filter(m => (m.category || '').toLowerCase() !== cat);
-          const removed = before - siteData.menu.length;
+          const before = rmcList.length;
+          const filtered = rmcList.filter(m => (m.category || '').toLowerCase() !== cat);
+          setItems(filtered);
+          const removed = before - filtered.length;
           if (removed > 0) {
             results.push(`✅ "${params.category}" category hata di (${removed} items removed)`);
           } else {

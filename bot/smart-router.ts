@@ -83,8 +83,10 @@ function matchRemoveItem(msg: string, lower: string, data: SiteData): PatternRes
   // Skip if message mentions photo/gallery/hero — let AI agent handle
   if (/photo|gallery|gallary|image|hero|pic/i.test(msg)) return { matched: false };
   const patterns = [
-    /(?:remove|hatao|hata do|delete|nikalo)\s+(.+)/i,
-    /(.+?)\s+(?:hatao|hata do|remove|delete|nikalo|nikaal)\s*$/i,
+    // Suffix first: "Litti chokha delete karo", "samosa hatao", "dal ko nikaal do"
+    /(.+?)\s+(?:ko\s+)?(?:hatao|hata do|remove karo|remove kar|remove|delete karo|delete kar|delete|nikalo|nikaal do|nikaal)$/i,
+    // Prefix: "remove sattu paratha from our products", "delete samosa"
+    /(?:remove|hatao|hata do|delete|nikalo)\s+(.+?)(?:\s+(?:from|se|mein se|out of|karo|kar|kardo|our|my|mere|apne|products?|menu|services?|items?)\b.*)?$/i,
   ];
   
   for (const pattern of patterns) {

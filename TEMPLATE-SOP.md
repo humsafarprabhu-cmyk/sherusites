@@ -291,5 +291,36 @@ Every category must have 6 default Unsplash gallery photos. Defined in the templ
 | 2026-02-25 | Slim promo banner, single WA_NUMBER | renderer |
 | 2026-02-25 | Default gallery photos per category | salon |
 | 2026-02-25 | Fixed 2 broken Unsplash URLs | salon |
+## 10.1 AI Agent Actions — CRITICAL RULE
+
+**NEVER use `siteData.menu` directly for item operations.** Different categories store items in different fields:
+- Restaurant → `siteData.menu`
+- Store/Salon/Clinic/Gym/etc → `siteData.services`
+- Tutor → `siteData.subjects`
+
+**Always use `getItems()` / `setItems()` helpers** in `bot/site-agent.ts` which auto-detect the correct field.
+
+Actions affected: `add_menu_item`, `remove_menu_item`, `mark_popular`, `unmark_popular`, `set_veg`, `set_nonveg`, `rename_category`, `reorder_category`, `remove_category`, `update_item_description`.
+
+## 10.2 AI Agent Response — JSON Leak Prevention
+
+AI agent sometimes returns text + JSON mixed. The parser in `bot/site-agent.ts`:
+1. First tries regex extraction: `raw.match(/\{.*"reply".*"actions".*\}/)`
+2. Falls back to stripping JSON fragments: `raw.replace(/\{[\s\S]*\}/g, '')`
+3. Never expose raw JSON to the user
+
+## 10.3 AI Content Generation — Smart & Fast
+
+- **3 parallel API calls**: menu/services, meta (tagline/about/reviews), photo queries
+- Each call has its own timeout (menu: 15s, meta: 12s, photos: 8s)
+- **Category-specific menu prompts** — restaurant gets cuisine prompt, store gets products prompt, salon gets services prompt
+- **Business name inference** — "Bihari Restaurant" → Bihari dishes, "Kumar Electronics" → electronics products
+- If any call fails, others still succeed → partial AI + partial defaults
+- Fallback defaults used when ALL calls fail
+- **Progress message** sent to user before generation: "🔨 Website ban rahi hai..."
+- Unsplash photos fetched in parallel based on AI-generated search queries
+
+---
+
 | 2026-02-25 | SOP created | — |
 | 2026-02-25 | Created store-2026.html with product grid + category tabs | store |

@@ -50,7 +50,7 @@ export async function createPaymentLink(slug: string): Promise<{ url: string; am
           name: site.businessName,
           contact: `+91${phone}`,
         },
-        notify: { sms: true, email: false, whatsapp: false },
+        notify: { sms: false, email: false, whatsapp: false },
         callback_url: `https://whatswebsite.com/api/payment/link-callback?slug=${slug}`,
         callback_method: 'get',
         notes: {

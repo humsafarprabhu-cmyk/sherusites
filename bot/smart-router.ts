@@ -80,9 +80,11 @@ function matchAddItem(msg: string, lower: string, data: SiteData): PatternResult
 
 // Remove item: "remove Paneer Tikka" or "Paneer Tikka hatao"
 function matchRemoveItem(msg: string, lower: string, data: SiteData): PatternResult {
+  // Skip if message mentions photo/gallery/hero — let AI agent handle
+  if (/photo|gallery|gallary|image|hero|pic/i.test(msg)) return { matched: false };
   const patterns = [
     /(?:remove|hatao|hata do|delete|nikalo)\s+(.+)/i,
-    /(.+?)\s+(?:hatao|hata do|remove|delete|nikalo|nikaal)/i,
+    /(.+?)\s+(?:hatao|hata do|remove|delete|nikalo|nikaal)\s*$/i,
   ];
   
   for (const pattern of patterns) {

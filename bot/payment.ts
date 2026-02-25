@@ -23,6 +23,59 @@ function getRazorpay(): Razorpay {
 
 // ─── CREATE ORDER ────────────────────────────────────────────────────────────
 
+// Create Razorpay Payment Link — opens Razorpay directly, no custom page needed
+export async function createPaymentLink(slug: string): Promise<{ url: string; amount: number } | null> {
+  const site = getSiteData(slug);
+  if (!site) return null;
+
+  const amount = ((site as any).pendingPlanPrice || 1499) * 100; // paise
+  const domain = (site as any).pendingDomain || '';
+  const phone = site.phone.replace(/^91/, '');
+
+  try {
+    const keyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    
+    const res = await fetch('https://api.razorpay.com/v1/payment_links', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic ' + Buffer.from(`${keyId}:${keySecret}`).toString('base64'),
+      },
+      body: JSON.stringify({
+        amount,
+        currency: 'INR',
+        description: `Premium Plan — ${domain || site.businessName}`,
+        customer: {
+          name: site.businessName,
+          contact: `+91${phone}`,
+        },
+        notify: { sms: true, email: false, whatsapp: false },
+        callback_url: `https://whatswebsite.com/api/payment/link-callback?slug=${slug}`,
+        callback_method: 'get',
+        notes: {
+          slug,
+          business: site.businessName,
+          domain,
+          phone: site.phone,
+        },
+        expire_by: Math.floor(Date.now() / 1000) + 86400, // 24h expiry
+      }),
+    });
+    
+    const data = await res.json();
+    if (data.short_url) {
+      createPaymentRecord(slug, site.phone, data.id, amount);
+      return { url: data.short_url, amount };
+    }
+    console.error('[Payment] Link creation failed:', JSON.stringify(data));
+    return null;
+  } catch (err: any) {
+    console.error('[Payment] Link error:', err.message);
+    return null;
+  }
+}
+
 export async function createOrder(slug: string): Promise<{ orderId: string; amount: number } | null> {
   const site = getSiteData(slug);
   if (!site) return null;

@@ -798,14 +798,26 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         session.state = 'complete';
         persistSession(phone, session);
 
-        // Send CTA URL to payment page
-        const payUrl = `${BASE_URL}/pay/${slug}`;
-        return { replies: [{
-          type: 'cta_url',
-          body: `✅ *${selectedDomain}* selected!\n\n💰 Price: ₹${price.toLocaleString()}/year\n\n📱 Pay karke domain 30 min mein live!`,
-          url: payUrl,
-          buttonText: `💳 Pay ₹${price.toLocaleString()}`,
-        }] };
+        // Create Razorpay Payment Link — opens Razorpay directly
+        const { createPaymentLink } = await import('./payment.ts');
+        const link = await createPaymentLink(slug);
+        
+        if (link) {
+          return { replies: [{
+            type: 'cta_url',
+            body: `✅ *${selectedDomain}* selected!\n\n💰 Price: ₹${(link.amount / 100).toLocaleString()}/year\n\n📱 Tap to pay — domain 30 min mein live!`,
+            url: link.url,
+            buttonText: `💳 Pay ₹${(link.amount / 100).toLocaleString()}`,
+          }] };
+        } else {
+          // Fallback to payment page
+          return { replies: [{
+            type: 'cta_url',
+            body: `✅ *${selectedDomain}* selected!\n\n💰 Price: ₹${price.toLocaleString()}/year`,
+            url: `${BASE_URL}/pay/${slug}`,
+            buttonText: `💳 Pay ₹${price.toLocaleString()}`,
+          }] };
+        }
       }
 
       if (lower === 'btn_later') {

@@ -223,7 +223,7 @@ function welcomeBackMsg(sites: any[]): Reply {
       },
       {
         title: 'Your Websites',
-        rows: sites.map(s => ({
+        rows: sites.slice(0, 9).map(s => ({
           id: `site_${s.slug}`,
           title: s.businessName.substring(0, 24),
           description: `${CATEGORY_DISPLAY[s.category] || s.category} • ${s.plan === 'premium' ? '⭐ Premium' : '🆓 Free'}`

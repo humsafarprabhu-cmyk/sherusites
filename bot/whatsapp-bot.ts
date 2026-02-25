@@ -364,9 +364,14 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       }
 
       if (lower === 'share' || lower === 'btn_share') {
-        return { replies: [
-          `📤 *Share your website:*\n\n🔗 ${session.siteUrl}\n\n📋 Copy karke share karo:\n"${session.data.businessName} ka website dekho: ${session.siteUrl}"\n\n🖨️ QR Code print karke dukan mein lagao!`
-        ]};
+        const shareText = `${session.data.businessName} ka website dekho: ${session.siteUrl}`;
+        const shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+        return { replies: [{
+          type: 'cta_url',
+          body: `📤 *Share your website:*\n\n🔗 ${session.siteUrl}`,
+          url: shareUrl,
+          buttonText: '📤 Share Now',
+        }] };
       }
 
       // Site selection from list (multi-site user)

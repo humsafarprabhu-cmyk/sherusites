@@ -472,6 +472,18 @@ async function sendBotResponse(to: string, response: any) {
           }))
         }
       });
+    } else if (reply.type === 'cta_url') {
+      await sendInteractiveMessage(to, {
+        type: 'cta_url',
+        body: { text: reply.body },
+        action: {
+          name: 'cta_url',
+          parameters: {
+            display_text: reply.buttonText || 'Open',
+            url: reply.url,
+          }
+        }
+      });
     } else if (reply.type === 'list') {
       await sendInteractiveMessage(to, {
         type: 'list',

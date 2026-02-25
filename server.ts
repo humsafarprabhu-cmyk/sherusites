@@ -389,10 +389,20 @@ app.post('/api/webhook', webhookLimiter, async (req, res) => {
             const lng = loc?.longitude;
             const locName = loc?.name || '';
             const locAddr = loc?.address || '';
-            // Build address from location metadata + coords
-            const addrParts = [locName, locAddr].filter(Boolean).join(', ');
+            let addrParts = [locName, locAddr].filter(Boolean).join(', ');
+            // Reverse geocode if no address from WhatsApp
+            if (!addrParts && lat && lng) {
+              try {
+                const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=18&addressdetails=1`, {
+                  headers: { 'User-Agent': 'WhatsWebsite/1.0' }
+                });
+                if (geoRes.ok) {
+                  const geo = await geoRes.json();
+                  addrParts = geo.display_name || '';
+                }
+              } catch {}
+            }
             text = addrParts || `📍 ${lat}, ${lng}`;
-            // Pass coordinates as metadata prefix
             text = `__LOC__${lat}__${lng}__${text}`;
           }
           else if (message.type === 'image') {

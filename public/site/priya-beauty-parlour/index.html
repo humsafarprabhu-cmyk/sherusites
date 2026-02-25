@@ -382,7 +382,27 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
   t('galDesc', sec.galleryDesc || 'A glimpse of our work');
 
   // Gallery
-  const galPhotos = photos.filter(p => p.type === 'gallery' || !p.type);
+    // Default gallery photos per category when user hasn't uploaded any
+  const defaultGallery = {
+    salon: [
+      {url:'https://images.unsplash.com/photo-1562322140-8baeacacf529?w=600&q=80',caption:'Salon Interior'},
+      {url:'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=600&q=80',caption:'Hair Styling'},
+      {url:'https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=600&q=80',caption:'Spa Treatment'},
+      {url:'https://images.unsplash.com/photo-1457972729786-0411a3b2b626?w=600&q=80',caption:'Makeup'},
+      {url:'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&q=80',caption:'Beauty Care'},
+      {url:'https://images.unsplash.com/photo-1633681122956-4dafa0569ceb?w=600&q=80',caption:'Nail Art'},
+    ],
+    restaurant: [
+      {url:'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=80',caption:'Restaurant'},
+      {url:'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80',caption:'Fine Dining'},
+      {url:'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=80',caption:'Cuisine'},
+      {url:'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80',caption:'Ambience'},
+      {url:'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=600&q=80',caption:'Plating'},
+      {url:'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=600&q=80',caption:'Fresh Food'},
+    ]
+  };
+  let galPhotos = photos.filter(p => p.type === 'gallery' || !p.type);
+  if(!galPhotos.length) galPhotos = defaultGallery[cat] || defaultGallery.salon || [];
   const $gg = document.getElementById('galGrid');
   const $gs = document.getElementById('gallerySection');
   if(galPhotos.length && $gg){

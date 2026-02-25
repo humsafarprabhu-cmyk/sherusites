@@ -542,12 +542,15 @@ Always return valid JSON:
     // Parse response
     let parsed: { reply: string; actions: AgentAction[] };
     try {
-      const jsonStr = raw.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
+      // Extract JSON from anywhere in the response (AI sometimes adds text before/after)
+      const jsonMatch = raw.match(/\{[\s\S]*"reply"[\s\S]*"actions"[\s\S]*\}/);
+      const jsonStr = (jsonMatch ? jsonMatch[0] : raw).replace(/```json?\n?/g, '').replace(/```/g, '').trim();
       parsed = JSON.parse(jsonStr);
     } catch {
-      // If JSON parse fails, treat the whole response as a reply
-      addToHistory(phone, 'assistant', raw);
-      return raw;
+      // If JSON parse fails, treat the whole response as a reply but strip any JSON fragments
+      const cleanReply = raw.replace(/\{[\s\S]*\}/g, '').replace(/```[\s\S]*```/g, '').trim();
+      addToHistory(phone, 'assistant', cleanReply || raw);
+      return cleanReply || raw;
     }
 
     // Execute actions

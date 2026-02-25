@@ -11,11 +11,9 @@ import {
   getOrCreateUser, saveUser, getUser,
   getSiteData, saveSiteData, createSiteData, generateUniqueSlug,
   getSession, saveSession, deleteSession, listUserSites,
-  SiteData,
 } from './db.ts';
-import { generateContent } from './ai-content.ts';
+import { generateContent, generateImages, downloadAndSaveImage } from './ai-content.ts';
 import { renderSite } from './template-renderer.ts';
-import { getStockPhotos } from './stock-photos.ts';
 import { smartRoute } from './smart-router.ts';
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
@@ -182,6 +180,8 @@ function editOptionsMsg(): ListMsg {
     sections: [{
       title: 'Edit Options',
       rows: [
+        { id: 'edit_hero', title: '📸 Hero Photo', description: 'Main photo change karo' },
+        { id: 'edit_gallery', title: '🖼️ Gallery Photos', description: 'Gallery mein photos add karo' },
         { id: 'edit_add', title: '➕ Add Item/Service', description: 'Naya item ya service add karo' },
         { id: 'edit_remove', title: '🗑️ Remove Item', description: 'Koi item hatao' },
         { id: 'edit_price', title: '💰 Change Price', description: 'Price update karo' },
@@ -197,7 +197,7 @@ function editOptionsMsg(): ListMsg {
 
 // ─── WELCOME BACK (existing user) ───────────────────────────────────────────
 
-function welcomeBackMsg(sites: SiteData[]): Reply {
+function welcomeBackMsg(sites: any[]): Reply {
   if (sites.length === 1) {
     return {
       type: 'buttons',
@@ -240,8 +240,8 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
   const lower = msg.toLowerCase();
   const session = loadSession(phone);
 
-  // Global commands
-  if (lower === 'reset' || lower === 'restart' || lower === 'naya' || lower === 'new' || lower === 'wb_new') {
+  // Global commands  
+  if (lower === 'reset' || lower === 'restart' || lower === 'naya' || lower === 'new') {
     deleteSession(phone);
     return { replies: [categoryListMsg()] };
   }
@@ -328,6 +328,13 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         session.editMode = undefined;
         persistSession(phone, session);
         return { replies: [editOptionsMsg()] };
+      }
+
+      if (lower === 'wb_new' || lower === 'naya website banao') {
+        session.state = 'awaiting_category';
+        session.data = {};
+        persistSession(phone, session);
+        return { replies: [categoryListMsg()] };
       }
 
       if (lower === 'wb_upgrade' || lower === 'upgrade' || lower === 'premium' || lower === '999' || lower === 'pay') {
@@ -572,6 +579,69 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         session.data.timings = msg;
       }
 
+      session.state = 'awaiting_hero';
+      persistSession(phone, session);
+      return { replies: [{
+        type: 'buttons',
+        body: '📸 Apna hero photo bhejo — jo sabse pehle dikhega website pe!\n\nYa skip karo 👇',
+        buttons: [{ id: 'skip_hero', title: '⏭️ Skip Hero' }]
+      }] };
+    }
+
+    case 'awaiting_hero': {
+      if (lower.match(/^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru|website|site|reset|restart|naya|new)$/)) {
+        deleteSession(phone);
+        return handleMessage(phone, message);
+      }
+      if (lower === 'skip_hero') {
+        // No hero image, move to gallery
+      } else if (lower === '__photo_uploaded__' || message.startsWith('__PHOTO_UPLOADED__')) {
+        // Photo saved by server.ts handleWhatsAppImage → session.data.uploadedPhotos
+        const lastPhoto = session.data.uploadedPhotos?.slice(-1)[0];
+        if (lastPhoto) session.data.heroImage = lastPhoto.url;
+      } else {
+        return { replies: [{
+          type: 'buttons',
+          body: '📸 Photo bhejo ya skip karo 👇',
+          buttons: [{ id: 'skip_hero', title: '⏭️ Skip Hero' }]
+        }] };
+      }
+      session.state = 'awaiting_gallery';
+      persistSession(phone, session);
+      return { replies: [{
+        type: 'buttons',
+        body: '🖼️ Gallery photos bhejo (ek ek karke).\n\nJab ho jaye, Done dabao 👇',
+        buttons: [{ id: 'skip_gallery', title: '⏭️ Skip' }, { id: 'done_gallery', title: '✅ Done' }]
+      }] };
+    }
+
+    case 'awaiting_gallery': {
+      if (lower.match(/^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru|website|site|reset|restart|naya|new)$/)) {
+        deleteSession(phone);
+        return handleMessage(phone, message);
+      }
+      if (lower === 'skip_gallery' || lower === 'done_gallery') {
+        // Move to generating
+      } else if (lower === '__photo_uploaded__' || message.startsWith('__PHOTO_UPLOADED__')) {
+        // Photo saved by server.ts handleWhatsAppImage → session.data.uploadedPhotos
+        if (!session.data.galleryPhotos) session.data.galleryPhotos = [];
+        const lastPhoto = session.data.uploadedPhotos?.slice(-1)[0];
+        if (lastPhoto) session.data.galleryPhotos.push(lastPhoto.url);
+        persistSession(phone, session);
+        const count = session.data.galleryPhotos.length;
+        return { replies: [{
+          type: 'buttons',
+          body: `✅ Photo ${count} added! Aur bhejo ya Done dabao 👇`,
+          buttons: [{ id: 'done_gallery', title: '✅ Done' }]
+        }] };
+      } else {
+        return { replies: [{
+          type: 'buttons',
+          body: '🖼️ Photo bhejo ya Done dabao 👇',
+          buttons: [{ id: 'done_gallery', title: '✅ Done' }]
+        }] };
+      }
+
       session.state = 'generating';
       persistSession(phone, session);
 
@@ -595,6 +665,16 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
           about: aiContent.about,
         }, phone);
 
+        // Inject uploaded photos
+        if (session.data.heroImage) {
+          siteData.heroImage = session.data.heroImage;
+        }
+        if (session.data.galleryPhotos?.length) {
+          siteData.photos = session.data.galleryPhotos.map((url: string, i: number) => ({
+            url, caption: session.data.businessName || '', type: 'gallery' as const,
+          }));
+        }
+
         if (aiContent.menu) siteData.menu = aiContent.menu;
         if (aiContent.services) siteData.services = aiContent.services;
         if (aiContent.packages) siteData.packages = aiContent.packages;
@@ -602,12 +682,14 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         if (aiContent.subjects) siteData.subjects = aiContent.subjects;
         if (aiContent.reviews) siteData.reviews = aiContent.reviews;
         if (aiContent.todaySpecial) siteData.todaySpecial = aiContent.todaySpecial;
-
-        // Assign stock photos (instant, zero cost)
-        siteData.photos = getStockPhotos(category, session.data.businessName!, 6);
-        
         saveSiteData(siteData, phone);
+
         renderSite(siteData);
+
+        // Generate AI images in background (don't block site creation)
+        generateAIImages(slug, category, session.data.businessName!, phone).catch(err => {
+          console.error('[AI-IMG] Background gen error:', err.message);
+        });
 
         const user = getOrCreateUser(phone);
         const sites = user.sites || [];
@@ -643,9 +725,28 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
     case 'editing': {
       // Photo uploaded while editing
       if (msg === '__PHOTO_UPLOADED__' || lower === '__photo_uploaded__') {
+        if (session.editMode === 'edit_hero') {
+          // Hero updated by server.ts handleWhatsAppImage
+          session.editMode = undefined;
+          session.data.pendingPhotoType = undefined;
+          session.state = 'complete';
+          persistSession(phone, session);
+          const sd = getSiteData(session.slug || '');
+          if (sd) renderSite(sd);
+          return { replies: [{
+            type: 'buttons',
+            body: `✅ Hero photo updated!\n🔗 ${session.siteUrl}`,
+            buttons: [{ id: 'wb_edit', title: '✏️ More Edits' }, { id: 'btn_share', title: '📤 Share' }]
+          }] };
+        }
+        // Gallery photo
         const sData = getSiteData(session.slug || '');
         const count = sData?.photos?.length || 0;
-        return { replies: [`📸 Photo #${count} added to gallery! ✅\n\n🔗 ${BASE_URL}/site/${session.slug}/gallery`] };
+        return { replies: [{
+          type: 'buttons',
+          body: `✅ Photo ${count} added! Aur bhejo ya Done dabao 👇`,
+          buttons: [{ id: 'edit_gallery_done', title: '✅ Done' }]
+        }] };
       }
       const slug = session.slug;
       if (!slug) {
@@ -658,6 +759,42 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         session.state = 'idle';
         persistSession(phone, session);
         return { replies: ['Website data nahi mila. "reset" karke dobara banao.'] };
+      }
+
+      // Hero & Gallery edit handlers
+      if (lower === 'edit_hero') {
+        session.editMode = 'edit_hero';
+        session.data.pendingPhotoType = 'hero';
+        persistSession(phone, session);
+        return { replies: [{
+          type: 'buttons',
+          body: '📸 Naya hero photo bhejo 👇',
+          buttons: [{ id: 'wb_edit', title: '⬅️ Back' }]
+        }] };
+      }
+
+      if (lower === 'edit_gallery') {
+        session.editMode = 'edit_gallery';
+        session.data.pendingPhotoType = 'gallery';
+        persistSession(phone, session);
+        return { replies: [{
+          type: 'buttons',
+          body: '🖼️ Gallery photos bhejo (ek ek karke).\nJab ho jaye, Done dabao 👇',
+          buttons: [{ id: 'edit_gallery_done', title: '✅ Done' }, { id: 'wb_edit', title: '⬅️ Back' }]
+        }] };
+      }
+
+      if (lower === 'edit_gallery_done') {
+        session.editMode = undefined;
+        session.data.pendingPhotoType = undefined;
+        session.state = 'complete';
+        persistSession(phone, session);
+        renderSite(siteData);
+        return { replies: [{
+          type: 'buttons',
+          body: `✅ Gallery updated!\n🔗 ${session.siteUrl}`,
+          buttons: [{ id: 'wb_edit', title: '✏️ More Edits' }, { id: 'btn_share', title: '📤 Share' }]
+        }] };
       }
 
       // List button handlers
@@ -898,6 +1035,43 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       session.state = 'idle';
       persistSession(phone, session);
       return handleMessage(phone, message); // Re-process as idle
+    }
+  }
+}
+
+// ─── AI IMAGE GENERATION (BACKGROUND) ────────────────────────────────────────
+
+async function generateAIImages(slug: string, category: string, businessName: string, phone: string) {
+  console.log(`[AI-IMG] Starting image generation for ${slug}...`);
+  
+  // Generate hero image
+  const heroUrls = await generateImages(category, businessName, 'hero', 1);
+  const photos: any[] = [];
+  
+  if (heroUrls.length > 0) {
+    const localUrl = await downloadAndSaveImage(heroUrls[0], slug, 'hero.jpg');
+    if (localUrl) {
+      photos.push({ url: localUrl, caption: businessName, type: 'hero' });
+    }
+  }
+  
+  // Generate gallery images (up to 4 to save costs)
+  const galleryUrls = await generateImages(category, businessName, 'gallery', 4);
+  for (let i = 0; i < galleryUrls.length; i++) {
+    const localUrl = await downloadAndSaveImage(galleryUrls[i], slug, `gallery-${i + 1}.jpg`);
+    if (localUrl) {
+      photos.push({ url: localUrl, caption: `${businessName} gallery`, type: 'gallery' });
+    }
+  }
+  
+  if (photos.length > 0) {
+    // Update site data with photos
+    const siteData = getSiteData(slug);
+    if (siteData) {
+      siteData.photos = [...(siteData.photos || []), ...photos];
+      saveSiteData(siteData, phone);
+      renderSite(siteData);
+      console.log(`[AI-IMG] ${photos.length} images saved for ${slug}`);
     }
   }
 }

@@ -4,7 +4,21 @@
  * Cost: ~₹0.5 per site (500 tokens)
  */
 
-import { SiteData, MenuItem, ServiceItem } from './db.ts';
+type SiteData = {
+  slug: string;
+  businessName: string;
+  category: string;
+  tagline: string;
+  phone: string;
+  whatsapp: string;
+  address: string;
+  timings: string;
+  plan: string;
+  isOpen?: boolean;
+};
+
+type MenuItem = { name: string; price: string; category?: string; description?: string; popular?: boolean };
+type ServiceItem = { name: string; price: string; duration?: string; description?: string };
 
 const OPENAI_KEY = process.env.OPENAI_API_KEY || '';
 

@@ -11,7 +11,23 @@
  * Cost: ~₹0.3-0.5 per interaction (GPT-4o-mini)
  */
 
-import { SiteData, getSiteData, saveSiteData, getOrCreateUser, listUserSites, addChatMessage, getChatHistory } from './db.ts';
+import { getSiteData, saveSiteData, getOrCreateUser, listUserSites, addChatMessage, getChatHistory } from './db.ts';
+
+type SiteData = {
+  slug: string;
+  businessName: string; 
+  category: string;
+  phone: string;
+  whatsapp: string;
+  address: string;
+  timings: string;
+  plan: string;
+  isOpen?: boolean;
+  menu?: any[];
+  services?: any[];
+  photos?: any[];
+  activeOffer?: any;
+};
 import { renderSite } from './template-renderer.ts';
 
 const OPENAI_KEY = process.env.OPENAI_API_KEY || '';

@@ -370,6 +370,30 @@ async function handleWhatsAppImage(phone: string, mediaId: string, caption: stri
   if (!imgRes.ok) throw new Error(`Image download failed: ${imgRes.status}`);
   const buffer = Buffer.from(await imgRes.arrayBuffer());
   
+  // Check if user is in photo collection state (pre-site creation)
+  const { getSession: getDbSession, saveSession: saveDbSession } = await import('./bot/db.ts');
+  const session = getDbSession(phone);
+  
+  if (session?.state === 'awaiting_hero' || session?.state === 'awaiting_gallery') {
+    // Save to temp uploads dir
+    const tempDir = path.join(SITES_DIR, '_temp', phone);
+    if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+    const filename = `upload-${Date.now()}.jpg`;
+    fs.writeFileSync(path.join(tempDir, filename), buffer);
+    
+    if (!session.data.uploadedPhotos) session.data.uploadedPhotos = [];
+    const isHero = session.state === 'awaiting_hero';
+    session.data.uploadedPhotos.push({
+      url: `/_temp/${phone}/${filename}`,
+      caption: caption || session.data.businessName || '',
+      type: isHero ? 'hero' : 'gallery',
+      tempFile: filename,
+    });
+    saveDbSession(phone, session);
+    console.log(`[Image] Pre-site upload #${session.data.uploadedPhotos.length} for ${phone}`);
+    return;
+  }
+
   // Find user's active site
   const { getOrCreateUser, getSiteData, saveSiteData } = await import('./bot/db.ts');
   const { renderSite } = await import('./bot/template-renderer.ts');

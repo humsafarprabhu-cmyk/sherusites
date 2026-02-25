@@ -7,7 +7,9 @@
  * Cost per user: ~₹5-10/month instead of ₹300+/month
  */
 
-import { getSiteData, saveSiteData, SiteData, getAiCallCount, incrementAiCall } from './db.ts';
+import { getSiteData, saveSiteData, getAiCallCount, incrementAiCall } from './db.ts';
+
+type SiteData = any; // Simple type for smart-router
 import { renderSite } from './template-renderer.ts';
 import { agentHandle } from './site-agent.ts';
 

@@ -6,7 +6,22 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { SiteData } from './db.ts';
+type SiteData = {
+  slug: string;
+  businessName: string;
+  category: string;
+  tagline: string;
+  phone: string;
+  whatsapp: string;
+  address: string;
+  timings: string;
+  plan: string;
+  isOpen?: boolean;
+  photos?: any[];
+  menu?: any[];
+  services?: any[];
+  activeOffer?: any;
+};
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,7 +29,7 @@ const TEMPLATES_DIR = path.join(__dirname, '..', 'templates');
 const SITES_DIR = path.join(__dirname, '..', 'sites');
 
 const CATEGORY_TEMPLATE: Record<string, string> = {
-  restaurant: 'restaurant.html',
+  restaurant: 'restaurant-2026.html',
   store: 'store.html',
   salon: 'salon.html',
   tutor: 'tutor.html',
@@ -88,6 +103,26 @@ export function renderSite(data: SiteData): string {
     html = html.replace('</body>', `${closedHtml}\n</body>`);
   }
   
+  // Add promotional footer for free sites
+  if (data.plan !== 'premium') {
+    const promoFooter = `
+    <div style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 20px; text-align: center; position: sticky; bottom: 0; z-index: 1000; box-shadow: 0 -4px 20px rgba(99, 102, 241, 0.3);">
+      <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">
+        🦁 Made with WhatsWebsite
+      </div>
+      <div style="font-size: 14px; opacity: 0.9; margin-bottom: 12px;">
+        Get YOUR custom domain in 2 minutes!
+      </div>
+      <a href="https://wa.me/918210329601?text=Hi%2C%20I%20want%20my%20own%20website%20like%20${data.businessName}!" 
+         style="background: white; color: #6366f1; padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: 600; display: inline-block; transition: transform 0.3s;">
+        ₹1,499 - Get Custom Domain 🚀
+      </a>
+    </div>`;
+    
+    // Add promotional banner before closing body
+    html = html.replace('</body>', `${promoFooter}\n</body>`);
+  }
+
   // Save
   const siteDir = path.join(SITES_DIR, data.slug);
   if (!fs.existsSync(siteDir)) fs.mkdirSync(siteDir, { recursive: true });

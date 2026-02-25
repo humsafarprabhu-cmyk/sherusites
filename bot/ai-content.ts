@@ -355,7 +355,22 @@ IMPORTANT: Analyze the business name and location to INTELLIGENTLY infer what th
     const [menuResult, metaResult, photoResult] = await Promise.all([
       // Call 1: Menu/Services only (heaviest, but isolated)
       aiCall(
-        `"${businessName}" in ${address}.\nWhat specific cuisine/products does "${businessName}" serve based on its name? First figure that out, then generate 12-15 menu items ONLY from that specific cuisine.\nIf name says "Bihari" → only Bihari dishes (litti chokha, sattu paratha, dal pitha, thekua, choora matar).\nIf name says "South Indian" → only dosa, idli, vada, uttapam, sambar.\nNO butter chicken, NO dal makhani, NO paneer tikka unless the name specifically suggests North Indian/Punjabi.\n\nEach item: name, price ₹, category, description (1 line). 3-4 popular:true.\nJSON: {"${contentKey}":[...]}`,
+        `"${businessName}" in ${address}. Category: ${category}.\nInfer from the name "${businessName}" what EXACTLY this business sells/serves.\n${category === 'restaurant' ? 
+          `This is a RESTAURANT. Infer cuisine from name: "Bihari"=litti chokha/sattu paratha, "South Indian"=dosa/idli, "Chinese"=noodles/manchurian, "Punjabi"=butter chicken/dal makhani. NO generic items — ONLY items matching the inferred cuisine.\nGenerate 12-15 menu items: name, price ₹, category, description (1 line). 3-4 popular:true.` :
+        category === 'store' ? 
+          `This is a STORE/SHOP. Infer products from name: "Electronics"=mobiles/laptops/TVs, "Kirana/General"=grocery/daily needs, "Medical"=medicines/health, "Cloth"=garments/fashion. Generate 10-12 products SPECIFIC to this store type.\nEach: name, price ₹, category, description (1 line). 3-4 popular:true.` :
+        category === 'salon' ?
+          `This is a SALON/PARLOUR. Generate 12-14 beauty/grooming services.\nEach: name, price ₹, duration, description (1 line). 3-4 popular:true.` :
+        category === 'clinic' ?
+          `This is a CLINIC. Infer specialization from name. Generate 8-10 services/treatments.\nEach: name, price ₹, duration, description (1 line).` :
+        category === 'gym' ?
+          `This is a GYM/FITNESS center. Generate 6-8 membership plans + facilities.\nEach: name, price ₹/month, description, features list.` :
+        category === 'tutor' ?
+          `This is a TUITION/COACHING center. Generate 6-8 subjects/courses.\nEach: name, price ₹/month, duration, description.` :
+        category === 'photographer' ?
+          `This is a PHOTOGRAPHY studio. Generate 6-8 packages.\nEach: name, price ₹, description, category (Wedding/Portrait/Event etc).` :
+          `Generate 10-12 services for this business.\nEach: name, price ₹, description (1 line). 3-4 popular:true.`
+        }\nJSON: {"${contentKey}":[...]}`,
         500, 15000
       ),
       // Call 2: Tagline + about + reviews + todaySpecial (light)

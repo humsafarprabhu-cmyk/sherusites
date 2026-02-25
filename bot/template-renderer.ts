@@ -35,7 +35,7 @@ const CATEGORY_TEMPLATE: Record<string, string> = {
   tutor: 'tutor-2026.html',
   clinic: 'clinic-2026.html',
   gym: 'gym-2026.html',
-  photographer: 'photographer.html',
+  photographer: 'photographer-2026.html',
   service: 'service.html',
 };
 

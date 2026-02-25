@@ -410,11 +410,28 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       if (lower === 'share' || lower === 'btn_share') {
         const shareText = `${session.data.businessName} ka website dekho: ${session.siteUrl}`;
         const shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+        const isPaid = session.paid;
+        const msg = isPaid
+          ? `👏 *Kya baat!* Aapka website ready hai!\n\n🔗 ${session.siteUrl}\n\nShare karo apne customers ke saath 👇`
+          : `👏 *Kya baat!* Aapne apna website bana liya hai!\n\n🔗 ${session.siteUrl}\n\nAbhi aapka apna domain nahi hai — upgrade karke ise apna bana sakte hain! ⭐`;
+        
+        if (isPaid) {
+          return { replies: [{
+            type: 'cta_url',
+            body: msg,
+            url: shareUrl,
+            buttonText: '📤 Share Now',
+          }] };
+        }
         return { replies: [{
           type: 'cta_url',
-          body: `📤 *Share your website:*\n\n🔗 ${session.siteUrl}`,
+          body: msg,
           url: shareUrl,
           buttonText: '📤 Share Now',
+        }, {
+          type: 'buttons',
+          body: `⭐ Custom domain sirf ₹1,499/yr`,
+          buttons: [{ id: 'wb_upgrade', title: '⭐ Upgrade Now' }]
         }] };
       }
 

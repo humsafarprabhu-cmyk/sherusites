@@ -325,64 +325,61 @@ export async function generateContent(
   }
 
   const prompt = CATEGORY_PROMPTS[category] || CATEGORY_PROMPTS['restaurant'];
+  const systemMsg = `You generate realistic business content for Indian small businesses. Output ONLY valid JSON, no markdown. All prices in ₹ (Indian Rupees). Keep descriptions short (under 15 words). Names should feel authentic Indian. Language: English with occasional Hindi words is OK.
+IMPORTANT: Analyze the business name and location to INTELLIGENTLY infer what they serve/sell. Generate content that MATCHES what this specific business would actually offer. Never generate generic placeholder content.`;
+
+  // Helper: single OpenAI call with timeout
+  async function aiCall(userMsg: string, maxTokens: number, timeoutMs: number): Promise<any> {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${OPENAI_KEY}`, 'Content-Type': 'application/json' },
+        signal: ctrl.signal,
+        body: JSON.stringify({ model: 'gpt-4o-mini', messages: [{ role: 'system', content: systemMsg }, { role: 'user', content: userMsg }], max_tokens: maxTokens, temperature: 0.7 }),
+      });
+      clearTimeout(t);
+      if (!res.ok) return null;
+      const d = await res.json();
+      const txt = (d.choices?.[0]?.message?.content || '').replace(/```json?\n?/g, '').replace(/```/g, '').trim();
+      return JSON.parse(txt);
+    } catch { clearTimeout(t); return null; }
+  }
 
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000); // 20 sec max
+    // Two parallel calls: content + photo queries
+    const [contentResult, photoResult] = await Promise.all([
+      aiCall(
+        `Business: "${businessName}" in ${address}. Category: ${category}.${extraInfo ? `\nExtra info: ${extraInfo}` : ''}\n\n${prompt}\n\nAlso generate:\n- reviews: 3 realistic Google-style reviews [{author (Indian name), text (1-2 sentences), rating (4-5), date ("2 weeks ago" etc)}]\n- todaySpecial: one special item {name, description, price as "₹XX", oldPrice as "₹XX" (higher)}\n\nOutput JSON with keys: tagline, about, ${getContentKey(category)}, reviews, todaySpecial`,
+        1000, 15000
+      ),
+      aiCall(
+        `Business: "${businessName}" in ${address}. Category: ${category}.\nGenerate:\n- heroPhotoQuery: one Unsplash search query (2-4 words) for hero photo\n- galleryPhotoQueries: 6 Unsplash search queries for gallery\nMatch what THIS business actually serves/sells. JSON only with keys: heroPhotoQuery, galleryPhotoQueries`,
+        200, 8000
+      ),
+    ]);
 
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `You generate realistic business content for Indian small businesses. Output ONLY valid JSON, no markdown. All prices in ₹ (Indian Rupees). Keep descriptions short (under 15 words). Names should feel authentic Indian. Language: English with occasional Hindi words is OK.
-
-IMPORTANT: Analyze the business name and location to INTELLIGENTLY infer what they serve/sell:
-- "Sharma Dhaba" in Patna → North Indian dhaba food (dal, roti, sabzi, thali)
-- "Kumar Electronics" in Delhi → electronics, mobiles, laptops
-- "Priya Beauty Parlour" → women's beauty services (facial, waxing, bridal makeup)
-- "Fish Corner" → seafood specialties
-- "Gupta Kirana Store" → grocery/kirana items
-- A restaurant in Kerala → South Indian food; in Punjab → Punjabi food
-- Name has "Pizza/Burger/Chinese" → that specific cuisine
-
-Generate menu/services that MATCH what this specific business would actually offer based on name + location. Never generate generic placeholder content.`
-          },
-          {
-            role: 'user',
-            content: `Business: "${businessName}" in ${address}. Category: ${category}.${extraInfo ? `\nExtra info: ${extraInfo}` : ''}\n\n${prompt}\n\nAlso generate:\n- reviews: 3 realistic Google-style reviews [{author (Indian name), text (1-2 sentences), rating (4-5), date ("2 weeks ago" etc)}]\n- todaySpecial: one special item {name, description, price as "₹XX", oldPrice as "₹XX" (higher)}\n- heroPhotoQuery: one Unsplash search query (2-4 words) for a perfect hero background photo for THIS specific business (e.g. "north indian thali food" or "luxury hair salon interior" or "electronics store display")\n- galleryPhotoQueries: array of 6 Unsplash search queries for gallery photos matching what this business actually does\n\nOutput JSON with keys: tagline, about, ${getContentKey(category)}, reviews, todaySpecial, heroPhotoQuery, galleryPhotoQueries`
-          }
-        ],
-        max_tokens: 1200,
-        temperature: 0.7,
-      }),
-    });
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      console.error('[AI] API error:', res.status);
-      return getDefaultContent(category, businessName);
+    if (!contentResult) {
+      console.error('[AI] Content call failed — using defaults');
+      const defaults = getDefaultContent(category, businessName);
+      if (photoResult) {
+        defaults.heroPhotoQuery = photoResult.heroPhotoQuery;
+        defaults.galleryPhotoQueries = photoResult.galleryPhotoQueries;
+      }
+      return defaults;
     }
 
-    const data = await res.json();
-    const text = data.choices?.[0]?.message?.content || '';
-    
-    // Parse JSON from response (handle markdown code blocks)
-    const jsonStr = text.replace(/```json?\n?/g, '').replace(/```/g, '').trim();
-    const parsed = JSON.parse(jsonStr);
-    
+    // Merge photo queries into content
+    if (photoResult) {
+      contentResult.heroPhotoQuery = photoResult.heroPhotoQuery;
+      contentResult.galleryPhotoQueries = photoResult.galleryPhotoQueries;
+    }
+
     console.log(`[AI] Generated content for ${businessName} (${category})`);
-    return parsed;
+    return contentResult;
   } catch (err: any) {
-    const reason = err.name === 'AbortError' ? 'timeout (8s)' : err.message;
-    console.error(`[AI] Error: ${reason} — using randomized defaults`);
+    console.error(`[AI] Error: ${err.message} — using defaults`);
     return getDefaultContent(category, businessName);
   }
 }

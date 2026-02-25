@@ -443,6 +443,19 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         }
       }
 
+      // Button IDs that weren't handled — don't send to AI
+      if (/^(cat_|wb_|btn_|dom_|edit_|site_|rm_|skip_|done_)/.test(lower)) {
+        return { replies: [{
+          type: 'buttons',
+          body: `🌐 *${session.data.businessName}*\n🔗 ${session.siteUrl}\n\nKya karna hai?`,
+          buttons: [
+            { id: 'wb_edit', title: '✏️ Edit Website' },
+            ...(session.paid ? [] : [{ id: 'wb_upgrade', title: '⭐ Upgrade' }]),
+            { id: 'btn_share', title: '📤 Share' },
+          ]
+        }] };
+      }
+
       // Natural language via smart router
       if (session.slug) {
         try {
@@ -1169,6 +1182,11 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
             { id: 'btn_share', title: '📤 Share' },
           ]
         }]};
+      }
+
+      // If it looks like a button ID that wasn't handled, show edit menu
+      if (/^(cat_|wb_|btn_|dom_|edit_|site_|rm_|skip_|done_)/.test(lower)) {
+        return { replies: [editOptionsMsg()] };
       }
 
       // Fallback — route to AI agent for natural language edits

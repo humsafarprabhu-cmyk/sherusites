@@ -734,12 +734,48 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         session.data.timings = msg;
       }
 
+      // Wedding gets extra questions
+      if (session.data.category === 'wedding') {
+        session.state = 'awaiting_bride_name';
+        persistSession(phone, session);
+        return { replies: ['👰 *Dulhan ka naam kya hai?*\n(Bride\'s full name)'] };
+      }
+
       session.state = 'awaiting_hero';
       persistSession(phone, session);
       return { replies: [{
         type: 'buttons',
         body: '📸 Apna hero photo bhejo — jo sabse pehle dikhega website pe!\n\nYa skip karo 👇',
         buttons: [{ id: 'skip_hero', title: '⏭️ Skip Hero' }]
+      }] };
+    }
+
+    case 'awaiting_bride_name': {
+      if (!msg.trim()) return { replies: ['👰 Dulhan ka naam batao please!'] };
+      session.data.brideName = msg.trim();
+      session.state = 'awaiting_groom_name';
+      persistSession(phone, session);
+      return { replies: ['🤵 *Dulhe ka naam kya hai?*\n(Groom\'s full name)'] };
+    }
+
+    case 'awaiting_groom_name': {
+      if (!msg.trim()) return { replies: ['🤵 Dulhe ka naam batao please!'] };
+      session.data.groomName = msg.trim();
+      session.state = 'awaiting_wedding_date';
+      persistSession(phone, session);
+      return { replies: ['📅 *Shaadi ki date kya hai?*\n\nJaise: _15 March 2025_ ya _2025-03-15_\n\n(Skip karna ho toh "skip" likho)'] };
+    }
+
+    case 'awaiting_wedding_date': {
+      if (lower !== 'skip' && msg.trim()) {
+        session.data.weddingDate = msg.trim();
+      }
+      session.state = 'awaiting_hero';
+      persistSession(phone, session);
+      return { replies: [{
+        type: 'buttons',
+        body: '📸 *Couple photo bhejo!*\nYe hero section mein dikhega — couple ki best photo!\n\nYa skip karo 👇',
+        buttons: [{ id: 'skip_hero', title: '⏭️ Skip' }]
       }] };
     }
 
@@ -885,6 +921,19 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         if (aiContent.reviews) siteData.reviews = aiContent.reviews;
         if (aiContent.todaySpecial) siteData.todaySpecial = aiContent.todaySpecial;
         if (aiContent.stats) siteData.stats = aiContent.stats;
+
+        // Wedding-specific sectionContent
+        if (category === 'wedding') {
+          (siteData as any).sectionContent = {
+            ...(aiContent.sectionContent || {}),
+            brideName: session.data.brideName || '',
+            groomName: session.data.groomName || '',
+            weddingDate: session.data.weddingDate || '',
+          };
+        } else if (aiContent.sectionContent) {
+          (siteData as any).sectionContent = aiContent.sectionContent;
+        }
+
         saveSiteData(siteData, phone);
 
         renderSite(siteData);

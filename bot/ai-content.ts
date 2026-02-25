@@ -32,6 +32,10 @@ interface AIContent {
   subjects?: ServiceItem[];
   reviews?: { author: string; text: string; rating: number; date: string }[];
   todaySpecial?: { name: string; description: string; price: string; oldPrice?: string };
+  sectionContent?: Record<string, any>;
+  stats?: any[];
+  heroPhotoQuery?: string;
+  galleryPhotoQueries?: string[];
 }
 
 // ─── AI IMAGE GENERATION ─────────────────────────────────────────────────────
@@ -369,14 +373,18 @@ IMPORTANT: Analyze the business name and location to INTELLIGENTLY infer what th
           `This is a TUITION/COACHING center. Generate 6-8 subjects/courses.\nEach: name, price ₹/month, duration, description.` :
         category === 'photographer' ?
           `This is a PHOTOGRAPHY studio. Generate 6-8 packages.\nEach: name, price ₹, description, category (Wedding/Portrait/Event etc).` :
+        category === 'wedding' ?
+          `This is a WEDDING/MARRIAGE celebration. Generate 5-6 wedding events in order.\nEvent types (pick relevant): Mehendi, Haldi, Sangeet, Baraat, Wedding Ceremony, Reception.\nEach: {eventType, name, date (e.g. "Day 1", "2 days before wedding"), time (e.g. "4:00 PM"), venue (e.g. "Main Lawn, Venue Name"), description (1-2 lines, warm), dressCode (e.g. "Traditional Indian Attire", "Pastel Colors", "Formal")}\nJSON: {"services":[...]}` :
           `Generate 10-12 services for this business.\nEach: name, price ₹, description (1 line). 3-4 popular:true.`
         }\nJSON: {"${contentKey}":[...]}`,
         500, 15000
       ),
       // Call 2: Tagline + about + reviews + todaySpecial (light)
       aiCall(
-        `${biz}\nGenerate for this specific business:\n- tagline (catchy, short, Hindi-English OK, NO business name in tagline)\n- about (2-3 lines)\n- reviews: 3 Google-style [{author (Indian name), text (1-2 lines), rating (4-5), date}]\n- todaySpecial: {name, description, price "₹XX", oldPrice "₹XX"}${['tutor','clinic','gym','service'].includes(category) ? `\n- stats: 3 stats [{value,label}] — realistic for a ${category}` : ''}\nJSON only.`,
-        400, 12000
+        category === 'wedding'
+          ? `${biz}\nGenerate wedding website content:\n- tagline (romantic, short, Hindi-English OK)\n- about (3-4 lines love story, warm and poetic)\n- reviews: 3 wedding wishes from guests [{author (Indian name), text (heartfelt wish, 1-2 lines), rating: 5}]\n- sectionContent: {milestones:[{emoji,date,title,desc}] (6 milestones: how they met → proposal), trustBadges:[{icon,text}] (5 wedding-themed), travelInfo:[{ico,name,info}] (4 travel tips for guests)}\nJSON only.`
+          : `${biz}\nGenerate for this specific business:\n- tagline (catchy, short, Hindi-English OK, NO business name in tagline)\n- about (2-3 lines)\n- reviews: 3 Google-style [{author (Indian name), text (1-2 lines), rating (4-5), date}]\n- todaySpecial: {name, description, price "₹XX", oldPrice "₹XX"}${['tutor','clinic','gym','service'].includes(category) ? `\n- stats: 3 stats [{value,label}] — realistic for a ${category}` : ''}\nJSON only.`,
+        category === 'wedding' ? 600 : 400, 15000
       ),
       // Call 3: Photo queries (lightest)
       aiCall(
@@ -395,6 +403,7 @@ IMPORTANT: Analyze the business name and location to INTELLIGENTLY infer what th
       if (metaResult.reviews?.length) result.reviews = metaResult.reviews;
       if (metaResult.todaySpecial) result.todaySpecial = metaResult.todaySpecial;
       if (metaResult.stats) result.stats = metaResult.stats;
+      if (metaResult.sectionContent) result.sectionContent = metaResult.sectionContent;
     }
     if (menuResult?.[contentKey]) {
       result[contentKey] = menuResult[contentKey];

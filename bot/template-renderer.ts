@@ -196,6 +196,14 @@ function injectDynamicContent(html: string, data: SiteData): string {
     experience: (data as any).experience || '',
     sectionContent: (data as any).sectionContent || {},
     trustBadges: (data as any).trustBadges || null,
+    // wedding-specific top-level shortcuts
+    brideName: (data as any).sectionContent?.brideName || (data as any).brideName || null,
+    groomName: (data as any).sectionContent?.groomName || (data as any).groomName || null,
+    weddingDate: (data as any).sectionContent?.weddingDate || (data as any).weddingDate || null,
+    bridePhoto: (data as any).sectionContent?.bridePhoto || null,
+    groomPhoto: (data as any).sectionContent?.groomPhoto || null,
+    brideDescription: (data as any).sectionContent?.brideDescription || null,
+    groomDescription: (data as any).sectionContent?.groomDescription || null,
   });
   
   // Replace static placeholders

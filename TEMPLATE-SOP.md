@@ -125,6 +125,27 @@ Each template has its own **fonts, color palette, and vibe**. No two categories 
 - **Booking CTA**
 - Data: `D.services[]` with `{name, price, description, category}`
 
+### 💒 Wedding
+- **Hero**: Couple names in script font + countdown timer + hero photo
+- **Couple cards**: Bride + Groom full cards with photo, bio, tags
+- **Story timeline**: Alternating left-right milestones (how they met → proposal)
+- **Events/Schedule**: Each event card with date, time, venue, dress code, mini-map + Directions button
+- **Wedding party grid**: Family members / bridesmaids / groomsmen (from `sectionContent.weddingParty` or `D.menu`)
+- **Gallery with lightbox**: Click-to-enlarge, arrow navigation, keyboard support
+- **RSVP form**: Name, attendance, guests, events, message → opens WhatsApp with pre-filled text
+- **Travel & Stay**: 4 travel tips (road, rail, air, hotel) for guests
+- **Venue map**: Google Maps embed with directions link
+- **Data sources**:
+  - `D.brideName`, `D.groomName` — from `sectionContent.brideName/groomName` (promoted to top-level by renderer)
+  - `D.weddingDate` — ISO date string `YYYY-MM-DD` for countdown, display
+  - `D.sectionContent.milestones[]` — `{emoji, date, title, desc}` story timeline
+  - `D.sectionContent.weddingParty[]` — `{name, role, photo, relation}` or from `D.menu[]`
+  - `D.sectionContent.travelInfo[]` — `{ico, name, info, link}` travel cards
+  - `D.sectionContent.trustBadges[]` — wedding-themed pills
+  - `D.services[]` — wedding events: `{eventType, name, date, time, venue, description, dressCode}`
+  - `D.photos[]` — `type:'hero'` + `type:'gallery'`
+- **Bot onboarding**: After timings, asks bride name → groom name → wedding date (3 extra steps for wedding category)
+
 ### 🔧 Service (General)
 - **Services list**: Clean cards with pricing
 - **Service area / coverage**
@@ -380,6 +401,10 @@ AI agent sometimes returns text + JSON mixed. The parser in `bot/site-agent.ts`:
 
 | 2026-02-25 | SOP created | — |
 | 2026-02-25 | Created store-2026.html with product grid + category tabs | store |
-| 2026-02-25 | Created wedding-2026.html with Playfair + burgundy/gold Indian shaadi theme | wedding |
+| 2026-02-25 | Created wedding-2026.html v1 — basic | wedding |
+| 2026-02-25 | Rebuilt wedding-2026.html v2 — full: couple cards, story timeline, wedding party, lightbox gallery, RSVP form, travel section, per-event maps | wedding |
+| 2026-02-25 | Added section_content column to SQLite + rowToSite/siteToRow updated | db |
+| 2026-02-25 | Bot collects brideName/groomName/weddingDate for wedding category (3 extra steps) | bot |
+| 2026-02-25 | AI content for wedding generates events, story milestones, travel info, trustBadges | ai-content |
 | 2026-02-25 | Created event-2026.html with Outfit + purple-pink gradient modern theme | event |
 | 2026-02-25 | Added wedding & event to WhatsApp bot categories | bot |

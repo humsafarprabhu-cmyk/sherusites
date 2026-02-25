@@ -106,18 +106,14 @@ export function renderSite(data: SiteData): string {
   // Add promotional footer for free sites
   if (data.plan !== 'premium') {
     const promoFooter = `
-    <div style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 20px; text-align: center; position: sticky; bottom: 0; z-index: 1000; box-shadow: 0 -4px 20px rgba(99, 102, 241, 0.3);">
-      <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">
-        🦁 Made with WhatsWebsite
-      </div>
-      <div style="font-size: 14px; opacity: 0.9; margin-bottom: 12px;">
-        Get YOUR custom domain in 2 minutes!
-      </div>
+    <div style="position:fixed;bottom:0;left:0;right:0;z-index:10000;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;padding:14px 20px;text-align:center;box-shadow:0 -4px 20px rgba(99,102,241,0.3);font-family:system-ui,sans-serif;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px;">🦁 Made with WhatsWebsite</div>
       <a href="https://wa.me/918210329601?text=Hi%2C%20I%20want%20my%20own%20website%20like%20${data.businessName}!" 
-         style="background: white; color: #6366f1; padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: 600; display: inline-block; transition: transform 0.3s;">
+         style="background:white;color:#6366f1;padding:8px 18px;border-radius:25px;text-decoration:none;font-weight:600;display:inline-block;font-size:14px;">
         ₹1,499 - Get Custom Domain 🚀
       </a>
-    </div>`;
+    </div>
+    <div style="height:80px;"></div>`;
     
     // Add promotional banner before closing body
     html = html.replace('</body>', `${promoFooter}\n</body>`);
@@ -141,54 +137,48 @@ function injectDynamicContent(html: string, data: SiteData): string {
   // Generate items HTML
   // The templates have default items; we try to replace them
   // For now, we inject a data attribute that JS can read
+  // Build photos array with hero + gallery for template JS
+  const allPhotos: any[] = [];
+  if ((data as any).heroImage) {
+    allPhotos.push({ url: (data as any).heroImage, caption: data.businessName, type: 'hero' });
+  }
+  if (data.photos?.length) {
+    for (const p of data.photos) {
+      allPhotos.push({ ...p, type: p.type || 'gallery' });
+    }
+  }
+
   const jsonData = JSON.stringify({
+    slug: data.slug,
     businessName: data.businessName,
+    tagline: data.tagline || '',
+    about: (data as any).about || '',
     whatsapp: data.whatsapp,
     phone: data.phone,
+    address: data.address,
+    timings: data.timings,
+    isOpen: data.isOpen !== false,
+    activeOffer: data.activeOffer || null,
     menu: data.menu,
     services: data.services,
     packages: data.packages,
     plans: data.plans,
     subjects: data.subjects,
-    photos: data.photos,
+    photos: allPhotos,
     reviews: (data as any).reviews || [],
     todaySpecial: (data as any).todaySpecial || null,
   });
   
-  // Inject data into the page so dynamic rendering can pick it up
+  // Inject __SITE_DATA__ before the template's <!-- __INJECT_DATA__ --> marker
   const dataScript = `
-  <script>
-    window.__SITE_DATA__ = ${jsonData};
-    // Dynamic content injector — replaces template defaults with real data
-    document.addEventListener('DOMContentLoaded', function() {
-      var d = window.__SITE_DATA__;
-      // Update menu items if present
-      if (d.menu && d.menu.length) injectItems(d.menu, 'menu');
-      if (d.services && d.services.length) injectItems(d.services, 'services');
-      if (d.packages && d.packages.length) injectItems(d.packages, 'packages');
-      if (d.plans && d.plans.length) injectItems(d.plans, 'plans');
-      if (d.subjects && d.subjects.length) injectItems(d.subjects, 'subjects');
-    });
-    function injectItems(items, type) {
-      var containers = document.querySelectorAll('[data-content="' + type + '"]');
-      if (!containers.length) return;
-      containers.forEach(function(c) {
-        var html = items.map(function(item) {
-          return '<div style="display:flex;justify-content:space-between;align-items:start;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);">' +
-            '<div><strong style="color:#f5f5f5;">' + item.name + '</strong>' +
-            (item.description ? '<br><small style="color:#a3a3a3;">' + item.description + '</small>' : '') +
-            (item.duration ? '<br><small style="color:#a3a3a3;">⏱ ' + item.duration + '</small>' : '') +
-            (item.popular ? ' <span style="background:rgba(245,158,11,0.2);color:#f59e0b;padding:2px 6px;border-radius:4px;font-size:11px;margin-left:4px;">Popular</span>' : '') +
-            '</div>' +
-            '<span style="color:#f59e0b;font-weight:600;white-space:nowrap;margin-left:12px;">' + item.price + '</span>' +
-          '</div>';
-        }).join('');
-        c.innerHTML = html;
-      });
-    }
-  </script>`;
+  <script>window.__SITE_DATA__ = ${jsonData};</script>`;
   
-  html = html.replace('</body>', `${dataScript}\n</body>`);
+  // Inject at marker if present, otherwise before </body>
+  if (html.includes('<!-- __INJECT_DATA__ -->')) {
+    html = html.replace('<!-- __INJECT_DATA__ -->', dataScript);
+  } else {
+    html = html.replace('</body>', `${dataScript}\n</body>`);
+  }
   return html;
 }
 

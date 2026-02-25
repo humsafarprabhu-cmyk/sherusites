@@ -32,7 +32,7 @@ const CATEGORY_TEMPLATE: Record<string, string> = {
   restaurant: 'restaurant-2026.html',
   store: 'store-2026.html',
   salon: 'salon-2026.html',
-  tutor: 'tutor.html',
+  tutor: 'tutor-2026.html',
   clinic: 'clinic.html',
   gym: 'gym.html',
   photographer: 'photographer.html',

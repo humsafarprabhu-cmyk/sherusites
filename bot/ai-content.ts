@@ -210,7 +210,7 @@ export async function downloadAndSaveImage(url: string, slug: string, filename: 
 
 const CATEGORY_PROMPTS: Record<string, string> = {
   restaurant: `Generate for an Indian restaurant/dhaba:
-- tagline (short, catchy, Hindi-English mix OK)
+- tagline (short, catchy, Hindi-English mix OK. DO NOT include the business name — just the slogan)
 - about (2-3 lines about the restaurant)
 - menu: 12-15 items across categories (Starters, Main Course, Breads, Rice, Drinks, Desserts)
   Each item: name, price in ₹ (realistic Indian prices), category, description (one line)
@@ -546,7 +546,7 @@ function getDefaultContent(category: string, name: string): AIContent {
       menu: generateRandomMenu(),
     },
     store: {
-      tagline: `${name} — Sab kuch milega, sasta aur accha`,
+      tagline: `Sab kuch milega, sasta aur accha`,
       about: `${name} is your trusted neighborhood store for all daily essentials. Quality products, fair prices, and home delivery available.`,
       reviews: generateRandomReviews('store', name),
       services: [
@@ -563,7 +563,7 @@ function getDefaultContent(category: string, name: string): AIContent {
       ],
     },
     salon: {
-      tagline: `${name} — Where beauty meets confidence`,
+      tagline: `Where beauty meets confidence`,
       about: `${name} offers premium grooming and beauty services. Expert stylists, quality products, and a relaxing experience every visit.`,
       reviews: generateRandomReviews('salon', name),
       services: [
@@ -584,7 +584,7 @@ function getDefaultContent(category: string, name: string): AIContent {
       ],
     },
     tutor: {
-      tagline: `${name} — Padhai smart, result best`,
+      tagline: `Padhai smart, result best`,
       about: `${name} provides quality coaching with experienced teachers, proven methods, and personal attention. Helping students achieve their best since years.`,
       reviews: generateRandomReviews('tutor', name),
       subjects: [
@@ -598,7 +598,7 @@ function getDefaultContent(category: string, name: string): AIContent {
       ],
     },
     clinic: {
-      tagline: `${name} — Aapki sehat, hamari zimmedari`,
+      tagline: `Aapki sehat, hamari zimmedari`,
       about: `Providing compassionate healthcare with modern facilities. MBBS, MD with 10+ years experience. We believe in thorough diagnosis and affordable treatment.`,
       reviews: generateRandomReviews('clinic', name),
       services: [
@@ -614,7 +614,7 @@ function getDefaultContent(category: string, name: string): AIContent {
       ],
     },
     gym: {
-      tagline: `${name} — No excuses, only results`,
+      tagline: `No excuses, only results`,
       about: `${name} is your fitness destination with state-of-the-art equipment, expert trainers, and a motivating community. Transform your body, transform your life.`,
       reviews: generateRandomReviews('gym', name),
       plans: [
@@ -632,7 +632,7 @@ function getDefaultContent(category: string, name: string): AIContent {
       ],
     },
     photographer: {
-      tagline: `${name} — Moments frozen, memories forever`,
+      tagline: `Moments frozen, memories forever`,
       about: `${name} captures life's most precious moments. Professional equipment, creative vision, and years of experience in making your memories timeless.`,
       reviews: generateRandomReviews('photographer', name),
       packages: [
@@ -644,7 +644,7 @@ function getDefaultContent(category: string, name: string): AIContent {
       ],
     },
     service: {
-      tagline: `${name} — Ek call, sab theek`,
+      tagline: `Ek call, sab theek`,
       about: `${name} provides fast, reliable home services at honest prices. Experienced technicians, quality work, and satisfaction guaranteed.`,
       reviews: generateRandomReviews('service', name),
       services: [

@@ -274,7 +274,18 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       session.state = 'awaiting_name';
       session.data = { category };
       persistSession(phone, session);
-      return { replies: ['👍 *' + (category.charAt(0).toUpperCase() + category.slice(1)) + '!*\n\nApne business ka naam batao 👇'] };
+      const catNames: Record<string,string> = {
+        restaurant: '🍽️ restaurant/dhaba',
+        salon: '💇 salon/parlour',
+        store: '🏪 dukaan/store',
+        tutor: '📚 coaching/tuition',
+        clinic: '🏥 clinic',
+        gym: '💪 gym',
+        photographer: '📸 studio',
+        service: '🔧 business',
+      };
+      const catLabel = catNames[category] || 'business';
+      return { replies: [`👍 *${category.charAt(0).toUpperCase() + category.slice(1)}!*\n\nApne ${catLabel} ka naam batao 👇`] };
     }
   }
 
@@ -545,8 +556,18 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       session.data.category = category;
       session.state = 'awaiting_name';
       persistSession(phone, session);
+      const examples: Record<string,string> = {
+        restaurant: '"Sharma Ji Ka Dhaba", "Royal Biryani"',
+        salon: '"Priya Beauty Parlour", "Style Studio"',
+        store: '"Kumar Electronics", "Gupta Kirana Store"',
+        tutor: '"Sharma Classes", "Excel Academy"',
+        clinic: '"City Health Clinic", "Dr. Gupta Clinic"',
+        gym: '"Royal Gym & Fitness", "PowerHouse Gym"',
+        photographer: '"Click Studio", "Moments Photography"',
+        service: '"QuickFix Repairs", "Sharma Plumbing"',
+      };
       return { replies: [
-        `✅ *${CATEGORY_DISPLAY[category]}*\n\nAb aapke business ka *naam* batao? 👇\n(Jaise: "Sharma Ji Ka Dhaba", "Priya Beauty Parlour")`
+        `✅ *${CATEGORY_DISPLAY[category]}*\n\nApne business ka *naam* batao 👇\n(Jaise: ${examples[category] || '"My Business"}'})`
       ]};
     }
 

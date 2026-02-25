@@ -107,10 +107,11 @@ export function renderSite(data: SiteData): string {
   if (data.plan !== 'premium') {
     const promoFooter = `
     <div style="position:fixed;bottom:0;left:0;right:0;z-index:10000;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;padding:14px 20px;text-align:center;box-shadow:0 -4px 20px rgba(99,102,241,0.3);font-family:system-ui,sans-serif;">
-      <div style="font-size:15px;font-weight:600;margin-bottom:6px;">🦁 Made with WhatsWebsite</div>
-      <a href="https://wa.me/918210329601?text=Hi%2C%20I%20want%20my%20own%20website%20like%20${data.businessName}!" 
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px;">🦁 Apna website banao WhatsApp pe!</div>
+      <div style="font-size:13px;opacity:0.9;margin-bottom:8px;">📱 <a href="https://wa.me/918210329601?text=Hi%2C%20mujhe%20bhi%20website%20chahiye!" style="color:white;text-decoration:underline;">+91 82103 29601</a></div>
+      <a href="https://wa.me/918210329601?text=Hi%2C%20mujhe%20bhi%20website%20chahiye!" 
          style="background:white;color:#6366f1;padding:8px 18px;border-radius:25px;text-decoration:none;font-weight:600;display:inline-block;font-size:14px;">
-        ₹1,499 - Get Custom Domain 🚀
+        Free Website Banao 🚀
       </a>
     </div>
     <div style="height:80px;"></div>`;

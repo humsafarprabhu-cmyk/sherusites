@@ -352,7 +352,7 @@ IMPORTANT: Analyze the business name and location to INTELLIGENTLY infer what th
     const [contentResult, photoResult] = await Promise.all([
       aiCall(
         `Business: "${businessName}" in ${address}. Category: ${category}.${extraInfo ? `\nExtra info: ${extraInfo}` : ''}\n\n${prompt}\n\nAlso generate:\n- reviews: 3 realistic Google-style reviews [{author (Indian name), text (1-2 sentences), rating (4-5), date ("2 weeks ago" etc)}]\n- todaySpecial: one special item {name, description, price as "₹XX", oldPrice as "₹XX" (higher)}\n\nOutput JSON with keys: tagline, about, ${getContentKey(category)}, reviews, todaySpecial`,
-        1000, 15000
+        800, 18000
       ),
       aiCall(
         `Business: "${businessName}" in ${address}. Category: ${category}.\nGenerate:\n- heroPhotoQuery: one Unsplash search query (2-4 words) for hero photo\n- galleryPhotoQueries: 6 Unsplash search queries for gallery\nMatch what THIS business actually serves/sells. JSON only with keys: heroPhotoQuery, galleryPhotoQueries`,

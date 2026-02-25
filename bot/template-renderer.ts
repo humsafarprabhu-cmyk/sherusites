@@ -31,7 +31,7 @@ const SITES_DIR = path.join(__dirname, '..', 'sites');
 const CATEGORY_TEMPLATE: Record<string, string> = {
   restaurant: 'restaurant-2026.html',
   store: 'store.html',
-  salon: 'salon.html',
+  salon: 'salon-2026.html',
   tutor: 'tutor.html',
   clinic: 'clinic.html',
   gym: 'gym.html',

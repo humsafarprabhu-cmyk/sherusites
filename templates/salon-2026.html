@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>Priya Beauty Parlour — Where beauty meets confidence</title>
-<meta name="description" content="Priya Beauty Parlour — Where beauty meets confidence. Priya Beauty Parlour offers premium grooming and beauty services. Expert stylists, quality products, and a relaxing experience every visit. Book on WhatsApp or call 9876543210.">
-<meta property="og:title" content="Priya Beauty Parlour — Where beauty meets confidence">
-<meta property="og:description" content="Priya Beauty Parlour offers premium grooming and beauty services. Expert stylists, quality products, and a relaxing experience every visit.">
+<title>{{businessName}} — {{tagline}}</title>
+<meta name="description" content="{{businessName}} — {{tagline}}. {{about}} Book on WhatsApp or call {{phone}}.">
+<meta property="og:title" content="{{businessName}} — {{tagline}}">
+<meta property="og:description" content="{{about}}">
 <meta property="og:type" content="business.business">
 <meta property="og:url" content="https://whatswebsite.com/site/{{slug}}">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💇</text></svg>">
@@ -195,26 +195,26 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
 
 <!-- Header -->
 <header class="hdr" id="hdr">
-  <span class="hdr-name" id="hdr-name">Priya Beauty Parlour</span>
+  <span class="hdr-name" id="hdr-name">{{businessName}}</span>
   <div class="hdr-r">
     <a href="#services" class="hdr-b hdr-menu">Services</a>
-    <a href="tel:9876543210" class="hdr-b hdr-cta">📞 Call</a>
+    <a href="tel:{{phone}}" class="hdr-b hdr-cta">📞 Call</a>
   </div>
 </header>
 
 <!-- Hero -->
 <section class="hero">
-  <div class="hero-bg"><img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1400&q=80" alt="Priya Beauty Parlour" id="h-img"></div>
+  <div class="hero-bg"><img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1400&q=80" alt="{{businessName}}" id="h-img"></div>
   <div class="hero-content">
     <div class="hero-open" id="h-open"><span class="hero-dot"></span><span>Open Now</span></div>
-    <h1 id="h-title">Priya Beauty Parlour</h1>
-    <div class="hero-sub" id="h-sub">Where beauty meets confidence</div>
+    <h1 id="h-title">{{businessName}}</h1>
+    <div class="hero-sub" id="h-sub">{{tagline}}</div>
     <div class="hero-btns">
-      <a href="https://wa.me/919876543210?text=Hi!%20Appointment%20book%20karna%20hai" class="btn-wa" id="cta-wa">
+      <a href="https://wa.me/{{whatsapp}}?text=Hi!%20Appointment%20book%20karna%20hai" class="btn-wa" id="cta-wa">
         <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
         Book on WhatsApp
       </a>
-      <a href="tel:9876543210" class="btn-ghost">📞 Call Now</a>
+      <a href="tel:{{phone}}" class="btn-ghost">📞 Call Now</a>
     </div>
   </div>
 </section>
@@ -281,7 +281,7 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
   <div class="cta-banner rv">
     <h3>Ready for a Makeover?</h3>
     <p>Book your appointment now — WhatsApp pe baat karo!</p>
-    <a href="https://wa.me/919876543210?text=Hi!%20Appointment%20book%20karna%20hai" class="btn-wa">
+    <a href="https://wa.me/{{whatsapp}}?text=Hi!%20Appointment%20book%20karna%20hai" class="btn-wa">
       <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       Book Appointment
     </a>
@@ -299,28 +299,17 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
 <!-- Sticky Bar -->
 <div class="sticky" id="sticky-bar">
   <div class="sticky-in">
-    <a href="https://wa.me/919876543210?text=Hi!%20Appointment%20book%20karna%20hai" class="btn-wa">
+    <a href="https://wa.me/{{whatsapp}}?text=Hi!%20Appointment%20book%20karna%20hai" class="btn-wa">
       <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       Book on WhatsApp
     </a>
-    <a href="tel:9876543210" class="btn-ph">📞</a>
+    <a href="tel:{{phone}}" class="btn-ph">📞</a>
   </div>
 </div>
 
-
-    <div style="position:fixed;bottom:0;left:0;right:0;z-index:10000;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;padding:14px 20px;text-align:center;box-shadow:0 -4px 20px rgba(99,102,241,0.3);font-family:system-ui,sans-serif;">
-      <div style="font-size:15px;font-weight:600;margin-bottom:4px;">🦁 Apna website banao WhatsApp pe!</div>
-      <div style="font-size:13px;opacity:0.9;margin-bottom:8px;">📱 <a href="https://wa.me/918210329601?text=Hi%2C%20mujhe%20bhi%20website%20chahiye!" style="color:white;text-decoration:underline;">+91 82103 29601</a></div>
-      <a href="https://wa.me/918210329601?text=Hi%2C%20mujhe%20bhi%20website%20chahiye!" 
-         style="background:white;color:#6366f1;padding:8px 18px;border-radius:25px;text-decoration:none;font-weight:600;display:inline-block;font-size:14px;">
-        Free Website Banao 🚀
-      </a>
-    </div>
-    <div style="height:80px;"></div>
 </div><!-- __PAGE_END__ -->
 
-
-  <script>window.__SITE_DATA__ = {"slug":"priya-beauty-parlour","businessName":"Priya Beauty Parlour","tagline":"Where beauty meets confidence","about":"Priya Beauty Parlour offers premium grooming and beauty services. Expert stylists, quality products, and a relaxing experience every visit.","whatsapp":"919876543210","phone":"9876543210","address":"near bus stand, sadar bazar, jhansi","timings":"subah 10 se raat 8 baje tak","isOpen":true,"activeOffer":null,"menu":[{"name":"Haircut","price":"₹200"},{"name":"facial","price":"₹500"}],"services":[{"name":"Men's Haircut","price":"₹200","duration":"30 min","description":"Precision cut with styling"},{"name":"Beard Trim & Shape","price":"₹100","duration":"15 min","description":"Clean trim and shaping"},{"name":"Men's Facial","price":"₹400","duration":"45 min","description":"Deep cleanse and glow facial"},{"name":"Hair Color (Men)","price":"₹300","duration":"40 min","description":"Professional hair coloring"},{"name":"Women's Haircut","price":"₹400","duration":"45 min","description":"Cut, layers, and blow dry"},{"name":"Hair Spa","price":"₹800","duration":"60 min","description":"Deep conditioning treatment"},{"name":"Classic Facial","price":"₹600","duration":"50 min","description":"Cleanse, scrub, massage, mask"},{"name":"Gold Facial","price":"₹1200","duration":"60 min","description":"Premium gold-infused glow treatment"},{"name":"Full Arms Waxing","price":"₹250","duration":"20 min","description":"Smooth waxing with soothing gel"},{"name":"Threading","price":"₹50","duration":"10 min","description":"Eyebrow and upper lip threading"},{"name":"Bridal Makeup","price":"₹8000","duration":"120 min","description":"Complete bridal look with draping"},{"name":"Party Makeup","price":"₹2500","duration":"60 min","description":"Glamorous party-ready look"},{"name":"Mehndi","price":"₹500","duration":"30 min","description":"Beautiful traditional mehndi designs"},{"name":"Head Massage","price":"₹200","duration":"20 min","description":"Relaxing oil head massage"}],"packages":[],"plans":[],"subjects":[],"photos":[],"reviews":[],"todaySpecial":null};</script>
+<!-- __INJECT_DATA__ -->
 <script>
 var D=window.__SITE_DATA__||{};
 

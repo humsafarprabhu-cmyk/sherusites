@@ -665,13 +665,32 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
           about: aiContent.about,
         }, phone);
 
-        // Inject uploaded photos
+        // Move uploaded photos from _temp to site folder
+        const fs = await import('fs');
+        const path = await import('path');
+        const SITES_DIR = path.default.join(process.cwd(), 'sites');
+        const imgDir = path.default.join(SITES_DIR, slug, 'images');
+        if (!fs.default.existsSync(imgDir)) fs.default.mkdirSync(imgDir, { recursive: true });
+
+        function movePhoto(tempUrl: string): string {
+          const filename = `img-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.jpg`;
+          const srcPath = path.default.join(SITES_DIR, tempUrl);
+          const destPath = path.default.join(imgDir, filename);
+          try {
+            if (fs.default.existsSync(srcPath)) {
+              fs.default.copyFileSync(srcPath, destPath);
+              return `/site/${slug}/images/${filename}`;
+            }
+          } catch {}
+          return tempUrl; // fallback
+        }
+
         if (session.data.heroImage) {
-          siteData.heroImage = session.data.heroImage;
+          siteData.heroImage = movePhoto(session.data.heroImage);
         }
         if (session.data.galleryPhotos?.length) {
-          siteData.photos = session.data.galleryPhotos.map((url: string, i: number) => ({
-            url, caption: session.data.businessName || '', type: 'gallery' as const,
+          siteData.photos = session.data.galleryPhotos.map((url: string) => ({
+            url: movePhoto(url), caption: session.data.businessName || '', type: 'gallery' as const,
           }));
         }
 

@@ -108,9 +108,9 @@ app.get('/site/:slug/images/:filename', (req, res) => {
 // Gallery page
 app.get('/site/:slug/gallery', async (req, res) => {
   try {
-    const dataPath = path.join(SITES_DIR, req.params.slug, 'data.json');
-    if (!fs.existsSync(dataPath)) return res.status(404).send('Site not found');
-    const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+    const { getSiteData } = await import('./bot/db.ts');
+    const data = getSiteData(req.params.slug);
+    if (!data) return res.status(404).send('Site not found');
     const { renderGalleryPage } = await import('./bot/template-renderer.ts');
     const galleryHtml = renderGalleryPage(data);
     res.setHeader('Content-Type', 'text/html');

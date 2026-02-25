@@ -27,21 +27,25 @@ export async function createOrder(slug: string): Promise<{ orderId: string; amou
   const site = getSiteData(slug);
   if (!site) return null;
 
+  // Use pending plan price from DB, fallback to ₹1,499
+  const amount = ((site as any).pendingPlanPrice || 1499) * 100; // paise
+
   const order = await getRazorpay().orders.create({
-    amount: 99900, // ₹999 in paise
+    amount,
     currency: 'INR',
     receipt: `ss_${slug.substring(0, 20)}_${Date.now().toString(36)}`,
     notes: {
       slug,
       business: site.businessName,
       phone: site.phone,
+      domain: (site as any).pendingDomain || '',
     },
   });
 
   // Record in DB
-  createPaymentRecord(slug, site.phone, order.id, 99900);
+  createPaymentRecord(slug, site.phone, order.id, amount);
 
-  return { orderId: order.id, amount: 99900 };
+  return { orderId: order.id, amount };
 }
 
 // ─── VERIFY PAYMENT ──────────────────────────────────────────────────────────
@@ -75,6 +79,8 @@ export function getPaymentPageHTML(slug: string, orderId: string, amount: number
   const site = getSiteData(slug);
   const businessName = site?.businessName || slug;
   const phone = site?.phone || '';
+  const pendingDomain = (site as any)?.pendingDomain || '';
+  const displayPrice = `₹${(amount / 100).toLocaleString()}`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -172,7 +178,7 @@ export function getPaymentPageHTML(slug: string, orderId: string, amount: number
     <div class="business-name">${businessName}</div>
 
     <div class="features">
-      <div class="feature"><span class="check">✓</span> Custom .in domain</div>
+      <div class="feature"><span class="check">✓</span> Custom domain${pendingDomain ? `: <strong>${pendingDomain}</strong>` : ''}</div>
       <div class="feature"><span class="check">✓</span> No SheruSites branding</div>
       <div class="feature"><span class="check">✓</span> Priority support</div>
       <div class="feature"><span class="check">✓</span> Google Business setup</div>

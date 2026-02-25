@@ -12,8 +12,8 @@ import { fileURLToPath } from 'url';
 import rateLimit from 'express-rate-limit';
 import { handleMessage, setBaseUrl, getBaseUrl } from './bot/whatsapp-bot.ts';
 import { createOrder, verifyPayment, markPaid, getPaymentPageHTML } from './bot/payment.ts';
-import { listAllSites, getSiteData, saveSiteData } from './bot/db.ts';
-import { provisionDomain, sendTelegramAlert } from './bot/domain.ts';
+import { listAllSites, getSiteData, saveSiteData, findSiteByDomain, findSiteByPendingDomain } from './bot/db.ts';
+import { provisionDomain, sendTelegramAlert, setSendWhatsApp, getSetupPageHTML } from './bot/domain.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -74,6 +74,27 @@ const webhookLimiter = rateLimit({
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
 app.use(express.static(PUBLIC_DIR, { maxAge: '30d' }));
+
+// ─── CUSTOM DOMAIN ROUTING ──────────────────────────────────────────────────
+app.use((req, res, next) => {
+  const host = req.hostname?.toLowerCase();
+  if (!host || host === 'whatswebsite.com' || host === 'localhost' || host.includes('vercel') || host.includes('cloudflared')) {
+    return next();
+  }
+  // Check if this host is a custom domain
+  const site = findSiteByDomain(host);
+  if (site) {
+    const sitePath = path.join(SITES_DIR, site.slug, 'index.html');
+    if (fs.existsSync(sitePath)) return res.sendFile(sitePath);
+  }
+  // Check pending domain — show setup page
+  const pending = findSiteByPendingDomain(host);
+  if (pending) {
+    const siteUrl = `https://whatswebsite.com/site/${pending.slug}`;
+    return res.send(getSetupPageHTML(host, pending.businessName, siteUrl));
+  }
+  next();
+});
 
 // ─── HEALTH ──────────────────────────────────────────────────────────────────
 
@@ -205,16 +226,16 @@ app.post('/api/payment/verify', payLimiter, (req, res) => {
         sendTextMessage(site.phone, `🎉 *Payment Successful!*\n\n✅ ${site.businessName} is now PREMIUM!\n💳 Payment ID: ${razorpay_payment_id}\n\nYour custom domain is being set up. We'll message you when it's live!\n\nThank you for choosing SheruSites! 🦁`);
       }
 
-      // Auto-provision domain
-      provisionDomain(slug, site.businessName, site.phone).then(result => {
+      // Auto-provision domain (use pending domain from DB if selected)
+      const pendingDomain = (site as any).pendingDomain;
+      if (!pendingDomain) {
+        sendTelegramAlert(`⚠️ Payment received but NO pending domain for ${site.businessName} (${slug})\nPayment: ${razorpay_payment_id}\n\n👉 Manually provision domain`);
+      }
+      provisionDomain(slug, site.businessName, site.whatsapp || `91${site.phone}`, pendingDomain).then(result => {
         if (result.success && result.domain) {
-          site.customDomain = result.domain;
-          saveSiteData(site);
-          if (ACCESS_TOKEN && PHONE_NUMBER_ID) {
-            sendTextMessage(site.phone, `🌐 *Your domain is LIVE!*\n\n✨ ${result.domain}\n\nAb aapke customers ${result.domain} pe jaake aapka website dekh sakte hain! 🚀`);
-          }
+          // provisionDomain already updates DB and sends WhatsApp
+          console.log(`[Domain] ✅ Provisioned: ${result.domain} for ${slug}`);
         } else {
-          // Alert Abhi for manual intervention
           sendTelegramAlert(`⚠️ Auto-domain failed for ${site.businessName} (${slug})\nPayment: ${razorpay_payment_id}\nError: ${result.error}\n\n👉 Register manually and update DB`);
         }
       }).catch(err => {
@@ -507,6 +528,11 @@ process.on('unhandledRejection', (err: any) => {
 });
 
 // ─── START ──────────────────────────────────────────────────────────────────
+
+// Wire up WhatsApp sender for domain.ts
+setSendWhatsApp(async (to: string, text: string) => {
+  await sendTextMessage(to, text);
+});
 
 app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`\n🦁 SheruSites Server v2.0 running on http://0.0.0.0:${PORT}`);

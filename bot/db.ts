@@ -126,12 +126,12 @@ const stmts = {
     slug, owner_phone, business_name, category, tagline, phone, whatsapp, address, timings, about,
     owner_name, experience, specialization, menu, services, subjects, packages, plans, photos,
     delivery, delivery_area, emergency_available, active_offer, is_open, plan, custom_domain,
-    payment_id, paid_at, created_at, updated_at
+    payment_id, paid_at, created_at, updated_at, today_special, reviews, pending_domain, pending_plan_price
   ) VALUES (
     @slug, @owner_phone, @business_name, @category, @tagline, @phone, @whatsapp, @address, @timings, @about,
     @owner_name, @experience, @specialization, @menu, @services, @subjects, @packages, @plans, @photos,
     @delivery, @delivery_area, @emergency_available, @active_offer, @is_open, @plan, @custom_domain,
-    @payment_id, @paid_at, @created_at, @updated_at
+    @payment_id, @paid_at, @created_at, @updated_at, @today_special, @reviews, @pending_domain, @pending_plan_price
   )`),
   getUserSites: db.prepare('SELECT * FROM sites WHERE owner_phone = ?'),
   listAllSites: db.prepare('SELECT slug FROM sites'),
@@ -214,6 +214,8 @@ export interface SiteData {
   isOpen: boolean;
   plan: 'free' | 'premium';
   customDomain?: string;
+  pendingDomain?: string;
+  pendingPlanPrice?: number;
   paymentId?: string;
   paidAt?: string;
   createdAt: string;
@@ -247,6 +249,8 @@ function rowToSite(row: any): SiteData {
     isOpen: !!row.is_open,
     plan: row.plan || 'free',
     customDomain: row.custom_domain,
+    pendingDomain: row.pending_domain,
+    pendingPlanPrice: row.pending_plan_price ? Number(row.pending_plan_price) : undefined,
     paymentId: row.payment_id,
     paidAt: row.paid_at,
     createdAt: row.created_at,
@@ -282,6 +286,10 @@ function siteToRow(data: SiteData, ownerPhone: string) {
     is_open: data.isOpen ? 1 : 0,
     plan: data.plan || 'free',
     custom_domain: data.customDomain || null,
+    pending_domain: data.pendingDomain || null,
+    pending_plan_price: data.pendingPlanPrice || null,
+    today_special: data.todaySpecial ? JSON.stringify(data.todaySpecial) : null,
+    reviews: JSON.stringify(data.reviews || []),
     payment_id: data.paymentId || null,
     paid_at: data.paidAt || null,
     created_at: data.createdAt || new Date().toISOString(),
@@ -345,6 +353,18 @@ export function generateUniqueSlug(baseSlug: string): string {
 
 export function listAllSites(): string[] {
   return (stmts.listAllSites.all() as any[]).map(r => r.slug);
+}
+
+export function findSiteByDomain(domain: string): SiteData | null {
+  const row: any = db.prepare('SELECT * FROM sites WHERE custom_domain = ?').get(domain);
+  if (row) return rowToSite(row);
+  return null;
+}
+
+export function findSiteByPendingDomain(domain: string): SiteData | null {
+  const row: any = db.prepare('SELECT * FROM sites WHERE pending_domain = ?').get(domain);
+  if (row) return rowToSite(row);
+  return null;
 }
 
 export function listUserSites(phone: string): SiteData[] {

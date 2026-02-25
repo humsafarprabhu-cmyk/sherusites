@@ -338,18 +338,38 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       }
 
       if (lower === 'wb_upgrade' || lower === 'upgrade' || lower === 'premium' || lower === '999' || lower === 'pay') {
-        return { replies: [{
-          type: 'buttons',
-          body: `⭐ *Premium Upgrade — ₹1,499/year*\n\nAapko milega:\n✨ Custom .in domain\n✨ No branding\n✨ Priority support\n✨ Google Business listing`,
-          buttons: [
-            { id: 'btn_pay', title: '💳 Pay ₹1,499' },
-            { id: 'btn_later', title: '🔙 Baad Mein' },
-          ]
-        }]};
-      }
-
-      if (lower === 'btn_pay') {
-        return { replies: [`💳 *Payment link:*\n🔗 ${BASE_URL}/pay/${session.slug}\n\nLink pe click karo aur Razorpay se pay karo. Payment ke baad custom domain 30 min mein live! 🚀`] };
+        // Start domain suggestion flow
+        const { findAvailableDomains, calculatePlanPrice } = await import('./domain.ts');
+        const bizName = session.data.businessName || session.slug || 'business';
+        
+        try {
+          const suggestions = await findAvailableDomains(bizName, 3);
+          if (suggestions.length > 0) {
+            session.state = 'domain_search';
+            session.data.domainSuggestions = suggestions;
+            persistSession(phone, session);
+            
+            const price = calculatePlanPrice(suggestions[0]);
+            const buttons = suggestions.slice(0, 3).map((d: string, i: number) => ({
+              id: `dom_${i}`, title: d.substring(0, 20),
+            }));
+            
+            return { replies: [{
+              type: 'buttons',
+              body: `⭐ *Premium Upgrade — ₹${price.toLocaleString()}/year*\n\n✨ Custom .in domain\n✨ No branding\n✨ Priority support\n\n🌐 *Choose your domain:*`,
+              buttons,
+            }] };
+          } else {
+            return { replies: [{
+              type: 'buttons',
+              body: `⭐ *Premium Upgrade*\n\nDomain suggestions mil nahi rahe. Try again later ya humse contact karo!`,
+              buttons: [{ id: 'btn_later', title: '🔙 Baad Mein' }]
+            }] };
+          }
+        } catch (err: any) {
+          console.error('[Upgrade] Domain suggestion error:', err.message);
+          return { replies: ['❌ Error fetching domains. Try again later.'] };
+        }
       }
 
       if (lower === 'btn_later') {
@@ -744,6 +764,75 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         console.error('[SheruSites] Generation error:', err.message);
         return { replies: [`❌ Oops! Website generate karne mein error aaya. Dobara try karo.\nError: ${err.message}`] };
       }
+    }
+
+    case 'domain_search': {
+      if (lower.match(/^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru|website|site|reset|restart|naya|new)$/)) {
+        deleteSession(phone);
+        return handleMessage(phone, message);
+      }
+
+      // User selected a domain (dom_0, dom_1, dom_2)
+      if (lower.startsWith('dom_')) {
+        const idx = parseInt(lower.replace('dom_', ''));
+        const suggestions = session.data.domainSuggestions || [];
+        const selectedDomain = suggestions[idx];
+        if (!selectedDomain) {
+          return { replies: ['❌ Invalid selection. Try again.'] };
+        }
+
+        const { calculatePlanPrice } = await import('./domain.ts');
+        const price = calculatePlanPrice(selectedDomain);
+        const slug = session.slug || session.data.slug;
+
+        // Save pending domain to site DB
+        const siteData = getSiteData(slug);
+        if (siteData) {
+          (siteData as any).pendingDomain = selectedDomain;
+          (siteData as any).pendingPlanPrice = price;
+          saveSiteData(siteData, phone);
+        }
+
+        session.data.selectedDomain = selectedDomain;
+        session.data.selectedPlanPrice = price;
+        session.state = 'complete';
+        persistSession(phone, session);
+
+        // Send CTA URL to payment page
+        const payUrl = `${BASE_URL}/pay/${slug}`;
+        return { replies: [{
+          type: 'cta_url',
+          body: `✅ *${selectedDomain}* selected!\n\n💰 Price: ₹${price.toLocaleString()}/year\n\n📱 Pay karke domain 30 min mein live!`,
+          url: payUrl,
+          buttonText: `💳 Pay ₹${price.toLocaleString()}`,
+        }] };
+      }
+
+      if (lower === 'btn_later') {
+        session.state = 'complete';
+        persistSession(phone, session);
+        return { replies: [{
+          type: 'buttons',
+          body: `👍 Koi baat nahi! Jab bhi chahiye "upgrade" type karo.`,
+          buttons: [{ id: 'wb_edit', title: '✏️ Edit Website' }, { id: 'btn_share', title: '📤 Share' }]
+        }] };
+      }
+
+      // Unknown input in domain_search — show suggestions again
+      const suggestions = session.data.domainSuggestions || [];
+      if (suggestions.length > 0) {
+        const buttons = suggestions.slice(0, 3).map((d: string, i: number) => ({
+          id: `dom_${i}`, title: d.substring(0, 20),
+        }));
+        return { replies: [{
+          type: 'buttons',
+          body: `🌐 Neeche se domain choose karo 👇`,
+          buttons,
+        }] };
+      }
+      session.state = 'complete';
+      persistSession(phone, session);
+      return { replies: ['Kuch galat ho gaya. "upgrade" type karo dobara try karne ke liye.'] };
     }
 
     case 'editing': {

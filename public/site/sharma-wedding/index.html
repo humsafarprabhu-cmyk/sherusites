@@ -121,22 +121,27 @@ button{font-family:var(--ui);cursor:pointer;border:none;background:none;color:in
 /* STORY TIMELINE */
 .story-section{background:var(--ivory)}
 .timeline{position:relative;max-width:700px;margin:0 auto}
-.timeline::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,var(--border2) 10%,var(--border2) 90%,transparent);transform:translateX(-50%)}
-@media(max-width:600px){.timeline::before{left:16px}}
-.tl-item{display:grid;grid-template-columns:1fr 40px 1fr;gap:0;margin-bottom:40px;position:relative}
-@media(max-width:600px){.tl-item{grid-template-columns:40px 1fr;margin-left:0}}
-.tl-left{text-align:right;padding-right:24px;padding-top:8px}
-.tl-right{padding-left:24px;padding-top:8px}
-@media(max-width:600px){.tl-left{display:none}}
-.tl-dot{width:40px;height:40px;border-radius:50%;background:var(--white);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;box-shadow:var(--sh-s);position:relative;z-index:1;transition:all .3s var(--ease)}
+
+/* ── Mobile: simple vertical list ── */
+.timeline::before{content:'';position:absolute;left:20px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,var(--border2) 10%,var(--border2) 90%,transparent)}
+.tl-item{display:grid;grid-template-columns:44px 1fr;gap:0;margin-bottom:28px;position:relative}
+.tl-dot{grid-column:1;grid-row:1;width:40px;height:40px;border-radius:50%;background:var(--white);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;box-shadow:var(--sh-s);position:relative;z-index:1;transition:all .3s var(--ease);align-self:start}
 .tl-item.vis .tl-dot{border-color:var(--gold);background:var(--gold-xl)}
+/* Both sides map to col 2 on mobile — only the populated one is visible */
+.tl-left,.tl-right{grid-column:2;grid-row:1;padding-left:16px;padding-top:4px;text-align:left;min-width:0}
 .tl-date{font-family:var(--ui);font-size:.72rem;color:var(--rose);font-weight:500;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
-.tl-title{font-family:var(--serif);font-size:1.15rem;color:var(--ink);margin-bottom:4px}
-.tl-desc{font-size:.85rem;color:var(--ink3);line-height:1.55}
-.tl-right .tl-date{text-align:left}
-.tl-left .tl-date{text-align:right}
-.tl-left .tl-title{text-align:right}
-.tl-left .tl-desc{text-align:right}
+.tl-title{font-family:var(--serif);font-size:1.1rem;color:var(--ink);margin-bottom:4px}
+.tl-desc{font-size:.85rem;color:var(--ink3);line-height:1.55;word-break:break-word}
+
+/* ── Desktop: alternating left-right ── */
+@media(min-width:640px){
+  .timeline::before{left:50%;transform:translateX(-50%)}
+  .tl-item{grid-template-columns:1fr 44px 1fr;margin-bottom:40px}
+  .tl-dot{grid-column:2;grid-row:1}
+  .tl-left{grid-column:1;grid-row:1;text-align:right;padding-right:24px;padding-left:0;padding-top:8px}
+  .tl-right{grid-column:3;grid-row:1;text-align:left;padding-left:24px;padding-top:8px}
+  .tl-left .tl-date,.tl-left .tl-title,.tl-left .tl-desc{text-align:right}
+}
 
 /* EVENTS */
 .events-section{background:var(--cream)}
@@ -652,10 +657,11 @@ button{font-family:var(--ui);cursor:pointer;border:none;background:none;color:in
   const tl = document.getElementById('timeline');
   if(tl) tl.innerHTML = milestones.map((m,i)=>{
     const isLeft = i%2===0;
+    const content = `<div class="tl-date">${m.date||''}</div><div class="tl-title">${m.title||''}</div><div class="tl-desc">${m.desc||''}</div>`;
     return `<div class="tl-item fu" style="transition-delay:${i*80}ms">
-      ${isLeft?`<div class="tl-left"><div class="tl-date">${m.date||''}</div><div class="tl-title">${m.title||''}</div><div class="tl-desc">${m.desc||''}</div></div>`:'<div></div>'}
+      <div class="tl-left">${isLeft?content:''}</div>
       <div class="tl-dot">${m.emoji||'💕'}</div>
-      ${!isLeft?`<div class="tl-right"><div class="tl-date">${m.date||''}</div><div class="tl-title">${m.title||''}</div><div class="tl-desc">${m.desc||''}</div></div>`:'<div></div>'}
+      <div class="tl-right">${!isLeft?content:''}</div>
     </div>`;
   }).join('');
 

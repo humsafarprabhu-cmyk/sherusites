@@ -78,6 +78,37 @@ function executeActions(slug: string, actions: AgentAction[]): string[] {
           }
           break;
         }
+        case 'reorder_category': {
+          if (!siteData.menu) break;
+          const targetCat = params.category.toLowerCase();
+          const pos = parseInt(params.position) || 1;
+          // Get unique categories in current order
+          const catOrder: string[] = [];
+          siteData.menu.forEach(m => { const c = m.category || 'Menu'; if (!catOrder.includes(c)) catOrder.push(c); });
+          const catIdx = catOrder.findIndex(c => c.toLowerCase() === targetCat);
+          if (catIdx < 0) { results.push(`❌ "${params.category}" category nahi mili`); break; }
+          const [moved] = catOrder.splice(catIdx, 1);
+          catOrder.splice(Math.max(0, pos - 1), 0, moved);
+          // Reorder menu items by new category order
+          const reordered: any[] = [];
+          catOrder.forEach(c => { siteData.menu!.filter(m => (m.category || 'Menu') === c).forEach(m => reordered.push(m)); });
+          siteData.menu = reordered;
+          results.push(`✅ "${moved}" ab #${pos} pe hai`);
+          break;
+        }
+        case 'remove_category': {
+          if (!siteData.menu) break;
+          const cat = params.category.toLowerCase();
+          const before = siteData.menu.length;
+          siteData.menu = siteData.menu.filter(m => (m.category || '').toLowerCase() !== cat);
+          const removed = before - siteData.menu.length;
+          if (removed > 0) {
+            results.push(`✅ "${params.category}" category hata di (${removed} items removed)`);
+          } else {
+            results.push(`❌ "${params.category}" category nahi mili`);
+          }
+          break;
+        }
         case 'update_price': {
           const allItems = [...(siteData.menu || []), ...(siteData.services || []), ...(siteData.packages || []), ...(siteData.plans || [])];
           const item = allItems.find(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
@@ -243,6 +274,71 @@ function executeActions(slug: string, actions: AgentAction[]): string[] {
           results.push(`🚗 Delivery: ${siteData.delivery ? 'ON' : 'OFF'}${siteData.deliveryArea ? ` (${siteData.deliveryArea})` : ''}`);
           break;
         }
+        case 'rename_category': {
+          if (!siteData.menu) break;
+          const oldCat = params.old_name?.toLowerCase();
+          let renamed = 0;
+          siteData.menu.forEach(m => {
+            if ((m.category || '').toLowerCase() === oldCat) { m.category = params.new_name; renamed++; }
+          });
+          results.push(renamed > 0 ? `✅ "${params.old_name}" → "${params.new_name}" (${renamed} items)` : `❌ "${params.old_name}" nahi mili`);
+          break;
+        }
+        case 'update_item_description': {
+          const allItems = [...(siteData.menu || []), ...(siteData.services || [])];
+          const item = allItems.find(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
+          if (item) { item.description = params.description; results.push(`✅ ${item.name} description updated`); }
+          else results.push(`❌ "${params.name}" nahi mila`);
+          break;
+        }
+        case 'unmark_popular': {
+          if (siteData.menu) {
+            const item = siteData.menu.find(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
+            if (item) { item.popular = false; results.push(`✅ ${item.name} popular tag hataya`); }
+            else results.push(`❌ "${params.name}" nahi mila`);
+          }
+          break;
+        }
+        case 'set_veg': {
+          if (siteData.menu) {
+            const item = siteData.menu.find(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
+            if (item) { item.veg = true; results.push(`✅ ${item.name} → 🟢 Veg`); }
+            else results.push(`❌ "${params.name}" nahi mila`);
+          }
+          break;
+        }
+        case 'set_nonveg': {
+          if (siteData.menu) {
+            const item = siteData.menu.find(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
+            if (item) { item.veg = false; results.push(`✅ ${item.name} → 🔴 Non-Veg`); }
+            else results.push(`❌ "${params.name}" nahi mila`);
+          }
+          break;
+        }
+        case 'remove_hero': {
+          (siteData as any).heroImage = undefined;
+          results.push(`✅ Hero photo hata di`);
+          break;
+        }
+        case 'request_photo': {
+          results.push(`📸 Photo bhejo WhatsApp pe — automatically add ho jayegi!`);
+          break;
+        }
+        case 'update_experience': {
+          (siteData as any).experience = params.text;
+          results.push(`✅ Experience updated: ${params.text}`);
+          break;
+        }
+        case 'update_specialization': {
+          (siteData as any).specialization = params.text;
+          results.push(`✅ Specialization updated: ${params.text}`);
+          break;
+        }
+        case 'update_owner_name': {
+          (siteData as any).ownerName = params.name;
+          results.push(`✅ Owner name: ${params.name}`);
+          break;
+        }
         case 'delete_photo': {
           if (!siteData.photos || siteData.photos.length === 0) {
             results.push('❌ Koi photo nahi hai abhi');
@@ -325,33 +421,63 @@ ${context}
 You can perform these actions on the website. Return them as JSON array in "actions" field.
 
 Available actions:
-- add_menu_item: {name, price, category?, description?, popular?}
+
+MENU / ITEMS:
+- add_menu_item: {name, price, category?, description?, popular?, veg?}
 - remove_menu_item: {name}
 - update_price: {name, price}
-- bulk_price_change: {percent} (e.g. +10 for 10% increase, -5 for 5% decrease)
+- update_item_description: {name, description}
+- bulk_price_change: {percent} (+10 = 10% increase, -5 = 5% decrease)
+- mark_popular: {name}
+- unmark_popular: {name}
+- set_veg: {name}
+- set_nonveg: {name}
+
+CATEGORIES:
+- remove_category: {category} — remove entire category with all items
+- reorder_category: {category, position} — move category to position (1=first)
+- rename_category: {old_name, new_name}
+
+SERVICES (salon, clinic, etc):
 - add_service: {name, price, duration?, description?}
 - remove_service: {name}
-- update_timings: {timings}
-- set_offer: {text, validTill?}
-- clear_offer: {}
-- set_closed: {}
-- set_open: {}
-- update_about: {text}
+
+PHOTOS:
+- delete_photo: {index} (1-based)
+- delete_all_photos: {}
+- remove_hero: {} — remove hero image
+- request_photo: {} — ask user to send photo on WhatsApp
+
+BUSINESS INFO:
+- update_business_name: {name}
 - update_tagline: {text}
+- update_about: {text}
 - update_address: {address}
 - update_phone: {phone}
-- mark_popular: {name}
-- add_review: {author, text, rating (1-5), date?}
-- remove_review: {author}
-- set_today_special: {name, description?, price, oldPrice?}
-- clear_today_special: {}
-- update_business_name: {name}
+- update_timings: {timings}
+- update_owner_name: {name}
+- update_experience: {text}
+- update_specialization: {text}
 - set_map_location: {lat, lng}
 - update_map_address: {address}
+
+OFFERS & SPECIALS:
+- set_offer: {text, validTill?}
+- clear_offer: {}
+- set_today_special: {name, description?, price, oldPrice?}
+- clear_today_special: {}
+
+REVIEWS:
+- add_review: {author, text, rating (1-5), date?}
+- remove_review: {author}
+
+STATUS:
+- set_closed: {}
+- set_open: {}
 - set_delivery: {enabled, area?}
-- delete_photo: {index} (1-based, e.g. "delete 3rd photo" → index:3)
-- delete_all_photos: {}
-- no_action: {} (when just chatting, no website change needed)
+
+OTHER:
+- no_action: {} (just chatting, no website change)
 
 ## Response Format:
 Always return valid JSON:
@@ -458,6 +584,7 @@ Plan: ${data.plan}
     });
   }
 
+  ctx += `Hero Image: ${(data as any).heroImage ? 'Yes' : 'None'}\n`;
   if (data.photos && data.photos.length > 0) {
     ctx += `\nPhotos (${data.photos.length}):\n`;
     data.photos.forEach((p: any, i: number) => {

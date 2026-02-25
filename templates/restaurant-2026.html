@@ -420,7 +420,8 @@ else{obs={observe:function(el){el.classList.add('in')},unobserve:function(){}};}
   var p=(D.photos||[]).filter(function(x){return x.type==='gallery'});
   var el=document.getElementById('gal-g');
   if(!p.length){document.getElementById('sec-gal').style.display='none';return;}
-  el.innerHTML=p.slice(0,7).map(function(x){return '<div class="gi"><img src="'+x.url+'" alt="'+(x.caption||D.businessName)+'" loading="lazy"></div>';}).join('');
+  el.innerHTML=p.slice(0,6).map(function(x){return '<div class="gi"><img src="'+x.url+'" alt="'+(x.caption||D.businessName)+'" loading="lazy"></div>';}).join('');
+  if(p.length>6){el.innerHTML+='<a href="/site/'+D.slug+'/gallery" class="gi" style="display:flex;align-items:center;justify-content:center;background:var(--cream2);border-radius:var(--rs);text-decoration:none;min-height:120px;"><span style="font-size:1.1rem;font-weight:600;color:var(--teal);">+' + (p.length-6) + ' more →</span></a>';}
 })();
 
 // Reviews

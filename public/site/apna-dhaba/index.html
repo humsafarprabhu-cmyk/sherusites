@@ -26,10 +26,12 @@
   --ease:cubic-bezier(.25,.46,.45,.94);
 }
 html{scroll-behavior:smooth;font-size:16px}
-body{font-family:var(--sans);background:var(--cream);color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
-.page{width:100%;max-width:100%;background:var(--cream);min-height:100vh;position:relative}
+body{font-family:var(--sans);background:#F5EDE4;color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;display:flex;justify-content:center}
+.page{width:100%;max-width:1080px;background:var(--cream);min-height:100vh;position:relative}
+@media(min-width:1081px){.page{box-shadow:0 0 80px rgba(0,0,0,.08)}}
+@media(max-width:768px){body{background:var(--cream)}}
 a{text-decoration:none;color:inherit}
-img{max-width:100%;display:block}
+img{max-width:1080px;display:block}
 button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:inherit}
 .wrap{max-width:900px;margin:0 auto;padding:0 20px}
 .sec-inner{max-width:900px;margin:0 auto}
@@ -40,7 +42,7 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
 @media(scripting:none){.rv{opacity:1;transform:none}}
 
 /* ─── HEADER ─── */
-.hdr{position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-100%);z-index:100;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;transition:all .35s var(--ease);opacity:0;pointer-events:none;width:100%;max-width:100%}
+.hdr{position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-100%);z-index:100;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;transition:all .35s var(--ease);opacity:0;pointer-events:none;width:100%;max-width:1080px}
 .hdr.stuck{background:rgba(255,249,240,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);box-shadow:var(--shadow-s);transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
 .hdr-name{font-family:var(--serif);font-size:1.1rem;color:var(--text);transition:color .35s}
 .hdr-r{display:flex;gap:8px}
@@ -193,7 +195,7 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
 .ft-cr{font-size:.62rem;color:var(--text4)}.ft-cr a{color:var(--orange);font-weight:600}
 
 /* ─── STICKY BAR ─── */
-.sticky{display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);z-index:90;padding:10px 16px env(safe-area-inset-bottom);background:rgba(255,249,240,.95);backdrop-filter:blur(16px);border-top:1px solid var(--border);box-shadow:0 -2px 16px rgba(0,0,0,.04);width:100%;max-width:100%}
+.sticky{display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);z-index:90;padding:10px 16px env(safe-area-inset-bottom);background:rgba(255,249,240,.95);backdrop-filter:blur(16px);border-top:1px solid var(--border);box-shadow:0 -2px 16px rgba(0,0,0,.04);width:100%;max-width:1080px}
 .sticky-in{display:flex;gap:8px}
 .sticky .btn-wa{flex:1;justify-content:center;padding:13px;font-size:.84rem;border-radius:var(--rs)}
 .sticky .btn-ph{padding:13px 18px;border-radius:var(--rs);background:var(--white);border:1px solid var(--border);color:var(--text);font-size:1rem}

@@ -424,13 +424,8 @@ export async function provisionDomain(
     return { success: false, error: 'Contact creation failed' };
   }
 
-  // Re-verify domain is still available
-  const recheck = await checkDomainAvailability(domain.replace(/\.in$/, ''));
-  if (!recheck.available) {
-    await wa(phone, `❌ Sorry! ${domain} just got taken. Refund process shuru. Contact us on WhatsApp.`);
-    await sendTelegramAlert(`❌ Domain taken after payment: ${domain} for ${businessName}. REFUND needed!`);
-    return { success: false, error: 'Domain no longer available' };
-  }
+  // Skip re-verify — ResellerClub caches 'regthroughothers' after multiple checks.
+  // We already verified during suggestion phase. Just attempt registration — it will fail if truly taken.
 
   const reg = await registerDomain(domain, customerId, contactId, zone.nameservers);
   if (!reg.success) {
@@ -444,7 +439,7 @@ export async function provisionDomain(
   if (tunnelOk) await restartCloudflared();
 
   // Step 5: Update DB
-  const { getSiteData, saveSiteData } = await import('./bot/db.ts');
+  const { getSiteData, saveSiteData } = await import('./db.ts');
   const siteData = getSiteData(slug);
   if (siteData) {
     (siteData as any).customDomain = domain;

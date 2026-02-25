@@ -291,6 +291,44 @@ Every category must have 6 default Unsplash gallery photos. Defined in the templ
 | 2026-02-25 | Slim promo banner, single WA_NUMBER | renderer |
 | 2026-02-25 | Default gallery photos per category | salon |
 | 2026-02-25 | Fixed 2 broken Unsplash URLs | salon |
+## 10.0 Simple Commands (smart-router.ts) — NO AI NEEDED
+
+Simple regex-based commands work instantly without AI. These are the PRIMARY edit method.
+
+### Supported Commands (all categories):
+| Command | Examples |
+|---------|----------|
+| **Remove item** | "remove samosa", "litti chokha delete karo", "hatao paneer tikka", "remove X from our products" |
+| **Remove category** | "remove electronics category", "starters category hatao" |
+| **Add item** | "add samosa ₹50", "dalo coffee ₹80" |
+| **Change price** | "samosa ka price 60 karo", "price of coffee to 90" |
+| **Bulk add** | Multiple lines: "Samosa - ₹50\nChai - ₹20" |
+
+### Pattern Priority (ORDER MATTERS):
+1. `matchAddItem` — add items
+2. `matchRemoveCategory` — remove whole category (must be BEFORE item remove)
+3. `matchRemoveItem` — remove single item
+4. `matchPriceChange` — update price
+5. `matchBulkPrice` — bulk price update
+6. AI agent — fallback for complex edits
+
+### Data Field Handling:
+| Category | Items stored in | Notes |
+|----------|----------------|-------|
+| Restaurant | `menu` | Has `category` field (Starters, Main Course, etc.) |
+| Salon | `services` | May not have categories |
+| Store | `services` | Has `category` field |
+| Tutor | `subjects` | Has schedule/duration |
+| Clinic | `services` | Has duration |
+
+**All simple commands check ALL lists** (`menu`, `services`, `packages`, `plans`, `subjects`) — works for every category.
+
+### Regex Rules:
+- Suffix patterns (X delete karo) must come BEFORE prefix patterns (delete X) to avoid capturing command words as item names
+- Strip noise words: "from our products", "menu se", "karo", "kar", "do"
+- `(.+?)` (lazy) for suffix, `(.+?)` for prefix with noise stripping
+- Always skip if message contains photo/gallery/hero keywords → let AI handle
+
 ## 10.1 AI Agent Actions — CRITICAL RULE
 
 **NEVER use `siteData.menu` directly for item operations.** Different categories store items in different fields:

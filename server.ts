@@ -499,14 +499,19 @@ async function handleWhatsAppImage(phone: string, mediaId: string, caption: stri
   const siteData = getSiteData(slug);
   if (siteData) {
     if (!siteData.photos) siteData.photos = [];
+    const photoType = session?.data?.pendingPhotoType || 'gallery';
+    if (photoType === 'hero') {
+      // Replace existing hero photo
+      siteData.photos = siteData.photos.filter((p: any) => p.type !== 'hero');
+    }
     siteData.photos.push({
       url: `/site/${slug}/images/${filename}`,
       caption: caption || siteData.businessName,
-      type: 'gallery',
+      type: photoType,
     });
     saveSiteData(siteData, phone);
     renderSite(siteData);
-    console.log(`[Image] Saved ${filename} for ${slug} (${siteData.photos.length} total)`);
+    console.log(`[Image] Saved ${filename} as ${photoType} for ${slug} (${siteData.photos.length} total)`);
   }
 }
 

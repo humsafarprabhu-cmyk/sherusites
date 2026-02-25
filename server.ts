@@ -219,30 +219,8 @@ app.post('/api/payment/verify', payLimiter, (req, res) => {
 
     console.log(`[Payment] ✅ ${slug} upgraded to premium! Payment: ${razorpay_payment_id}`);
 
-    // Send WhatsApp confirmation
-    const site = getSiteData(slug);
-    if (site) {
-      if (ACCESS_TOKEN && PHONE_NUMBER_ID) {
-        sendTextMessage(site.phone, `🎉 *Payment Successful!*\n\n✅ ${site.businessName} is now PREMIUM!\n💳 Payment ID: ${razorpay_payment_id}\n\nYour custom domain is being set up. We'll message you when it's live!\n\nThank you for choosing SheruSites! 🦁`);
-      }
-
-      // Auto-provision domain (use pending domain from DB if selected)
-      const pendingDomain = (site as any).pendingDomain;
-      if (!pendingDomain) {
-        sendTelegramAlert(`⚠️ Payment received but NO pending domain for ${site.businessName} (${slug})\nPayment: ${razorpay_payment_id}\n\n👉 Manually provision domain`);
-      }
-      provisionDomain(slug, site.businessName, site.whatsapp || `91${site.phone}`, pendingDomain).then(result => {
-        if (result.success && result.domain) {
-          // provisionDomain already updates DB and sends WhatsApp
-          console.log(`[Domain] ✅ Provisioned: ${result.domain} for ${slug}`);
-        } else {
-          sendTelegramAlert(`⚠️ Auto-domain failed for ${site.businessName} (${slug})\nPayment: ${razorpay_payment_id}\nError: ${result.error}\n\n👉 Register manually and update DB`);
-        }
-      }).catch(err => {
-        console.error('[Domain] Provision error:', err.message);
-        sendTelegramAlert(`⚠️ Domain provisioning crashed for ${slug}: ${err.message}`);
-      });
-    }
+    // Trigger provisioning (idempotent)
+    triggerProvisionIfNeeded(slug, razorpay_payment_id);
 
     res.json({ success: true, paymentId: razorpay_payment_id });
   } catch (err: any) {
@@ -253,36 +231,21 @@ app.post('/api/payment/verify', payLimiter, (req, res) => {
 
 // Razorpay Payment Link callback (GET redirect after payment)
 app.get('/api/payment/link-callback', async (req, res) => {
-  const { slug, razorpay_payment_id, razorpay_payment_link_id, razorpay_payment_link_status } = req.query as any;
+  const { slug, razorpay_payment_id, razorpay_payment_link_status } = req.query as any;
   console.log(`[PayLink] Callback: slug=${slug}, status=${razorpay_payment_link_status}, payId=${razorpay_payment_id}`);
   
+  const site = getSiteData(slug as string);
+  const bizName = site?.businessName || slug;
+  
   if (razorpay_payment_link_status === 'paid' && slug) {
-    const site = getSiteData(slug);
-    if (site && site.plan !== 'premium') {
-      // Mark as paid
-      const { markPaid } = await import('./bot/payment.ts');
-      markPaid(slug, razorpay_payment_link_id || '', razorpay_payment_id || '', '');
-      
-      // Send WhatsApp confirmation
-      const whatsapp = site.whatsapp || `91${site.phone}`;
-      if (ACCESS_TOKEN && PHONE_NUMBER_ID) {
-        sendTextMessage(whatsapp, `🎉 *Payment Successful!*\n\n✅ ${site.businessName} is now PREMIUM!\n💳 Payment ID: ${razorpay_payment_id}\n\nDomain setup shuru ho gaya! WhatsApp pe updates milenge.`);
-      }
-
-      // Auto-provision domain
-      const pendingDomain = (site as any).pendingDomain;
-      if (pendingDomain) {
-        provisionDomain(slug, site.businessName, whatsapp, pendingDomain).catch(err => {
-          console.error('[Domain] Provision error:', err.message);
-        });
-      }
-    }
-    // Redirect to success page
+    // Trigger provisioning (idempotent — safe even if webhook already fired)
+    triggerProvisionIfNeeded(slug as string, razorpay_payment_id as string);
+    
     res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Payment Successful!</title><style>body{font-family:system-ui;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#FFF9F0;color:#1C1108;text-align:center;padding:20px;}
 .box{max-width:400px;}.check{font-size:64px;margin-bottom:16px;}h2{margin:0 0 8px;}p{color:#5C4A38;line-height:1.5;}</style></head>
 <body><div class="box"><div class="check">✅</div><h2>Payment Successful!</h2>
-<p>${site?.businessName || 'Your business'} is now PREMIUM! 🎉</p>
+<p>${bizName} is now PREMIUM! 🎉</p>
 <p>Domain setup shuru ho gaya. WhatsApp pe updates milenge.</p>
 <p style="margin-top:24px;font-size:.85rem;color:#9C8A78;">You can close this page now.</p></div></body></html>`);
   } else {
@@ -296,35 +259,72 @@ app.get('/api/payment/link-callback', async (req, res) => {
 app.post('/api/webhooks/razorpay', webhookLimiter, (req, res) => {
   try {
     const event = req.body;
-    if (event.event === 'payment.captured' || event.event === 'order.paid') {
-      const payment = event.payload?.payment?.entity;
+    if (event.event === 'payment.captured' || event.event === 'payment_link.paid' || event.event === 'order.paid') {
+      const payment = event.payload?.payment?.entity || event.payload?.payment_link?.entity;
       if (payment) {
-        const orderId = payment.order_id;
-        const paymentId = payment.id;
+        const paymentId = payment.id || payment.payments?.[0]?.payment_id;
         const notes = payment.notes || {};
         const slug = notes.slug;
 
         if (slug) {
           console.log(`[Webhook] Payment captured: ${paymentId} for ${slug}`);
-          // We can't verify signature here without the razorpay_signature,
-          // but Razorpay webhooks are verified by webhook secret
-          const site = getSiteData(slug);
-          if (site && site.plan !== 'premium') {
-            site.plan = 'premium';
-            site.paymentId = paymentId;
-            site.paidAt = new Date().toISOString();
-            saveSiteData(site);
-            console.log(`[Webhook] ✅ ${slug} auto-upgraded via webhook`);
-          }
+          triggerProvisionIfNeeded(slug, paymentId);
         }
       }
     }
     res.json({ status: 'ok' });
   } catch (err: any) {
     console.error('[Webhook] Error:', err.message);
-    res.json({ status: 'ok' }); // Always 200 for webhooks
+    res.json({ status: 'ok' });
   }
 });
+
+// Central provisioning trigger — idempotent, safe to call multiple times
+async function triggerProvisionIfNeeded(slug: string, paymentId?: string) {
+  const site = getSiteData(slug);
+  if (!site) return;
+  
+  // Already fully provisioned
+  if (site.plan === 'premium' && (site as any).customDomain && !(site as any).pendingDomain) {
+    console.log(`[Provision] ${slug} already fully provisioned, skipping`);
+    return;
+  }
+
+  const whatsapp = site.whatsapp || `91${site.phone}`;
+  const pendingDomain = (site as any).pendingDomain;
+
+  // Mark as paid if not already
+  if (site.plan !== 'premium') {
+    site.plan = 'premium';
+    site.paymentId = paymentId || site.paymentId;
+    site.paidAt = new Date().toISOString();
+    saveSiteData(site);
+    console.log(`[Provision] ${slug} marked as premium`);
+    
+    if (ACCESS_TOKEN && PHONE_NUMBER_ID) {
+      sendTextMessage(whatsapp, `🎉 *Payment Successful!*\n\n✅ ${site.businessName} is now PREMIUM!\n💳 Payment ID: ${paymentId}\n\nDomain setup shuru ho gaya! WhatsApp pe updates milenge.`);
+    }
+  }
+
+  // Provision domain if pending
+  if (pendingDomain) {
+    console.log(`[Provision] Starting domain provisioning: ${pendingDomain} for ${slug}`);
+    try {
+      const result = await provisionDomain(slug, site.businessName, whatsapp, pendingDomain);
+      if (result.success) {
+        console.log(`[Provision] ✅ ${result.domain} provisioned for ${slug}`);
+      } else {
+        console.error(`[Provision] ❌ Failed: ${result.error}`);
+        sendTelegramAlert(`⚠️ Domain provisioning failed for ${site.businessName} (${slug})\nDomain: ${pendingDomain}\nError: ${result.error}\nPayment: ${paymentId}\n\n👉 Manual fix needed`);
+      }
+    } catch (err: any) {
+      console.error(`[Provision] ❌ Crash: ${err.message}`);
+      sendTelegramAlert(`🔥 Domain provisioning CRASHED for ${site.businessName} (${slug})\nDomain: ${pendingDomain}\nError: ${err.message}\n\n👉 Manual fix needed`);
+    }
+  } else {
+    sendTelegramAlert(`⚠️ Payment for ${site.businessName} (${slug}) but NO pending domain.\nPayment: ${paymentId}`);
+  }
+}
 
 // ─── WHATSAPP META WEBHOOK ──────────────────────────────────────────────────
 
@@ -582,4 +582,24 @@ app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`   Sites: ${listAllSites().length}`);
   console.log(`   Base URL: ${getBaseUrl()}`);
   console.log(`   Rate limits: chat=30/min, pay=10/min, webhook=100/min\n`);
+
+  // STARTUP RECOVERY: Check for paid sites with pending domains (crashed mid-provisioning)
+  setTimeout(async () => {
+    try {
+      const { db: database } = await import('./bot/db.ts');
+      const stuckSites = database.prepare(
+        "SELECT slug FROM sites WHERE plan = 'premium' AND pending_domain IS NOT NULL AND (custom_domain IS NULL OR custom_domain = '')"
+      ).all() as any[];
+      
+      if (stuckSites.length > 0) {
+        console.log(`[Recovery] Found ${stuckSites.length} paid sites needing domain provisioning`);
+        for (const row of stuckSites) {
+          console.log(`[Recovery] Retrying provisioning for: ${row.slug}`);
+          await triggerProvisionIfNeeded(row.slug);
+        }
+      }
+    } catch (err: any) {
+      console.error('[Recovery] Error:', err.message);
+    }
+  }, 10000); // Wait 10s after boot
 });

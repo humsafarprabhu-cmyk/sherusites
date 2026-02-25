@@ -429,8 +429,14 @@ export async function provisionDomain(
 
   const reg = await registerDomain(domain, customerId, contactId, zone.nameservers);
   if (!reg.success) {
-    await sendTelegramAlert(`❌ Registration failed: ${domain}\n${reg.error}`);
-    return { success: false, error: reg.error };
+    // Check if domain already registered (from a previous crashed attempt)
+    const errStr = reg.error || '';
+    if (errStr.includes('already exists in our database')) {
+      console.log(`[Domain] ${domain} already registered (previous attempt). Continuing...`);
+    } else {
+      await sendTelegramAlert(`❌ Registration failed: ${domain}\n${reg.error}`);
+      return { success: false, error: reg.error };
+    }
   }
 
   // Step 4: Update tunnel ingress
@@ -443,6 +449,7 @@ export async function provisionDomain(
   const siteData = getSiteData(slug);
   if (siteData) {
     (siteData as any).customDomain = domain;
+    (siteData as any).pendingDomain = undefined; // Clear pending — provisioning complete
     siteData.plan = 'premium';
     saveSiteData(siteData, phone);
   }

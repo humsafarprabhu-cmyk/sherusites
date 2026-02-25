@@ -70,21 +70,16 @@ const webhookLimiter = rateLimit({
   max: 100,
 });
 
-// ─── STATIC FILES ────────────────────────────────────────────────────────────
-
-const PUBLIC_DIR = path.join(__dirname, 'public');
-app.use(express.static(PUBLIC_DIR, { maxAge: '30d' }));
-
-// ─── CUSTOM DOMAIN ROUTING ──────────────────────────────────────────────────
+// ─── CUSTOM DOMAIN ROUTING (must be BEFORE static files) ────────────────────
 app.use((req, res, next) => {
-  const host = req.hostname?.toLowerCase();
+  const host = (req.hostname || '')?.toLowerCase()?.replace(/^www\./, '');
   if (!host || host === 'whatswebsite.com' || host === 'localhost' || host.includes('vercel') || host.includes('cloudflared')) {
     return next();
   }
   // Check if this host is a custom domain
   const site = findSiteByDomain(host);
   if (site) {
-    const sitePath = path.join(SITES_DIR, site.slug, 'index.html');
+    const sitePath = path.resolve(SITES_DIR, site.slug, 'index.html');
     if (fs.existsSync(sitePath)) return res.sendFile(sitePath);
   }
   // Check pending domain — show setup page
@@ -95,6 +90,11 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// ─── STATIC FILES ────────────────────────────────────────────────────────────
+
+const PUBLIC_DIR = path.join(__dirname, 'public');
+app.use(express.static(PUBLIC_DIR, { maxAge: '30d' }));
 
 // ─── HEALTH ──────────────────────────────────────────────────────────────────
 

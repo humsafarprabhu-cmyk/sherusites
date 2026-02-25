@@ -241,9 +241,24 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
   const session = loadSession(phone);
 
   // Global commands  
-  if (lower === 'reset' || lower === 'restart' || lower === 'naya' || lower === 'new') {
-    deleteSession(phone);
+  if (lower === 'reset' || lower === 'restart' || lower === 'naya' || lower === 'new' || lower === 'wb_new' || lower === 'naya website banao') {
+    const s = loadSession(phone);
+    s.state = 'awaiting_category';
+    s.data = {};
+    s.editMode = undefined;
+    persistSession(phone, s);
     return { replies: [categoryListMsg()] };
+  }
+
+  // Global cat_ handler — works from any state
+  if (lower.startsWith('cat_') && !session.slug) {
+    const category = lower.replace('cat_', '');
+    if (['restaurant','store','salon','tutor','clinic','gym','photographer','service'].includes(category)) {
+      session.state = 'awaiting_name';
+      session.data = { category };
+      persistSession(phone, session);
+      return { replies: ['👍 *' + (category.charAt(0).toUpperCase() + category.slice(1)) + '!*\n\nApne business ka naam batao 👇'] };
+    }
   }
 
   if (lower === 'help' || lower === 'madad') {

@@ -324,6 +324,15 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
     return { replies: ['Abhi tak koi website nahi hai. "Hi" bhejo banane ke liye! 😊'] };
   }
 
+  // ─── GLOBAL: Greetings reset to welcome from any awaiting state ──────────
+  if (/^(hi|hello|hey|hii+|namaste|namaskar|hola|start|shuru)[\s!?.]*$/i.test(msg.trim()) && 
+      session.state?.startsWith('awaiting_')) {
+    session.state = 'idle';
+    session.data = {};
+    persistSession(phone, session);
+    return handleMessage(phone, msg);
+  }
+
   // ─── STATE MACHINE ─────────────────────────────────────────────────────────
 
   switch (session.state) {

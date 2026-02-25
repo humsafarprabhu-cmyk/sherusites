@@ -267,14 +267,13 @@ export function updateTunnelIngress(domain: string): boolean {
     }
 
     // Add before the catch-all 404 rule
-    const catchAllPattern = /(\s*- service: http_status:404)/;
-    const newRule = `  - hostname: ${domain}\n    service: http://localhost:4000\n`;
+    const catchAllPattern = /(\n\s*- service: http_status:404)/;
+    const newRule = `\n  - hostname: ${domain}\n    service: http://localhost:4000\n  - hostname: www.${domain}\n    service: http://localhost:4000`;
 
     if (catchAllPattern.test(config)) {
       config = config.replace(catchAllPattern, `${newRule}$1`);
     } else {
-      // Append before last line
-      config += `\n${newRule}`;
+      config += `${newRule}\n`;
     }
 
     fs.writeFileSync(TUNNEL_CONFIG, config, 'utf-8');

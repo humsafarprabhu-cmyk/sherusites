@@ -375,7 +375,7 @@ IMPORTANT: Analyze the business name and location to INTELLIGENTLY infer what th
       ),
       // Call 2: Tagline + about + reviews + todaySpecial (light)
       aiCall(
-        `${biz}\nGenerate for this specific business:\n- tagline (catchy, short, Hindi-English OK, NO business name in tagline)\n- about (2-3 lines)\n- reviews: 3 Google-style [{author (Indian name), text (1-2 lines), rating (4-5), date}]\n- todaySpecial: {name, description, price "₹XX", oldPrice "₹XX"}${category === 'tutor' ? '\n- stats: 3 stats [{value:"10+",label:"Years Exp"},{value:"500+",label:"Students"},{value:"95%",label:"Results"}] — realistic' : category === 'clinic' ? '\n- stats: 3 stats [{value:"15+",label:"Years Exp"},{value:"10K+",label:"Patients"},{value:"4.8",label:"Rating"}] — realistic' : ''}\nJSON only.`,
+        `${biz}\nGenerate for this specific business:\n- tagline (catchy, short, Hindi-English OK, NO business name in tagline)\n- about (2-3 lines)\n- reviews: 3 Google-style [{author (Indian name), text (1-2 lines), rating (4-5), date}]\n- todaySpecial: {name, description, price "₹XX", oldPrice "₹XX"}${['tutor','clinic','gym'].includes(category) ? `\n- stats: 3 stats [{value,label}] — realistic for a ${category}` : ''}\nJSON only.`,
         400, 12000
       ),
       // Call 3: Photo queries (lightest)

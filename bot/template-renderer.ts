@@ -116,8 +116,8 @@ export function renderSite(data: SiteData): string {
     </div>
     <div style="height:80px;"></div>`;
     
-    // Add promotional banner before closing body
-    html = html.replace('</body>', `${promoFooter}\n</body>`);
+    html = html.replace('</div><!-- __PAGE_END__ -->', `${promoFooter}\n</div><!-- __PAGE_END__ -->`);
+    if (!html.includes('__PAGE_END__')) html = html.replace('</body>', `${promoFooter}\n</body>`);
   } else {
     // Premium: subtle "Created by" footer (not fixed, just at bottom)
     const premiumFooter = `
@@ -125,7 +125,8 @@ export function renderSite(data: SiteData): string {
       Created by <a href="https://wa.me/918210329601?text=Hi%2C%20mujhe%20bhi%20website%20chahiye!" style="color:#6366f1;text-decoration:none;font-weight:600;">WhatsWebsite</a> 
       · <a href="https://wa.me/918210329601?text=Hi%2C%20mujhe%20bhi%20website%20chahiye!" style="color:#6366f1;text-decoration:none;">Create yours 📱</a>
     </div>`;
-    html = html.replace('</body>', `${premiumFooter}\n</body>`);
+    html = html.replace('</div><!-- __PAGE_END__ -->', `${premiumFooter}\n</div><!-- __PAGE_END__ -->`);
+    if (!html.includes('__PAGE_END__')) html = html.replace('</body>', `${premiumFooter}\n</body>`);
   }
 
   // Save

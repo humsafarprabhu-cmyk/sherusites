@@ -96,7 +96,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
 .svc-tag.cat{background:var(--orange-glow);color:var(--orange)}
 .svc-tag.warranty{background:rgba(34,197,94,.08);color:#16A34A}
 .svc-desc{font-size:.8rem;color:var(--text2);line-height:1.5}
-.svc-popular{position:absolute;top:12px;right:12px;background:var(--orange);color:#fff;font-size:.58rem;font-weight:700;padding:3px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.5px}
+.svc-popular{display:inline-flex;align-items:center;gap:3px;background:var(--orange);color:#fff;font-size:.58rem;font-weight:700;padding:3px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
 .svc-cta{display:inline-flex;align-items:center;gap:4px;margin-top:10px;padding:6px 14px;border-radius:6px;background:var(--blue-glow);color:var(--blue);font-weight:600;font-size:.74rem;transition:all .25s var(--ease)}
 .svc-cta:hover{background:var(--blue);color:#fff}
 
@@ -399,9 +399,9 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
   if($sg && items.length){
     $sg.innerHTML = items.map((s,i) => `
       <div class="svc-card fade-up" style="transition-delay:${i*60}ms">
-        ${s.popular ? '<div class="svc-popular">🔥 Popular</div>' : ''}
         <div class="svc-icon">${getIcon(s.name)}</div>
         <div class="svc-body">
+          ${s.popular ? '<div class="svc-popular">🔥 Popular</div>' : ''}
           <div class="svc-top">
             <div class="svc-name">${s.name}</div>
             <div class="svc-price">${s.price || ''}</div>

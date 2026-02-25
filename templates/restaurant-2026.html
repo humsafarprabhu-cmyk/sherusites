@@ -10,7 +10,7 @@
 <meta property="og:type" content="restaurant">
 <meta property="og:url" content="https://whatswebsite.com/site/{{slug}}">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Caveat:wght@500;600;700&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -22,7 +22,7 @@
   --border:rgba(44,32,22,.06);--border2:rgba(44,32,22,.1);
   --shadow-s:0 1px 4px rgba(44,32,22,.04);--shadow-m:0 4px 16px rgba(44,32,22,.06);--shadow-l:0 12px 40px rgba(44,32,22,.08);
   --r:20px;--rs:14px;--rx:8px;
-  --sans:'DM Sans',system-ui,sans-serif;--serif:'DM Serif Display',Georgia,serif;--hand:'Caveat',cursive;--hindi:'Tiro Devanagari Hindi',serif;
+  --sans:'DM Sans',system-ui,sans-serif;--serif:'DM Serif Display',Georgia,serif;--hand:'Caveat',cursive;
   --ease:cubic-bezier(.25,.46,.45,.94);
 }
 html{scroll-behavior:smooth;font-size:16px}
@@ -58,7 +58,7 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
 @keyframes pulse{0%,100%{box-shadow:0 0 6px #4ADE80}50%{box-shadow:0 0 16px #4ADE80}}
 .hero-open span{font-size:.65rem;font-weight:600;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:1.5px}
 .hero h1{font-family:var(--serif);font-size:clamp(1.8rem,6vw,2.6rem);color:#fff;font-weight:400;line-height:1.15;margin-bottom:6px;position:relative;z-index:1}
-.hero-sub{font-family:var(--hindi);font-size:.92rem;color:rgba(255,255,255,.55);margin-bottom:20px}
+.hero-sub{font-size:.92rem;color:rgba(255,255,255,.55);margin-bottom:20px}
 .hero-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
 .hero-photo{margin:0 -4px;border-radius:var(--r) var(--r) 0 0;overflow:hidden;aspect-ratio:4/3;position:relative}
 .hero-photo img{width:100%;height:100%;object-fit:cover;animation:slowZoom 25s ease-in-out infinite alternate;filter:contrast(1.08) saturate(1.15) brightness(1.02)}
@@ -90,7 +90,6 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
 .sec-c{background:var(--cream2)}
 .sec-eye{font-family:var(--hand);font-size:1.3rem;color:var(--orange);margin-bottom:2px}
 .sec-t{font-family:var(--serif);font-size:clamp(1.6rem,5vw,2.2rem);color:var(--text);margin-bottom:4px;line-height:1.15}
-.sec-hindi{font-family:var(--hindi);font-size:.88rem;color:var(--text3);margin-bottom:4px}
 .sec-desc{font-size:.85rem;color:var(--text2);max-width:380px}
 .sec-hdr{margin-bottom:28px;padding:0 20px}
 
@@ -275,7 +274,6 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
   <div class="sec-hdr rv">
     <div class="sec-eye">What's Cooking</div>
     <div class="sec-t">Our Menu</div>
-    <div class="sec-hindi">स्वाद का सफ़र</div>
   </div>
   <div class="m-tabs rv rv-d1" id="m-tabs"></div>
   <div class="m-list" id="m-list"></div>
@@ -287,7 +285,6 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
   <div class="sec-hdr rv">
     <div class="sec-eye">Fresh from our Kitchen</div>
     <div class="sec-t">Gallery</div>
-    <div class="sec-hindi">पहले नज़र से खाओ</div>
   </div>
   <div class="gal rv rv-d1" id="gal-g"></div>
 </div>
@@ -297,7 +294,6 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
   <div class="sec-hdr rv">
     <div class="sec-eye">What People Say</div>
     <div class="sec-t">Reviews</div>
-    <div class="sec-hindi">ग्राहकों की राय</div>
   </div>
   <div class="rev-scroll rv rv-d1" id="rev-list"></div>
 </div>
@@ -319,7 +315,6 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
   <div class="sec-hdr rv">
     <div class="sec-eye">Visit Us</div>
     <div class="sec-t">Aaiye, Swagat Hai</div>
-    <div class="sec-hindi">आइये, स्वागत है</div>
   </div>
   <div class="abt-grid rv rv-d1" id="abt-g"></div>
   <div class="map-box rv rv-d2" id="map-b"></div>

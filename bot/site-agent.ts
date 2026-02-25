@@ -11,7 +11,7 @@
  * Cost: ~₹0.3-0.5 per interaction (GPT-4o-mini)
  */
 
-import { getSiteData, saveSiteData, getOrCreateUser, listUserSites, addChatMessage, getChatHistory } from './db.ts';
+import { getSiteData, saveSiteData, getOrCreateUser, listUserSites, addChatMessage, getChatHistory, getSession, saveSession } from './db.ts';
 
 type SiteData = {
   slug: string;
@@ -47,7 +47,7 @@ interface AgentAction {
   params: Record<string, any>;
 }
 
-function executeActions(slug: string, actions: AgentAction[]): string[] {
+function executeActions(slug: string, actions: AgentAction[], phone?: string): string[] {
   const results: string[] = [];
   let siteData = getSiteData(slug);
   if (!siteData) return ['Site data not found'];
@@ -321,7 +321,17 @@ function executeActions(slug: string, actions: AgentAction[]): string[] {
           break;
         }
         case 'request_photo': {
-          results.push(`📸 Photo bhejo WhatsApp pe — automatically add ho jayegi!`);
+          // Set pendingPhotoType in session
+          if (phone) {
+            const sess = getSession(phone);
+            if (sess) {
+              sess.data.pendingPhotoType = params.type === 'hero' ? 'hero' : 'gallery';
+              saveSession(phone, sess);
+            }
+          }
+          results.push(params.type === 'hero' 
+            ? `📸 Hero photo bhejo — website ka main photo update ho jayega!`
+            : `📸 Photo bhejo WhatsApp pe — gallery mein add ho jayegi!`);
           break;
         }
         case 'update_experience': {
@@ -452,7 +462,7 @@ PHOTOS:
 - delete_photo: {index} (1-based)
 - delete_all_photos: {}
 - remove_hero: {} — remove hero image
-- request_photo: {} — ask user to send photo on WhatsApp
+- request_photo: {type: "hero"|"gallery"} — ask user to send photo (specify hero or gallery)
 
 BUSINESS INFO:
 - update_business_name: {name}
@@ -540,7 +550,7 @@ Always return valid JSON:
     }
 
     // Execute actions
-    const actionResults = executeActions(siteSlug, parsed.actions || []);
+    const actionResults = executeActions(siteSlug, parsed.actions || [], phone);
     
     // Build final reply
     let finalReply = parsed.reply || '';

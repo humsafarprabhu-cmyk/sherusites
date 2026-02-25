@@ -240,6 +240,11 @@ function welcomeBackMsg(sites: any[]): Reply {
   };
 }
 
+// ─── SEND CALLBACK (set by server.ts) ────────────────────────────────────────
+let _sendMsg: ((phone: string, text: string) => Promise<void>) | null = null;
+export function setBotSendCallback(fn: (phone: string, text: string) => Promise<void>) { _sendMsg = fn; }
+async function sendProgress(phone: string, text: string) { if (_sendMsg) await _sendMsg(phone, text); }
+
 // ─── MAIN HANDLER ────────────────────────────────────────────────────────────
 
 const lastMsgTime: Record<string, number> = {};
@@ -788,6 +793,9 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
 
       session.state = 'generating';
       persistSession(phone, session);
+
+      // Send progress message immediately
+      await sendProgress(phone, '🔨 Aapki website ban rahi hai... 10-15 sec mein ready hogi! ⏳');
 
       try {
         const baseSlug = session.data.slug!;

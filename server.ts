@@ -10,7 +10,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import rateLimit from 'express-rate-limit';
-import { handleMessage, setBaseUrl, getBaseUrl } from './bot/whatsapp-bot.ts';
+import { handleMessage, setBaseUrl, getBaseUrl, setBotSendCallback } from './bot/whatsapp-bot.ts';
 import { createOrder, verifyPayment, markPaid, getPaymentPageHTML } from './bot/payment.ts';
 import { listAllSites, getSiteData, saveSiteData, findSiteByDomain, findSiteByPendingDomain } from './bot/db.ts';
 import { provisionDomain, sendTelegramAlert, setSendWhatsApp, getSetupPageHTML } from './bot/domain.ts';
@@ -612,6 +612,9 @@ process.on('unhandledRejection', (err: any) => {
 
 // Wire up WhatsApp sender for domain.ts
 setSendWhatsApp(async (to: string, text: string) => {
+  await sendTextMessage(to, text);
+});
+setBotSendCallback(async (to: string, text: string) => {
   await sendTextMessage(to, text);
 });
 

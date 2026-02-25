@@ -16,6 +16,7 @@ const CF_ACCOUNT_ID = process.env.CF_ACCOUNT_ID || '5fe680e01145c390314fc36eb93d
 const CF_TUNNEL_ID = 'cb96adac-799f-4f7f-b739-2b54d9f767e2';
 const CF_TUNNEL_CNAME = `${CF_TUNNEL_ID}.cfargotunnel.com`;
 const TUNNEL_CONFIG = '/root/.cloudflared/config.yml';
+const TUNNEL_CONFIG_SYSTEMD = '/etc/cloudflared/config.yml';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_ALERT_TOKEN || '';
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_ALERT_CHAT_ID || '1038264809';
@@ -277,7 +278,8 @@ export function updateTunnelIngress(domain: string): boolean {
     }
 
     fs.writeFileSync(TUNNEL_CONFIG, config, 'utf-8');
-    console.log('[Tunnel] Added ingress rule for:', domain);
+    fs.copyFileSync(TUNNEL_CONFIG, TUNNEL_CONFIG_SYSTEMD);
+    console.log('[Tunnel] Added ingress rule for:', domain, '(both configs updated)');
     return true;
   } catch (err: any) {
     console.error('[Tunnel] Config update error:', err.message);

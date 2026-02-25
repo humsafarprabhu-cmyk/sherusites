@@ -355,7 +355,7 @@ IMPORTANT: Analyze the business name and location to INTELLIGENTLY infer what th
     const [menuResult, metaResult, photoResult] = await Promise.all([
       // Call 1: Menu/Services only (heaviest, but isolated)
       aiCall(
-        `${biz}${extraInfo ? `\nExtra: ${extraInfo}` : ''}\nINFER from the name & location what cuisine/products/services this business offers. "${businessName}" = generate SPECIFIC items matching this business, NOT generic Indian food.\n\n${prompt}\nJSON with key: ${contentKey}`,
+        `"${businessName}" in ${address}.\nWhat specific cuisine/products does "${businessName}" serve based on its name? First figure that out, then generate 12-15 menu items ONLY from that specific cuisine.\nIf name says "Bihari" → only Bihari dishes (litti chokha, sattu paratha, dal pitha, thekua, choora matar).\nIf name says "South Indian" → only dosa, idli, vada, uttapam, sambar.\nNO butter chicken, NO dal makhani, NO paneer tikka unless the name specifically suggests North Indian/Punjabi.\n\nEach item: name, price ₹, category, description (1 line). 3-4 popular:true.\nJSON: {"${contentKey}":[...]}`,
         500, 15000
       ),
       // Call 2: Tagline + about + reviews + todaySpecial (light)

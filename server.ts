@@ -79,8 +79,17 @@ app.use((req, res, next) => {
   // Check if this host is a custom domain
   const site = findSiteByDomain(host);
   if (site) {
-    const sitePath = path.resolve(SITES_DIR, site.slug, 'index.html');
-    if (fs.existsSync(sitePath)) return res.sendFile(sitePath);
+    // Serve site images: /site/slug/images/file → sites/slug/images/file
+    if (req.path.startsWith('/site/' + site.slug + '/images/')) {
+      const imgPath = path.resolve(SITES_DIR, site.slug, 'images', path.basename(req.path));
+      if (fs.existsSync(imgPath)) return res.sendFile(imgPath);
+    }
+    // Only serve index.html for root path or /index.html
+    if (req.path === '/' || req.path === '/index.html') {
+      const sitePath = path.resolve(SITES_DIR, site.slug, 'index.html');
+      if (fs.existsSync(sitePath)) return res.sendFile(sitePath);
+    }
+    // Let other paths (like /site/slug/gallery) fall through to normal routes
   }
   // Check pending domain — show setup page
   const pending = findSiteByPendingDomain(host);

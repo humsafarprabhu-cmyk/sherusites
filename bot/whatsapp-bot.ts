@@ -172,6 +172,7 @@ function categoryListMsg(): ListMsg {
         { id: 'cat_gym', title: '💪 Gym/Fitness', description: 'Gym, Yoga, CrossFit' },
         { id: 'cat_photographer', title: '📸 Photographer', description: 'Photography, Studio, Video' },
         { id: 'cat_service', title: '🔧 Service Provider', description: 'Electrician, Plumber, AC Repair' },
+        { id: 'cat_portfolio', title: '💼 Personal Portfolio', description: 'Developer, Designer, Freelancer' },
       ]
     }]
   };
@@ -275,7 +276,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
   // Global cat_ handler — works from any state
   if (lower.startsWith('cat_') && !session.slug) {
     const category = lower.replace('cat_', '');
-    if (['restaurant','store','salon','tutor','clinic','gym','photographer','service'].includes(category)) {
+    if (['restaurant','store','salon','tutor','clinic','gym','photographer','service','portfolio'].includes(category)) {
       session.state = 'awaiting_name';
       session.data = { category };
       persistSession(phone, session);
@@ -288,6 +289,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         gym: '💪 gym',
         photographer: '📸 studio',
         service: '🔧 business',
+        portfolio: '💼 portfolio',
       };
       const catLabel = catNames[category] || 'business';
       return { replies: [`👍 *${category.charAt(0).toUpperCase() + category.slice(1)}!*\n\nApne ${catLabel} ka naam batao 👇`] };

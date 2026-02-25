@@ -37,6 +37,7 @@ const CATEGORY_TEMPLATE: Record<string, string> = {
   gym: 'gym-2026.html',
   photographer: 'photographer-2026.html',
   service: 'service-2026.html',
+  portfolio: 'portfolio-2026.html',
 };
 
 export function renderSite(data: SiteData): string {
@@ -224,6 +225,7 @@ function getContentKey(category: string): string {
     gym: 'plans',
     photographer: 'packages',
     service: 'services',
+    portfolio: 'projects',
   };
   return keys[category] || 'services';
 }
@@ -238,6 +240,7 @@ function getCategoryBadge(category: string): string {
     gym: '💪 Fitness',
     photographer: '📸 Photography',
     service: '🔧 Services',
+    portfolio: '💼 Portfolio',
   };
   return badges[category] || '🏪 Business';
 }

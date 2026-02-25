@@ -487,6 +487,15 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         }] };
       }
 
+      // Auto-set pendingPhotoType based on message context
+      if (/hero|main\s*photo|cover\s*photo/i.test(msg)) {
+        session.data.pendingPhotoType = 'hero';
+        persistSession(phone, session);
+      } else if (/gallery|photo|image/i.test(msg) && !/hero/i.test(msg)) {
+        session.data.pendingPhotoType = 'gallery';
+        persistSession(phone, session);
+      }
+
       // Natural language via smart router
       if (session.slug) {
         try {

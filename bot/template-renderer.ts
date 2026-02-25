@@ -251,7 +251,7 @@ export function renderGalleryPage(data: SiteData): string {
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--primary:#f59e0b;--bg:#0f0f0f;--surface:#1a1a1a;--text:#f5f5f5;--text-muted:#a3a3a3;--glass:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.08);--gradient:linear-gradient(135deg,#f59e0b,#ef4444);--font-body:'Inter',sans-serif;--font-heading:'Playfair Display',serif;--radius:16px;--radius-sm:10px}
+:root{--primary:#1A6B5A;--primary-light:#E6F5F0;--bg:#FFF9F0;--surface:#FFFFFF;--text:#2D2016;--text-muted:#5C4A38;--text-light:#9C8A78;--border:rgba(44,32,22,.08);--shadow:0 4px 16px rgba(44,32,22,.06);--font-body:'Inter',sans-serif;--font-heading:'Playfair Display',serif;--radius:16px;--radius-sm:10px}
 html{scroll-behavior:smooth}
 body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
 
@@ -260,24 +260,23 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-he
 
 /* Header */
 .g-header{padding:2rem 1.5rem 1rem;max-width:1200px;margin:0 auto}
-.g-back{display:inline-flex;align-items:center;gap:.5rem;color:var(--text-muted);font-size:.9rem;transition:color .3s;margin-bottom:1.5rem}
+.g-back{display:inline-flex;align-items:center;gap:.5rem;color:var(--text-muted);font-size:.9rem;transition:color .3s;margin-bottom:1.5rem;text-decoration:none}
 .g-back:hover{color:var(--primary)}
-.g-title{font-family:var(--font-heading);font-size:clamp(2rem,5vw,3rem);margin-bottom:.5rem}
-.g-title span{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.g-title{font-family:var(--font-heading);font-size:clamp(2rem,5vw,3rem);margin-bottom:.5rem;color:var(--text)}
 .g-subtitle{color:var(--text-muted);font-size:1rem}
-.g-count{display:inline-block;background:var(--glass);border:1px solid var(--glass-border);padding:.25rem .75rem;border-radius:50px;font-size:.8rem;color:var(--primary);margin-left:.75rem;font-weight:600}
+.g-count{display:inline-block;background:var(--primary-light);border:1px solid var(--border);padding:.25rem .75rem;border-radius:50px;font-size:.8rem;color:var(--primary);margin-left:.75rem;font-weight:600}
 
 /* Grid */
 .g-grid{max-width:1200px;margin:2rem auto;padding:0 1.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
 @media(min-width:900px){.g-grid{grid-template-columns:repeat(3,1fr)}}
 @media(min-width:1200px){.g-grid{grid-template-columns:repeat(4,1fr)}}
-.g-item{position:relative;border-radius:var(--radius-sm);overflow:hidden;cursor:pointer;aspect-ratio:1;background:var(--surface)}
+.g-item{position:relative;border-radius:var(--radius-sm);overflow:hidden;cursor:pointer;aspect-ratio:1;background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow)}
 .g-item img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
 .g-item:hover img{transform:scale(1.08)}
 .g-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 50%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:1rem}
 .g-item:hover .g-overlay{opacity:1}
 .g-overlay span{color:#fff;font-size:.85rem;font-weight:500}
-.g-empty{grid-column:1/-1;text-align:center;padding:4rem 2rem;color:var(--text-muted);font-size:1.1rem;background:var(--glass);border:2px dashed var(--glass-border);border-radius:var(--radius)}
+.g-empty{grid-column:1/-1;text-align:center;padding:4rem 2rem;color:var(--text-muted);font-size:1.1rem;background:var(--surface);border:2px dashed var(--border);border-radius:var(--radius)}
 
 /* Lightbox */
 .lightbox{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);align-items:center;justify-content:center;flex-direction:column}
@@ -294,14 +293,14 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-he
 
 /* CTA */
 .g-cta{max-width:1200px;margin:2rem auto 3rem;padding:0 1.5rem;text-align:center}
-.g-cta-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:2.5rem;backdrop-filter:blur(10px)}
+.g-cta-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem;box-shadow:var(--shadow)}
 .g-cta-card p{color:var(--text-muted);margin-bottom:1rem;font-size:1rem}
 .g-cta-card a{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 2rem;border-radius:50px;background:#25D366;color:#fff;font-weight:600;transition:transform .3s,box-shadow .3s;box-shadow:0 4px 20px rgba(37,211,102,0.3)}
 .g-cta-card a:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(37,211,102,0.4)}
 
 /* Footer */
-.g-footer{text-align:center;padding:2rem;border-top:1px solid var(--glass-border);color:var(--text-muted);font-size:.75rem}
-.g-footer a{color:var(--primary);font-weight:600}
+.g-footer{text-align:center;padding:2rem;border-top:1px solid var(--border);color:var(--text-light);font-size:.75rem}
+.g-footer a{color:var(--primary);font-weight:600;text-decoration:none}
 </style>
 </head>
 <body>

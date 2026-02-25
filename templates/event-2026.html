@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+<title>__BUSINESS_NAME__</title>
+<meta name="description" content="__TAGLINE__">
+<meta property="og:title" content="__BUSINESS_NAME__">
+<meta property="og:description" content="__TAGLINE__">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎉</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#8B5CF6;--primary-light:#A78BFA;--primary-dark:#7C3AED;
+  --secondary:#EC4899;--secondary-light:#F472B6;
+  --accent:#F59E0B;--accent-light:#FDE047;
+  --dark:#0F0F23;--dark-light:#1E1E3F;
+  --white:#FFFFFF;--gray-50:#F9FAFB;--gray-100:#F3F4F6;--gray-200:#E5E7EB;--gray-300:#D1D5DB;
+  --text:#1F2937;--text2:#4B5563;--text3:#6B7280;
+  --border:rgba(139,92,246,.15);
+  --shadow-s:0 2px 8px rgba(15,15,35,.06);
+  --shadow-m:0 8px 30px rgba(15,15,35,.08);
+  --shadow-l:0 20px 60px rgba(15,15,35,.12);
+  --ease:cubic-bezier(.22,1,.36,1);
+  --font-display:'Outfit',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --gradient:linear-gradient(135deg,var(--primary) 0%,var(--secondary) 100%);
+  --gradient-text:linear-gradient(135deg,var(--primary),var(--secondary));
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--font-body);background:var(--white);color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font-family:var(--font-body);cursor:pointer;border:none;background:none;color:inherit}
+
+/* === SCROLL PROGRESS === */
+.scroll-prog{position:fixed;top:0;left:0;height:3px;background:var(--gradient);z-index:1000;transition:width .15s;width:0}
+
+/* === HEADER === */
+.hdr{position:fixed;top:0;left:0;right:0;z-index:100;transition:all .4s var(--ease);padding:16px 20px}
+.hdr.scrolled{background:rgba(255,255,255,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:var(--shadow-s);padding:10px 20px;border-bottom:1px solid var(--border)}
+.hdr-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.hdr-name{font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:#fff;transition:color .35s;background:var(--gradient-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr.scrolled .hdr-name{color:var(--text);-webkit-text-fill-color:var(--text)}
+.hdr-b{padding:8px 18px;border-radius:50px;font-size:.78rem;font-weight:600;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(10px);transition:all .25s var(--ease)}
+.hdr.scrolled .hdr-b{background:var(--gradient);color:#fff;border:none}
+.hdr-b:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(139,92,246,.3)}
+
+/* === HERO === */
+.hero{position:relative;min-height:90vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:var(--dark)}
+.hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden}
+.hero-bg img{width:100%;height:100%;object-fit:cover;animation:ken-burns 20s ease-in-out infinite alternate}
+.hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(15,15,35,.85) 0%,rgba(139,92,246,.3) 40%,rgba(15,15,35,.9) 100%);z-index:1}
+@keyframes ken-burns{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.08) translate(-1%,-1%)}}
+.hero-content{position:relative;z-index:2;padding:40px 24px;max-width:700px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:50px;background:rgba(139,92,246,.2);backdrop-filter:blur(10px);border:1px solid rgba(139,92,246,.3);color:#fff;font-size:.8rem;font-weight:600;margin-bottom:20px;text-transform:uppercase;letter-spacing:1px}
+.hero h1{font-family:var(--font-display);font-size:clamp(2.5rem,8vw,4.5rem);color:#fff;font-weight:800;line-height:1.08;margin-bottom:16px;text-shadow:0 4px 30px rgba(0,0,0,.5)}
+.hero-date{font-family:var(--font-display);font-size:clamp(1.2rem,3vw,1.6rem);color:var(--accent-light);margin-bottom:8px;font-weight:600}
+.hero-venue{font-size:1rem;color:rgba(255,255,255,.7);margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:6px}
+.hero-tagline{font-size:.9rem;color:rgba(255,255,255,.6);font-weight:400;margin-bottom:24px;max-width:450px;margin-left:auto;margin-right:auto;line-height:1.6}
+.hero-countdown{background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:20px;margin-bottom:32px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.countdown-item{text-align:center}
+.countdown-num{font-family:var(--font-display);font-size:1.8rem;font-weight:700;background:var(--gradient-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block}
+.countdown-label{font-size:.7rem;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:1px}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;padding:15px 30px;border-radius:50px;background:var(--gradient);color:#fff;font-weight:600;font-size:.88rem;position:relative;overflow:hidden;transition:all .3s var(--ease);box-shadow:0 4px 20px rgba(139,92,246,.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(139,92,246,.4)}
+.btn-primary::after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.2),transparent);opacity:0;transition:opacity .3s}
+.btn-primary:hover::after{opacity:1}
+.btn-ghost{display:inline-flex;align-items:center;gap:6px;padding:15px 24px;border-radius:50px;color:#fff;border:1.5px solid rgba(255,255,255,.2);font-weight:500;font-size:.86rem;transition:all .3s var(--ease)}
+.btn-ghost:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35);transform:translateY(-1px)}
+
+/* === SECTIONS === */
+.section{padding:64px 20px}
+.sec-hdr{text-align:center;margin-bottom:40px}
+.sec-eye{font-family:var(--font-display);font-size:.9rem;color:var(--primary);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:2px}
+.sec-t{font-family:var(--font-display);font-size:clamp(1.8rem,5vw,2.4rem);color:var(--text);margin-bottom:8px;line-height:1.2;font-weight:700}
+.sec-desc{font-size:.9rem;color:var(--text2);max-width:500px;margin:0 auto;line-height:1.6}
+.sec-inner{max-width:900px;margin:0 auto}
+
+/* === SCHEDULE === */
+.schedule-grid{display:grid;grid-template-columns:1fr;gap:16px}
+.schedule-item{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:24px;transition:all .35s var(--ease);position:relative;overflow:hidden}
+.schedule-item:hover{transform:translateY(-2px);box-shadow:var(--shadow-m);border-color:var(--primary-light)}
+.schedule-item::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient);opacity:0;transition:opacity .3s}
+.schedule-item:hover::before{opacity:1}
+.schedule-time{font-family:var(--font-display);font-size:1.1rem;color:var(--primary);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.schedule-title{font-family:var(--font-display);font-size:1.3rem;color:var(--text);margin-bottom:6px;font-weight:600}
+.schedule-desc{font-size:.85rem;color:var(--text2);line-height:1.6}
+.schedule-speaker{font-size:.8rem;color:var(--text3);margin-top:8px;font-weight:500}
+
+/* === SPEAKERS === */
+.speakers-grid{display:grid;grid-template-columns:1fr;gap:24px}
+@media(min-width:640px){.speakers-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:900px){.speakers-grid{grid-template-columns:repeat(3,1fr)}}
+.speaker-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:24px;text-align:center;box-shadow:var(--shadow-s);transition:all .35s var(--ease);position:relative;overflow:hidden}
+.speaker-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-m);border-color:var(--primary-light)}
+.speaker-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient);opacity:0;transition:opacity .3s}
+.speaker-card:hover::before{opacity:1}
+.speaker-photo{width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 16px;border:3px solid var(--primary-light);box-shadow:0 4px 20px rgba(139,92,246,.2)}
+.speaker-name{font-family:var(--font-display);font-size:1.1rem;color:var(--text);margin-bottom:4px;font-weight:600}
+.speaker-title{font-size:.8rem;color:var(--primary);margin-bottom:8px;font-weight:500;text-transform:uppercase;letter-spacing:1px}
+.speaker-desc{font-size:.8rem;color:var(--text2);line-height:1.5}
+
+/* === GALLERY === */
+.gallery-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:640px){.gallery-grid{grid-template-columns:repeat(3,1fr)}}
+.gal-item{aspect-ratio:1;border-radius:16px;overflow:hidden;position:relative;cursor:pointer;background:var(--gray-100)}
+.gal-item img{width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+.gal-item:hover img{transform:scale(1.08)}
+.gal-item::after{content:'';position:absolute;inset:0;background:linear-gradient(transparent 60%,rgba(15,15,35,.4));opacity:0;transition:opacity .3s}
+.gal-item:hover::after{opacity:1}
+.gal-more{display:flex;align-items:center;justify-content:center;background:var(--gray-50);border:2px dashed var(--border);border-radius:16px;aspect-ratio:1;font-family:var(--font-display);font-size:.95rem;color:var(--primary);font-weight:600;transition:all .3s var(--ease)}
+.gal-more:hover{background:rgba(139,92,246,.05);border-color:var(--primary-light)}
+
+/* === ABOUT === */
+.about-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:32px 24px;text-align:center;box-shadow:var(--shadow-s)}
+.about-text{font-size:.9rem;color:var(--text2);line-height:1.7;margin-bottom:20px}
+.about-owner{font-family:var(--font-display);font-size:1.1rem;color:var(--text);margin-bottom:4px;font-weight:600}
+.about-exp{font-size:.8rem;color:var(--text3)}
+
+/* === SPONSORS === */
+.sponsors-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+@media(min-width:640px){.sponsors-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:900px){.sponsors-grid{grid-template-columns:repeat(4,1fr)}}
+.sponsor-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;transition:all .3s var(--ease);display:flex;align-items:center;justify-content:center;min-height:100px}
+.sponsor-card:hover{box-shadow:var(--shadow-m);transform:translateY(-2px)}
+.sponsor-logo{max-width:100px;max-height:60px;object-fit:contain;filter:grayscale(1) opacity(.7);transition:filter .3s}
+.sponsor-card:hover .sponsor-logo{filter:grayscale(0) opacity(1)}
+
+/* === TRUST STRIP === */
+.trust{padding:32px 20px;background:var(--gray-50);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.trust-inner{max-width:900px;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.trust-pill{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:50px;background:var(--white);border:1px solid var(--border);font-size:.76rem;font-weight:500;color:var(--text);box-shadow:var(--shadow-s)}
+
+/* === OFFER BANNER === */
+.offer{background:var(--gradient);padding:24px 20px;text-align:center;position:relative;overflow:hidden}
+.offer::before{content:'🎉';position:absolute;top:8px;left:20px;font-size:1.5rem;opacity:.3;animation:float 3s ease-in-out infinite}
+.offer::after{content:'🎉';position:absolute;bottom:8px;right:20px;font-size:1.5rem;opacity:.3;animation:float 3s ease-in-out infinite .5s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.offer-t{font-family:var(--font-display);font-size:1.2rem;color:#fff;margin-bottom:4px;font-weight:600}
+.offer-d{font-size:.8rem;color:rgba(255,255,255,.8)}
+
+/* === LOCATION === */
+.loc-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center;box-shadow:var(--shadow-s)}
+.loc-map{width:100%;height:200px;border-radius:12px;overflow:hidden;margin-bottom:16px;background:var(--gray-100)}
+.loc-map iframe{width:100%;height:100%;border:0}
+.loc-addr{font-size:.9rem;color:var(--text2);margin-bottom:4px;line-height:1.6}
+.loc-time{font-size:.85rem;color:var(--text3);margin-bottom:16px}
+.loc-btn{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;border-radius:50px;background:var(--gray-50);color:var(--primary);font-weight:600;font-size:.82rem;border:1px solid var(--border);transition:all .3s var(--ease)}
+.loc-btn:hover{background:var(--gradient);color:#fff;transform:translateY(-1px);border-color:transparent}
+
+/* === FOOTER === */
+.ftr{background:var(--dark);padding:32px 20px;text-align:center;position:relative}
+.ftr-name{font-family:var(--font-display);font-size:1.2rem;color:#fff;margin-bottom:8px;font-weight:700}
+.ftr-tag{font-size:.9rem;color:var(--primary-light);margin-bottom:16px}
+.ftr-links{display:flex;gap:16px;justify-content:center;margin-bottom:16px;flex-wrap:wrap}
+.ftr-links a{color:rgba(255,255,255,.6);font-size:.78rem;transition:color .3s}
+.ftr-links a:hover{color:var(--primary-light)}
+.ftr-copy{font-size:.65rem;color:rgba(255,255,255,.4)}
+
+/* === STICKY CTA === */
+.sticky-cta{position:fixed;bottom:0;left:0;right:0;z-index:90;background:rgba(255,255,255,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:12px 20px;transform:translateY(100%);transition:transform .4s var(--ease);display:flex;align-items:center;justify-content:center;gap:10px}
+.sticky-cta.show{transform:translateY(0)}
+.sticky-cta .btn-primary{padding:12px 28px;font-size:.84rem}
+
+/* === ANIMATIONS === */
+.fade-up{opacity:0;transform:translateY(25px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.fade-up.vis{opacity:1;transform:translateY(0)}
+
+/* === RESPONSIVE === */
+@media(max-width:480px){
+  .hero{min-height:85vh}
+  .section{padding:48px 16px}
+  .schedule-item{padding:20px}
+  .speaker-card{padding:20px}
+  .countdown-item{min-width:80px}
+}
+</style>
+</head>
+<body>
+<!-- Scroll Progress -->
+<div class="scroll-prog" id="prog"></div>
+
+<!-- Header -->
+<header class="hdr" id="hdr">
+  <div class="hdr-inner">
+    <span class="hdr-name" id="hdrName">__BUSINESS_NAME__</span>
+    <a class="hdr-b" id="hdrBook" href="#">Register</a>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero" id="heroSection">
+  <div class="hero-bg"><img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1400&q=80" alt="" id="heroImg"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge" id="heroBadge">🎯 LIVE EVENT</div>
+    <h1 id="heroName">__BUSINESS_NAME__</h1>
+    <div class="hero-date" id="heroDate">Event Date</div>
+    <div class="hero-venue" id="heroVenue">📍 Event Venue</div>
+    <div class="hero-tagline" id="heroTagline">__TAGLINE__</div>
+    <div class="hero-countdown" id="heroCountdown">
+      <div class="countdown-item"><span class="countdown-num" id="countDays">0</span><span class="countdown-label">Days</span></div>
+      <div class="countdown-item"><span class="countdown-num" id="countHours">0</span><span class="countdown-label">Hours</span></div>
+      <div class="countdown-item"><span class="countdown-num" id="countMins">0</span><span class="countdown-label">Minutes</span></div>
+    </div>
+    <div class="hero-btns">
+      <a class="btn-primary" id="heroBook" href="#">🎟️ Register Now</a>
+      <a class="btn-ghost" href="#schedule">View Schedule ↓</a>
+    </div>
+  </div>
+</section>
+
+<!-- Trust Strip -->
+<div class="trust">
+  <div class="trust-inner" id="trustStrip"></div>
+</div>
+
+<!-- Offer -->
+<section class="offer" id="offerSection" style="display:none">
+  <div class="offer-t" id="offerTitle"></div>
+  <div class="offer-d" id="offerDesc"></div>
+</section>
+
+<!-- Schedule -->
+<section class="section" id="schedule">
+  <div class="sec-hdr fade-up" id="scheduleHdr">
+    <div class="sec-eye" id="scheduleEye"></div>
+    <h2 class="sec-t" id="scheduleTitle"></h2>
+    <p class="sec-desc" id="scheduleDesc"></p>
+  </div>
+  <div class="sec-inner">
+    <div class="schedule-grid" id="scheduleGrid"></div>
+  </div>
+</section>
+
+<!-- Speakers -->
+<section class="section" id="speakersSection" style="background:var(--gray-50)">
+  <div class="sec-hdr fade-up" id="speakersHdr">
+    <div class="sec-eye" id="speakersEye"></div>
+    <h2 class="sec-t" id="speakersTitle"></h2>
+    <p class="sec-desc" id="speakersDesc"></p>
+  </div>
+  <div class="sec-inner">
+    <div class="speakers-grid" id="speakersGrid"></div>
+  </div>
+</section>
+
+<!-- Gallery -->
+<section class="section" id="gallerySection">
+  <div class="sec-hdr fade-up">
+    <div class="sec-eye" id="galEye"></div>
+    <h2 class="sec-t" id="galTitle"></h2>
+    <p class="sec-desc" id="galDesc"></p>
+  </div>
+  <div class="sec-inner">
+    <div class="gallery-grid" id="galGrid"></div>
+  </div>
+</section>
+
+<!-- About -->
+<section class="section" id="aboutSection" style="background:var(--gray-50)">
+  <div class="sec-hdr fade-up">
+    <div class="sec-eye" id="aboutEye"></div>
+    <h2 class="sec-t" id="aboutTitle"></h2>
+  </div>
+  <div class="sec-inner">
+    <div class="about-card fade-up" id="aboutCard">
+      <p class="about-text" id="aboutText"></p>
+      <div class="about-owner" id="aboutOwner"></div>
+      <div class="about-exp" id="aboutExp"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Sponsors -->
+<section class="section" id="sponsorsSection" style="display:none">
+  <div class="sec-hdr fade-up">
+    <div class="sec-eye" id="sponsorsEye">partners</div>
+    <h2 class="sec-t" id="sponsorsTitle">Our Sponsors</h2>
+    <p class="sec-desc" id="sponsorsDesc">Thanks to our amazing partners</p>
+  </div>
+  <div class="sec-inner">
+    <div class="sponsors-grid" id="sponsorsGrid"></div>
+  </div>
+</section>
+
+<!-- Location -->
+<section class="section" id="locSection">
+  <div class="sec-hdr fade-up">
+    <div class="sec-eye" id="locEye"></div>
+    <h2 class="sec-t" id="locTitle"></h2>
+  </div>
+  <div class="sec-inner">
+    <div class="loc-card fade-up">
+      <div class="loc-map" id="locMap"></div>
+      <p class="loc-addr" id="locAddr">__ADDRESS__</p>
+      <p class="loc-time" id="locTime">__TIMINGS__</p>
+      <a class="loc-btn" id="locBtn" href="#">📍 Get Directions</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="ftr">
+  <div class="ftr-name" id="ftrName">__BUSINESS_NAME__</div>
+  <div class="ftr-tag" id="ftrTag">__TAGLINE__</div>
+  <div class="ftr-links">
+    <a href="#schedule">Schedule</a>
+    <a href="#speakersSection">Speakers</a>
+    <a href="#gallerySection">Gallery</a>
+    <a href="#locSection">Venue</a>
+  </div>
+  <div class="ftr-copy">© 2026 <span id="ftrCopy">__BUSINESS_NAME__</span>. All rights reserved.</div>
+</footer>
+<!-- __PAGE_END__ -->
+
+<!-- Sticky CTA -->
+<div class="sticky-cta" id="stickyCta">
+  <a class="btn-primary" id="stickyBook" href="#">🎟️ Register</a>
+</div>
+
+<!-- __INJECT_DATA__ -->
+<script>
+(function(){
+  const D = window.__SITE_DATA__ || {};
+  const phone = D.whatsapp || D.phone || '';
+  const waLink = 'https://wa.me/' + phone.replace(/\D/g,'') + '?text=Hi! I want to register for your event';
+  const mapLink = 'https://maps.google.com/?q=' + encodeURIComponent(D.address || '');
+  const cat = D.category || 'event';
+  const sec = D.sectionContent || {};
+
+  // Helper: set text if element exists
+  function t(id,v){const e=document.getElementById(id);if(e&&v)e.textContent=v;return e}
+
+  // Header
+  t('hdrName', D.businessName);
+  document.querySelectorAll('#hdrBook,#heroBook,#stickyBook').forEach(el => el.href = waLink);
+
+  // Hero
+  t('heroName', D.businessName);
+  t('heroDate', D.eventDate || 'Coming Soon');
+  t('heroVenue', D.eventVenue ? '📍 ' + D.eventVenue : '');
+  t('heroTagline', D.tagline);
+
+  // Hero background image
+  const photos = D.photos || [];
+  const heroPhoto = photos.find(p => p.type === 'hero');
+  if(heroPhoto){
+    const heroImg = document.getElementById('heroImg');
+    if(heroImg) heroImg.src = heroPhoto.url;
+  }
+
+  // Countdown timer
+  if(D.eventDate){
+    const targetDate = new Date(D.eventDate);
+    function updateCountdown(){
+      const now = new Date().getTime();
+      const distance = targetDate.getTime() - now;
+      if(distance > 0){
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        t('countDays', days);
+        t('countHours', hours);
+        t('countMins', minutes);
+      } else {
+        t('countDays', '🎉');
+        t('countHours', '🎊');
+        t('countMins', '🔴');
+        const badge = document.getElementById('heroBadge');
+        if(badge) badge.textContent = '🔴 LIVE NOW';
+      }
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 60000);
+  }
+
+  // Trust strip (from DB or defaults)
+  const trustPills = D.trustBadges || sec.trustBadges || [
+    {icon:'🎯',text:'Expert Speakers'},
+    {icon:'🤝',text:'Networking'},
+    {icon:'🏆',text:'Industry Leaders'},
+    {icon:'💡',text:'Innovation'}
+  ];
+  const $ts = document.getElementById('trustStrip');
+  if($ts) $ts.innerHTML = trustPills.map(p => `<div class="trust-pill">${p.icon||''} ${p.text}</div>`).join('');
+
+  // Offer
+  if(D.activeOffer){
+    const $os = document.getElementById('offerSection');
+    if($os){
+      $os.style.display = 'block';
+      t('offerTitle', D.activeOffer.title);
+      t('offerDesc', D.activeOffer.description);
+    }
+  }
+
+  // Schedule section header
+  t('scheduleEye', sec.scheduleEye || 'agenda');
+  t('scheduleTitle', sec.scheduleTitle || 'Event Schedule');
+  t('scheduleDesc', sec.scheduleDesc || 'Your complete event timeline');
+
+  // Schedule/Services
+  const schedule = D.services || [];
+  const $sg = document.getElementById('scheduleGrid');
+  if($sg && schedule.length){
+    $sg.innerHTML = schedule.map((s,i) => `
+      <div class="schedule-item fade-up" style="transition-delay:${i*80}ms">
+        <div class="schedule-time">⏰ ${s.time || s.duration || 'TBD'}</div>
+        <div class="schedule-title">${s.name}</div>
+        <div class="schedule-desc">${s.description || ''}</div>
+        ${s.speaker ? `<div class="schedule-speaker">👤 ${s.speaker}</div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  // Speakers section header
+  t('speakersEye', sec.speakersEye || 'speakers');
+  t('speakersTitle', sec.speakersTitle || 'Featured Speakers');
+  t('speakersDesc', sec.speakersDesc || 'Learn from industry experts');
+
+  // Speakers (if any exist)
+  const speakers = D.speakers || [];
+  const $spg = document.getElementById('speakersGrid');
+  const $sps = document.getElementById('speakersSection');
+  if(speakers.length && $spg){
+    $spg.innerHTML = speakers.map((sp,i) => `
+      <div class="speaker-card fade-up" style="transition-delay:${i*80}ms">
+        <img class="speaker-photo" src="${sp.photo || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&q=80'}" alt="${sp.name}">
+        <div class="speaker-name">${sp.name}</div>
+        <div class="speaker-title">${sp.title || 'Speaker'}</div>
+        <div class="speaker-desc">${sp.description || ''}</div>
+      </div>
+    `).join('');
+  } else if($sps){
+    $sps.style.display = 'none';
+  }
+
+  // Gallery section header
+  t('galEye', sec.galleryEye || 'gallery');
+  t('galTitle', sec.galleryTitle || 'Event Highlights');
+  t('galDesc', sec.galleryDesc || 'Moments from our events');
+
+  // Gallery - Default event photos
+  const defaultGallery = [
+    {url:'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&q=80',caption:'Corporate Event'},
+    {url:'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=600&q=80',caption:'Conference'},
+    {url:'https://images.unsplash.com/photo-1511578314322-379afb476865?w=600&q=80',caption:'Networking'},
+    {url:'https://images.unsplash.com/photo-1531538606174-0f90ff5dce83?w=600&q=80',caption:'Workshop'},
+    {url:'https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=600&q=80',caption:'Presentation'},
+    {url:'https://images.unsplash.com/photo-1523050854058-8df90110c9d1?w=600&q=80',caption:'Seminar'},
+  ];
+  let galPhotos = photos.filter(p => p.type === 'gallery' || !p.type);
+  if(!galPhotos.length) galPhotos = defaultGallery;
+  const $gg = document.getElementById('galGrid');
+  const $gs = document.getElementById('gallerySection');
+  if(galPhotos.length && $gg){
+    const show = galPhotos.slice(0,6);
+    $gg.innerHTML = show.map((p,i) => `
+      <div class="gal-item fade-up" style="transition-delay:${i*80}ms">
+        <img src="${p.url}" alt="${p.caption || ''}" loading="lazy">
+      </div>
+    `).join('') + (galPhotos.length > 6 ? `<a class="gal-more fade-up" href="/site/${D.slug}/gallery">See All →</a>` : '');
+  } else if($gs){
+    $gs.style.display = 'none';
+  }
+
+  // About section header
+  t('aboutEye', sec.aboutEye || 'about');
+  t('aboutTitle', sec.aboutTitle || 'About This Event');
+
+  // About
+  const $at = document.getElementById('aboutText');
+  if($at) $at.textContent = D.about || '';
+  t('aboutOwner', D.ownerName ? '— ' + D.ownerName : '');
+  t('aboutExp', D.experience || '');
+
+  // Location section header
+  t('locEye', sec.locationEye || 'venue');
+  t('locTitle', sec.locationTitle || 'Event Venue');
+
+  // Location — map embed
+  const $map = document.getElementById('locMap');
+  if($map && D.address){
+    const q = encodeURIComponent(D.businessName + ', ' + D.address);
+    $map.innerHTML = `<iframe src="https://maps.google.com/maps?q=${q}&output=embed&z=15" allowfullscreen loading="lazy"></iframe>`;
+  }
+
+  // Location
+  t('locAddr', D.address);
+  const $lt = document.getElementById('locTime');
+  if($lt && D.timings) $lt.textContent = '🕐 ' + D.timings;
+  const $lb = document.getElementById('locBtn');
+  if($lb) $lb.href = mapLink;
+
+  // Footer
+  const $fn = document.getElementById('ftrName');
+  if($fn && D.businessName) $fn.textContent = D.businessName;
+  const $ft = document.getElementById('ftrTag');
+  if($ft && D.tagline) $ft.textContent = D.tagline;
+  const $fc = document.getElementById('ftrCopy');
+  if($fc && D.businessName) $fc.textContent = D.businessName;
+
+  // Title
+  if(D.businessName) document.title = D.businessName + ' | ' + (D.eventDate || 'Event Registration');
+
+  // === SCROLL EFFECTS === //
+  const hdr = document.getElementById('hdr');
+  const prog = document.getElementById('prog');
+  const sticky = document.getElementById('stickyCta');
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if(!ticking){
+      requestAnimationFrame(() => {
+        const st = window.scrollY;
+        const maxS = document.documentElement.scrollHeight - window.innerHeight;
+        // Header
+        hdr.classList.toggle('scrolled', st > 60);
+        // Progress bar
+        prog.style.width = (st/maxS*100) + '%';
+        // Sticky CTA
+        sticky.classList.toggle('show', st > 400);
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  // Intersection Observer for fade-up
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('vis'); obs.unobserve(e.target); }});
+  }, {threshold:0.15});
+  document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+})();
+</script>
+</body>
+</html>

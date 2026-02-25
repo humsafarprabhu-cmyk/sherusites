@@ -38,6 +38,8 @@ const CATEGORY_TEMPLATE: Record<string, string> = {
   photographer: 'photographer-2026.html',
   service: 'service-2026.html',
   portfolio: 'portfolio-2026.html',
+  wedding: 'wedding-2026.html',
+  event: 'event-2026.html',
 };
 
 export function renderSite(data: SiteData): string {
@@ -226,6 +228,8 @@ function getContentKey(category: string): string {
     photographer: 'packages',
     service: 'services',
     portfolio: 'projects',
+    wedding: 'services',
+    event: 'services',
   };
   return keys[category] || 'services';
 }
@@ -241,6 +245,8 @@ function getCategoryBadge(category: string): string {
     photographer: '📸 Photography',
     service: '🔧 Services',
     portfolio: '💼 Portfolio',
+    wedding: '💒 Wedding',
+    event: '🎉 Event',
   };
   return badges[category] || '🏪 Business';
 }

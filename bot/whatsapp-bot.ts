@@ -58,11 +58,14 @@ const CATEGORY_DISPLAY: Record<string, string> = {
   gym: '💪 Gym / Fitness',
   photographer: '📸 Photographer',
   service: '🔧 Service Provider',
+  wedding: '💒 Wedding / Marriage',
+  event: '🎉 Events',
 };
 
 const CATEGORY_NUMBERS: Record<string, string> = {
   '1': 'restaurant', '2': 'store', '3': 'salon', '4': 'tutor',
   '5': 'clinic', '6': 'gym', '7': 'photographer', '8': 'service',
+  '9': 'wedding', '10': 'event',
 };
 
 function detectCategory(input: string): string | null {
@@ -76,6 +79,8 @@ function detectCategory(input: string): string | null {
     gym: ['gym', 'fitness', 'yoga', 'workout', 'crossfit', 'zumba'],
     photographer: ['photographer', 'photography', 'studio', 'photo', 'video'],
     service: ['electrician', 'plumber', 'repair', 'service', 'ac', 'carpenter', 'painter'],
+    wedding: ['wedding', 'marriage', 'shaadi', 'shadi', 'vivah', 'bride', 'groom', 'mehendi', 'sangeet', 'baraat'],
+    event: ['event', 'birthday', 'party', 'celebration', 'function', 'corporate', 'meetup', 'workshop', 'conference', 'seminar'],
   };
   let best: string | null = null, bestScore = 0;
   for (const [cat, kws] of Object.entries(keywords)) {
@@ -173,6 +178,12 @@ function categoryListMsg(): ListMsg {
         { id: 'cat_photographer', title: '📸 Photographer', description: 'Photography, Studio, Video' },
         { id: 'cat_service', title: '🔧 Service Provider', description: 'Electrician, Plumber, AC Repair' },
         { id: 'cat_portfolio', title: '💼 Personal Portfolio', description: 'Developer, Designer, Freelancer' },
+      ]
+    }, {
+      title: 'Personal & Events',
+      rows: [
+        { id: 'cat_wedding', title: '💒 Wedding/Marriage', description: 'Wedding invitation, ceremony details' },
+        { id: 'cat_event', title: '🎉 Events', description: 'Birthday, Corporate, Meetup, Workshop' },
       ]
     }]
   };
@@ -583,6 +594,8 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         gym: '"Royal Gym & Fitness", "PowerHouse Gym"',
         photographer: '"Click Studio", "Moments Photography"',
         service: '"QuickFix Repairs", "Sharma Plumbing"',
+        wedding: '"Amit & Priya Wedding", "Sharma Family Wedding"',
+        event: '"Tech Meetup Delhi", "Annual Conference 2026"',
       };
       return { replies: [
         `✅ *${CATEGORY_DISPLAY[category]}*\n\nApne business ka *naam* batao 👇\n(Jaise: ${examples[category] || '"My Business"}'})`

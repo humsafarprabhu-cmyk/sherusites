@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+<title>Dr. Gupta Clinic</title>
+<meta name="description" content="Aapki sehat, hamari zimmedari">
+<meta property="og:title" content="Dr. Gupta Clinic">
+<meta property="og:description" content="Aapki sehat, hamari zimmedari">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#0D9488;--teal-light:#5EEAD4;--teal-dark:#0F766E;--teal-glow:rgba(13,148,136,.08);
+  --blue:#F0FDFA;--mint:#CCFBF1;--ice:#F7FFFE;
+  --white:#FFFFFF;--red:#EF4444;--green:#22C55E;
+  --text:#0F172A;--text2:#475569;--text3:#94A3B8;
+  --border:rgba(13,148,136,.1);
+  --shadow-s:0 2px 8px rgba(15,23,42,.04);
+  --shadow-m:0 8px 30px rgba(15,23,42,.07);
+  --shadow-l:0 20px 60px rgba(15,23,42,.1);
+  --ease:cubic-bezier(.22,1,.36,1);
+  --head:'Plus Jakarta Sans',sans-serif;
+  --body:'DM Sans','Segoe UI',sans-serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--body);background:var(--ice);color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font-family:var(--body);cursor:pointer;border:none;background:none;color:inherit}
+
+.scroll-prog{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--teal-light));z-index:1000;transition:width .15s;width:0}
+
+.hdr{position:fixed;top:0;left:0;right:0;z-index:100;transition:all .4s var(--ease);padding:16px 20px}
+.hdr.scrolled{background:rgba(247,255,254,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:var(--shadow-s);padding:10px 20px}
+.hdr-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.hdr-name{font-family:var(--head);font-size:1.05rem;font-weight:700;color:#fff;transition:color .35s;display:flex;align-items:center;gap:6px}
+.hdr.scrolled .hdr-name{color:var(--text)}
+.hdr-cross{color:var(--red);font-size:1.1rem}
+.hdr.scrolled .hdr-cross{color:var(--teal)}
+.hdr-b{padding:8px 18px;border-radius:50px;font-size:.78rem;font-weight:600;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(10px);transition:all .25s var(--ease)}
+.hdr.scrolled .hdr-b{background:var(--teal);color:#fff;border-color:var(--teal)}
+.hdr-b:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(13,148,136,.3)}
+
+.hero{position:relative;min-height:90vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:var(--blue)}
+.hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden}
+.hero-bg img{width:100%;height:100%;object-fit:cover;animation:ken-burns 20s ease-in-out infinite alternate}
+.hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(15,23,42,.82) 0%,rgba(13,148,136,.55) 40%,rgba(15,23,42,.85) 100%);z-index:1}
+@keyframes ken-burns{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.08) translate(-1%,-1%)}}
+.hero-content{position:relative;z-index:2;padding:40px 24px;max-width:640px}
+.hero h1{font-family:var(--head);font-size:clamp(2.2rem,6.5vw,3.6rem);color:#fff;font-weight:800;line-height:1.1;margin-bottom:12px}
+.hero-tagline{font-size:.95rem;color:rgba(255,255,255,.7);font-weight:300;margin-bottom:28px;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.6}
+.hero-open{display:inline-flex;align-items:center;gap:6px;margin-bottom:20px}
+.hero-open .dot{width:8px;height:8px;border-radius:50%;background:#4ADE80;box-shadow:0 0 12px rgba(74,222,128,.5);animation:pulse-dot 2s infinite}
+.hero-open span{font-size:.72rem;font-weight:600;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:1.5px}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-book{display:inline-flex;align-items:center;gap:8px;padding:15px 30px;border-radius:50px;background:var(--teal);color:#fff;font-weight:700;font-size:.88rem;transition:all .3s var(--ease);box-shadow:0 4px 20px rgba(13,148,136,.35)}
+.btn-book:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(13,148,136,.45);background:var(--teal-dark)}
+.btn-ghost{display:inline-flex;align-items:center;gap:6px;padding:15px 24px;border-radius:50px;color:#fff;border:1.5px solid rgba(255,255,255,.2);font-weight:500;font-size:.86rem;transition:all .3s var(--ease)}
+.btn-ghost:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35);transform:translateY(-1px)}
+.hero-emergency{margin-top:20px;display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:50px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#FCA5A5;font-size:.76rem;font-weight:600;animation:pulse-emg 2s infinite}
+@keyframes pulse-emg{0%,100%{opacity:1}50%{opacity:.7}}
+
+/* Stats */
+.stats{padding:0 20px;margin-top:-40px;position:relative;z-index:3}
+.stats-inner{max-width:700px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);background:var(--white);border-radius:16px;box-shadow:var(--shadow-m);overflow:hidden}
+.stat-item{padding:24px 16px;text-align:center;border-right:1px solid var(--border)}
+.stat-item:last-child{border-right:none}
+.stat-num{font-family:var(--head);font-size:clamp(1.6rem,4vw,2rem);font-weight:800;color:var(--teal);margin-bottom:2px}
+.stat-label{font-size:.7rem;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+
+/* Sections */
+.section{padding:64px 20px}
+.sec-hdr{text-align:center;margin-bottom:40px}
+.sec-eye{font-size:.72rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px}
+.sec-t{font-family:var(--head);font-size:clamp(1.6rem,5vw,2.2rem);color:var(--text);margin-bottom:6px;line-height:1.15;font-weight:800}
+.sec-desc{font-size:.85rem;color:var(--text2);max-width:420px;margin:0 auto}
+.sec-inner{max-width:900px;margin:0 auto}
+
+/* Services */
+.svc-grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:640px){.svc-grid{grid-template-columns:1fr 1fr}}
+.svc-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:24px;transition:all .35s var(--ease);position:relative;overflow:hidden}
+.svc-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-m);border-color:var(--teal-light)}
+.svc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--teal-light));opacity:0;transition:opacity .3s}
+.svc-card:hover::before{opacity:1}
+.svc-icon{width:44px;height:44px;border-radius:12px;background:var(--teal-glow);display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:14px}
+.svc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.svc-name{font-family:var(--head);font-size:1.05rem;color:var(--text);font-weight:700}
+.svc-price{font-weight:700;color:var(--teal);font-size:.95rem;white-space:nowrap}
+.svc-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.svc-tag{font-size:.68rem;padding:3px 10px;border-radius:50px;font-weight:600}
+.svc-tag.dur{background:var(--teal-glow);color:var(--teal-dark)}
+.svc-tag.cat{background:rgba(99,102,241,.08);color:#6366F1}
+.svc-desc{font-size:.8rem;color:var(--text2);line-height:1.5}
+.svc-popular{position:absolute;top:14px;right:14px;background:var(--teal);color:#fff;font-size:.6rem;font-weight:700;padding:3px 10px;border-radius:50px;text-transform:uppercase;letter-spacing:.5px}
+.svc-cta{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:8px 16px;border-radius:50px;background:var(--teal-glow);color:var(--teal-dark);font-weight:600;font-size:.76rem;transition:all .25s var(--ease);border:1px solid transparent}
+.svc-cta:hover{background:var(--teal);color:#fff;transform:translateY(-1px)}
+
+/* Doctor Card */
+.doc-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:32px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:var(--shadow-s)}
+.doc-avatar{width:100px;height:100px;border-radius:50%;background:var(--teal-glow);border:3px solid var(--teal-light);display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:16px}
+.doc-name{font-family:var(--head);font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.doc-spec{font-size:.82rem;color:var(--teal);font-weight:600;margin-bottom:4px}
+.doc-exp{font-size:.78rem;color:var(--text3);margin-bottom:12px}
+.doc-about{font-size:.85rem;color:var(--text2);line-height:1.7;max-width:500px}
+.doc-quals{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+.doc-qual{font-size:.68rem;padding:4px 12px;border-radius:50px;background:var(--blue);color:var(--teal-dark);font-weight:600;border:1px solid var(--border)}
+
+/* Trust */
+.trust{padding:32px 20px;background:var(--blue);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.trust-inner{max-width:900px;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.trust-pill{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:50px;background:var(--white);border:1px solid var(--border);font-size:.76rem;font-weight:500;color:var(--text);box-shadow:var(--shadow-s)}
+
+/* Offer */
+.offer{background:linear-gradient(135deg,var(--teal),#06B6D4);padding:24px 20px;text-align:center;position:relative;overflow:hidden}
+.offer::before{content:'💊';position:absolute;top:8px;left:20px;font-size:1.5rem;opacity:.3;animation:float 3s ease-in-out infinite}
+.offer::after{content:'🩺';position:absolute;bottom:8px;right:20px;font-size:1.5rem;opacity:.3;animation:float 3s ease-in-out infinite .5s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.offer-t{font-family:var(--head);font-size:1.2rem;color:#fff;font-weight:700;margin-bottom:4px}
+.offer-d{font-size:.8rem;color:rgba(255,255,255,.85)}
+
+/* Gallery */
+.gallery-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:640px){.gallery-grid{grid-template-columns:repeat(3,1fr)}}
+.gal-item{aspect-ratio:1;border-radius:14px;overflow:hidden;position:relative;cursor:pointer}
+.gal-item img{width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+.gal-item:hover img{transform:scale(1.08)}
+.gal-more{display:flex;align-items:center;justify-content:center;background:var(--blue);border:2px dashed var(--border);border-radius:14px;aspect-ratio:1;font-family:var(--head);font-size:.95rem;color:var(--teal);font-weight:700;transition:all .3s var(--ease)}
+.gal-more:hover{background:var(--teal-glow);border-color:var(--teal)}
+
+/* Reviews */
+.rev-list{display:flex;flex-direction:column;gap:14px}
+.rev-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:20px;transition:all .3s var(--ease)}
+.rev-card:hover{box-shadow:var(--shadow-m)}
+.rev-stars{color:var(--teal);font-size:.9rem;margin-bottom:8px;letter-spacing:2px}
+.rev-text{font-size:.84rem;color:var(--text2);line-height:1.6;margin-bottom:10px;font-style:italic}
+.rev-author{font-weight:600;font-size:.78rem;color:var(--text)}
+
+/* Location */
+.loc-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center;box-shadow:var(--shadow-s)}
+.loc-map{width:100%;height:200px;border-radius:12px;overflow:hidden;margin-bottom:16px;background:var(--blue)}
+.loc-map iframe{width:100%;height:100%;border:0}
+.loc-addr{font-size:.88rem;color:var(--text2);margin-bottom:4px;line-height:1.6}
+.loc-time{font-size:.82rem;color:var(--text3);margin-bottom:16px}
+.loc-btn{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;border-radius:50px;background:var(--blue);color:var(--teal);font-weight:600;font-size:.82rem;border:1px solid var(--border);transition:all .3s var(--ease)}
+.loc-btn:hover{background:var(--teal);color:#fff;transform:translateY(-1px)}
+
+/* Footer */
+.ftr{background:var(--text);padding:32px 20px;text-align:center}
+.ftr-name{font-family:var(--head);font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:4px}
+.ftr-tag{font-size:.85rem;color:var(--teal-light);margin-bottom:16px}
+.ftr-links{display:flex;gap:16px;justify-content:center;margin-bottom:16px}
+.ftr-links a{color:rgba(255,255,255,.6);font-size:.78rem;transition:color .3s}
+.ftr-links a:hover{color:var(--teal-light)}
+.ftr-copy{font-size:.65rem;color:rgba(255,255,255,.3)}
+
+/* Sticky CTA */
+.sticky-cta{position:fixed;bottom:0;left:0;right:0;z-index:90;background:rgba(247,255,254,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:12px 20px;transform:translateY(100%);transition:transform .4s var(--ease);display:flex;align-items:center;justify-content:center;gap:10px}
+.sticky-cta.show{transform:translateY(0)}
+.sticky-cta .btn-book{padding:12px 28px;font-size:.84rem}
+
+.fade-up{opacity:0;transform:translateY(25px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.fade-up.vis{opacity:1;transform:translateY(0)}
+
+@media(max-width:480px){
+  .hero{min-height:85vh}
+  .section{padding:48px 16px}
+  .svc-card{padding:18px}
+  .stats-inner{grid-template-columns:repeat(3,1fr)}
+  .stat-item{padding:16px 8px}
+  .stat-num{font-size:1.3rem}
+  .doc-card{padding:24px 16px}
+}
+</style>
+</head>
+<body>
+<div class="scroll-prog" id="prog"></div>
+
+<header class="hdr" id="hdr">
+  <div class="hdr-inner">
+    <span class="hdr-name" id="hdrName"><span class="hdr-cross">✚</span> Dr. Gupta Clinic</span>
+    <a class="hdr-b" id="hdrBook" href="#">Book Appointment</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-bg"><img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=1400&q=80" alt="" id="heroImg"></div>
+  <div class="hero-content">
+    <div class="hero-open" id="heroOpen"><div class="dot"></div><span>Open Now</span></div>
+    <h1 id="heroName">Dr. Gupta Clinic</h1>
+    <p class="hero-tagline" id="heroTagline">Aapki sehat, hamari zimmedari</p>
+    <div class="hero-btns">
+      <a class="btn-book" id="heroBook" href="#">📞 Book Appointment</a>
+      <a class="btn-ghost" href="#services">Our Services ↓</a>
+    </div>
+    <div class="hero-emergency" id="heroEmergency" style="display:none">🚨 Emergency Services Available 24/7</div>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stats-inner" id="statsStrip"></div>
+</div>
+
+<div class="trust" style="margin-top:32px">
+  <div class="trust-inner" id="trustStrip"></div>
+</div>
+
+<section class="offer" id="offerSection" style="display:none">
+  <div class="offer-t" id="offerTitle"></div>
+  <div class="offer-d" id="offerDesc"></div>
+</section>
+
+<!-- Doctor / About -->
+<section class="section" id="aboutSection">
+  <div class="sec-hdr fade-up">
+    <div class="sec-eye" id="aboutEye"></div>
+    <h2 class="sec-t" id="aboutTitle"></h2>
+  </div>
+  <div class="sec-inner">
+    <div class="doc-card fade-up">
+      <div class="doc-avatar">👨‍⚕️</div>
+      <div class="doc-name" id="aboutOwner"></div>
+      <div class="doc-spec" id="aboutSpec"></div>
+      <div class="doc-exp" id="aboutExp"></div>
+      <p class="doc-about" id="aboutText"></p>
+      <div class="doc-quals" id="docQuals"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Services -->
+<section class="section" id="services" style="background:var(--blue)">
+  <div class="sec-hdr fade-up">
+    <div class="sec-eye" id="svcEye"></div>
+    <h2 class="sec-t" id="svcTitle"></h2>
+    <p class="sec-desc" id="svcDesc"></p>
+  </div>
+  <div class="sec-inner">
+    <div class="svc-grid" id="svcGrid"></div>
+  </div>
+</section>
+
+<!-- Gallery -->
+<section class="section" id="gallerySection">
+  <div class="sec-hdr fade-up">
+    <div class="sec-eye" id="galEye"></div>
+    <h2 class="sec-t" id="galTitle"></h2>
+    <p class="sec-desc" id="galDesc"></p>
+  </div>
+  <div class="sec-inner">
+    <div class="gallery-grid" id="galGrid"></div>
+  </div>
+</section>
+
+<!-- Reviews -->
+<section class="section" style="background:var(--blue)" id="reviewSection">
+  <div class="sec-hdr fade-up">
+    <div class="sec-eye" id="revEye"></div>
+    <h2 class="sec-t" id="revTitle"></h2>
+  </div>
+  <div class="sec-inner">
+    <div class="rev-list" id="revList"></div>
+  </div>
+</section>
+
+<!-- Location -->
+<section class="section" id="locSection">
+  <div class="sec-hdr fade-up">
+    <div class="sec-eye" id="locEye"></div>
+    <h2 class="sec-t" id="locTitle"></h2>
+  </div>
+  <div class="sec-inner">
+    <div class="loc-card fade-up">
+      <div class="loc-map" id="locMap"></div>
+      <p class="loc-addr" id="locAddr">Boring Road, Patna, Bihar</p>
+      <p class="loc-time" id="locTime">Mon-Sat: 9 AM - 8 PM, Sun: 10 AM - 2 PM</p>
+      <a class="loc-btn" id="locBtn" href="#">📍 Get Directions</a>
+    </div>
+  </div>
+</section>
+
+<footer class="ftr">
+  <div class="ftr-name" id="ftrName">Dr. Gupta Clinic</div>
+  <div class="ftr-tag" id="ftrTag">Aapki sehat, hamari zimmedari</div>
+  <div class="ftr-links">
+    <a href="#aboutSection">Doctor</a>
+    <a href="#services">Services</a>
+    <a href="#reviewSection">Reviews</a>
+    <a href="#locSection">Visit</a>
+  </div>
+  <div class="ftr-copy">© 2026 <span id="ftrCopy">Dr. Gupta Clinic</span>. All rights reserved.</div>
+</footer>
+
+    <div style="position:fixed;bottom:0;left:0;right:0;z-index:10000;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:white;padding:10px 20px;text-align:center;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">
+      <span style="font-size:13px;opacity:.8;">Free website chahiye?</span>
+      <a href="https://wa.me/918210329601?text=Hi%2C%20mujhe%20bhi%20website%20chahiye!" style="background:#25D366;color:white;padding:6px 16px;border-radius:50px;text-decoration:none;font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:4px;">
+        WhatsApp karo →
+      </a>
+    </div>
+    <div style="height:46px;"></div>
+<!-- __PAGE_END__ -->
+
+<div class="sticky-cta" id="stickyCta">
+  <a class="btn-book" id="stickyBook" href="#">📞 Book Appointment</a>
+</div>
+
+
+  <script>window.__SITE_DATA__ = {"slug":"dr-gupta-clinic","businessName":"Dr. Gupta Clinic","category":"clinic","tagline":"Aapki sehat, hamari zimmedari","about":"Dr. Gupta Clinic provides comprehensive healthcare with modern diagnostics and compassionate care. We believe in thorough diagnosis and affordable treatment for every family.","whatsapp":"919876543210","phone":"9876543210","address":"Boring Road, Patna, Bihar","timings":"Mon-Sat: 9 AM - 8 PM, Sun: 10 AM - 2 PM","isOpen":true,"activeOffer":null,"menu":[],"services":[{"name":"General Consultation","price":"₹300","description":"Complete health checkup and consultation","duration":"30 min","popular":true},{"name":"Blood Pressure Check","price":"₹100","description":"BP monitoring and management","duration":"15 min"},{"name":"Diabetes Management","price":"₹500","description":"Sugar testing, diet plan, medication review","duration":"30 min","popular":true},{"name":"ECG Test","price":"₹400","description":"Heart rhythm monitoring and report","duration":"20 min"},{"name":"Blood Test (Basic)","price":"₹350","description":"CBC, sugar, thyroid, lipid profile","duration":"10 min","category":"Lab"},{"name":"Vaccination","price":"₹200","description":"All standard vaccinations for adults and children","duration":"15 min"},{"name":"Physiotherapy Session","price":"₹600","description":"Joint pain, back pain, post-surgery rehab","duration":"45 min"},{"name":"Skin Consultation","price":"₹400","description":"Acne, allergies, fungal infections, skin care","duration":"20 min"},{"name":"Child Health Checkup","price":"₹350","description":"Pediatric consultation and growth monitoring","duration":"30 min","category":"Pediatric"},{"name":"X-Ray","price":"₹500","description":"Digital X-ray with same-day report","duration":"15 min","category":"Lab"}],"packages":[],"plans":[],"subjects":[],"photos":[],"reviews":[{"author":"Sunita Devi","text":"Bahut acche doctor hain. Sabar se sunte hain aur sahi treatment dete hain. Highly recommended!","rating":5,"date":"1 month ago"},{"author":"Rajesh Yadav","text":"Clean clinic, time pe milte hain, fees bhi reasonable. Puri family yahi aati hai.","rating":5,"date":"2 weeks ago"},{"author":"Anita Kumari","text":"Bachche ko bukhar tha, Dr. Gupta ne turant dekha. Very caring doctor.","rating":4,"date":"3 weeks ago"}],"todaySpecial":null,"ownerName":"Dr. Rajesh Gupta","experience":"15+ years experience | 10,000+ patients treated","sectionContent":{},"trustBadges":null};</script>
+<script>
+(function(){
+  const D = window.__SITE_DATA__ || {};
+  const phone = D.whatsapp || D.phone || '';
+  const waLink = 'https://wa.me/' + phone.replace(/\D/g,'') + '?text=Hi! I want to book an appointment';
+  const mapLink = 'https://maps.google.com/?q=' + encodeURIComponent(D.address || '');
+  const sec = D.sectionContent || {};
+
+  function t(id,v){const e=document.getElementById(id);if(e&&v)e.textContent=v;return e}
+
+  // Service icon mapping
+  const svcIcons = {
+    'general':'🩺','consultation':'🩺','checkup':'🩺','check-up':'🩺','opd':'🩺',
+    'dental':'🦷','teeth':'🦷','root canal':'🦷','braces':'🦷','cleaning':'🦷',
+    'eye':'👁️','vision':'👁️','cataract':'👁️','lasik':'👁️','opthal':'👁️',
+    'skin':'🧴','dermat':'🧴','acne':'🧴','hair fall':'🧴',
+    'bone':'🦴','ortho':'🦴','joint':'🦴','fracture':'🦴','spine':'🦴',
+    'heart':'❤️','cardio':'❤️','ecg':'❤️','bp':'❤️',
+    'child':'👶','pediatric':'👶','baby':'👶',
+    'women':'👩','gynec':'👩','pregnancy':'👩','maternity':'👩',
+    'ent':'👂','ear':'👂','nose':'👃','throat':'👂',
+    'mental':'🧠','psych':'🧠','anxiety':'🧠','depression':'🧠','counsel':'🧠',
+    'physio':'💪','therapy':'💪','rehab':'💪',
+    'diabetes':'💉','sugar':'💉','thyroid':'💉','hormone':'💉',
+    'xray':'📷','x-ray':'📷','scan':'📷','ultrasound':'📷','mri':'📷','lab':'🔬','test':'🔬','blood':'🔬',
+    'surgery':'🔪','operation':'🔪',
+    'vaccine':'💉','vaccination':'💉','immuniz':'💉',
+    'diet':'🥗','nutrition':'🥗','weight':'🥗',
+    'ayurved':'🌿','homeo':'🌿','natural':'🌿','herbal':'🌿',
+  };
+  function getIcon(name){
+    const n=(name||'').toLowerCase();
+    for(const[k,v] of Object.entries(svcIcons)){if(n.includes(k))return v}
+    return '🏥';
+  }
+
+  // Header
+  t('hdrName', '✚ ' + D.businessName);
+  document.querySelectorAll('#hdrBook,#heroBook,#stickyBook').forEach(el => el.href = waLink);
+
+  // Hero
+  t('heroName', D.businessName);
+  t('heroTagline', D.tagline);
+  const photos = D.photos || [];
+  const heroPhoto = photos.find(p => p.type === 'hero');
+  if(heroPhoto) document.getElementById('heroImg').src = heroPhoto.url;
+
+  // Open status
+  const $open = document.getElementById('heroOpen');
+  if($open && D.isOpen === false){
+    $open.querySelector('.dot').style.background='#EF4444';
+    $open.querySelector('.dot').style.boxShadow='0 0 12px rgba(239,68,68,.5)';
+    $open.querySelector('span').textContent='Closed Now';
+  }
+
+  // Emergency
+  if(D.emergencyAvailable){
+    const $emg = document.getElementById('heroEmergency');
+    if($emg) $emg.style.display='inline-flex';
+  }
+
+  // Stats
+  const stats = D.stats || sec.stats || null;
+  const $ss = document.getElementById('statsStrip');
+  if($ss && stats && stats.length){
+    $ss.innerHTML = stats.map(s => `<div class="stat-item"><div class="stat-num">${s.value}</div><div class="stat-label">${s.label}</div></div>`).join('');
+  } else if($ss){ $ss.parentElement.style.display='none' }
+
+  // Trust
+  const trustPills = D.trustBadges || sec.trustBadges || [
+    {icon:'🩺',text:'Qualified Doctor'},
+    {icon:'🏥',text:'Modern Facility'},
+    {icon:'⏰',text:'On-Time Appointments'},
+    {icon:'💊',text:'In-House Pharmacy'}
+  ];
+  const $ts = document.getElementById('trustStrip');
+  if($ts) $ts.innerHTML = trustPills.map(p => `<div class="trust-pill">${p.icon||''} ${p.text}</div>`).join('');
+
+  // Offer
+  if(D.activeOffer){
+    const $os = document.getElementById('offerSection');
+    if($os){$os.style.display='block';t('offerTitle',D.activeOffer.title);t('offerDesc',D.activeOffer.description)}
+  }
+
+  // Doctor / About
+  t('aboutEye', sec.aboutEye || 'MEET THE DOCTOR');
+  t('aboutTitle', sec.aboutTitle || 'Your Health, Our Priority');
+  t('aboutOwner', D.ownerName || D.businessName);
+  t('aboutSpec', D.specialization || '');
+  t('aboutExp', D.experience || '');
+  t('aboutText', D.about || '');
+  // Qualifications
+  const quals = D.qualifications || sec.qualifications || [];
+  const $dq = document.getElementById('docQuals');
+  if($dq && quals.length){
+    $dq.innerHTML = quals.map(q => `<span class="doc-qual">${q}</span>`).join('');
+  }
+
+  // Services
+  t('svcEye', sec.servicesEye || 'OUR SERVICES');
+  t('svcTitle', sec.servicesTitle || 'Treatments & Services');
+  t('svcDesc', sec.servicesDesc || 'Comprehensive healthcare for you and your family');
+  const items = D.services || D.menu || [];
+  const $sg = document.getElementById('svcGrid');
+  if($sg && items.length){
+    $sg.innerHTML = items.map((s,i) => `
+      <div class="svc-card fade-up" style="transition-delay:${i*60}ms">
+        ${s.popular ? '<div class="svc-popular">⭐ Popular</div>' : ''}
+        <div class="svc-icon">${getIcon(s.name)}</div>
+        <div class="svc-top">
+          <div class="svc-name">${s.name}</div>
+          <div class="svc-price">${s.price || ''}</div>
+        </div>
+        <div class="svc-meta">
+          ${s.duration ? `<span class="svc-tag dur">🕐 ${s.duration}</span>` : ''}
+          ${s.category ? `<span class="svc-tag cat">${s.category}</span>` : ''}
+        </div>
+        ${s.description ? `<div class="svc-desc">${s.description}</div>` : ''}
+        <a class="svc-cta" href="${waLink}">Book →</a>
+      </div>
+    `).join('');
+  }
+
+  // Gallery
+  t('galEye', sec.galleryEye || 'OUR CLINIC');
+  t('galTitle', sec.galleryTitle || 'Gallery');
+  t('galDesc', sec.galleryDesc || 'Our modern healthcare facility');
+  const defaultGallery = [
+    {url:'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600&q=80',caption:'Clinic'},
+    {url:'https://images.unsplash.com/photo-1504439468489-c8920d796a29?w=600&q=80',caption:'Doctor'},
+    {url:'https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=600&q=80',caption:'Equipment'},
+    {url:'https://images.unsplash.com/photo-1631815588090-d4bfec5b1ccb?w=600&q=80',caption:'Treatment'},
+    {url:'https://images.unsplash.com/photo-1666214280557-f1b5022eb634?w=600&q=80',caption:'Care'},
+    {url:'https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=600&q=80',caption:'Facility'},
+  ];
+  let galPhotos = photos.filter(p => p.type === 'gallery' || !p.type);
+  if(!galPhotos.length) galPhotos = defaultGallery;
+  const $gg = document.getElementById('galGrid');
+  const $gs = document.getElementById('gallerySection');
+  if(galPhotos.length && $gg){
+    $gg.innerHTML = galPhotos.slice(0,6).map((p,i) => `
+      <div class="gal-item fade-up" style="transition-delay:${i*80}ms">
+        <img src="${p.url}" alt="${p.caption||''}" loading="lazy">
+      </div>
+    `).join('') + (galPhotos.length > 6 ? `<a class="gal-more fade-up" href="/site/${D.slug}/gallery">See All →</a>` : '');
+  } else if($gs){$gs.style.display='none'}
+
+  // Reviews
+  t('revEye', sec.reviewsEye || 'PATIENT REVIEWS');
+  t('revTitle', sec.reviewsTitle || 'What Our Patients Say');
+  const reviews = D.reviews || [];
+  const $rl = document.getElementById('revList');
+  const $rs = document.getElementById('reviewSection');
+  if(reviews.length && $rl){
+    $rl.innerHTML = reviews.map((r,i) => `
+      <div class="rev-card fade-up" style="transition-delay:${i*80}ms">
+        <div class="rev-stars">${'★'.repeat(r.rating||5)}</div>
+        <div class="rev-text">"${r.text}"</div>
+        <div class="rev-author">— ${r.author || r.name}</div>
+      </div>
+    `).join('');
+  } else if($rs){$rs.style.display='none'}
+
+  // Location
+  t('locEye', sec.locationEye || 'FIND US');
+  t('locTitle', sec.locationTitle || 'Visit Our Clinic');
+  const $map = document.getElementById('locMap');
+  if($map && D.address){
+    const q = encodeURIComponent(D.businessName+', '+D.address);
+    $map.innerHTML = `<iframe src="https://maps.google.com/maps?q=${q}&output=embed&z=15" allowfullscreen loading="lazy"></iframe>`;
+  }
+  t('locAddr', D.address);
+  const $lt = document.getElementById('locTime');
+  if($lt && D.timings) $lt.textContent = '🕐 ' + D.timings;
+  const $lb = document.getElementById('locBtn');
+  if($lb) $lb.href = mapLink;
+
+  // Footer
+  t('ftrName', D.businessName);
+  t('ftrTag', D.tagline);
+  t('ftrCopy', D.businessName);
+  if(D.businessName) document.title = D.businessName + ' | Healthcare & Clinic';
+
+  // Scroll
+  const hdr=document.getElementById('hdr'),prog=document.getElementById('prog'),sticky=document.getElementById('stickyCta');
+  let ticking=false;
+  window.addEventListener('scroll',()=>{
+    if(!ticking){requestAnimationFrame(()=>{
+      const st=window.scrollY,maxS=document.documentElement.scrollHeight-window.innerHeight;
+      hdr.classList.toggle('scrolled',st>60);
+      prog.style.width=(st/maxS*100)+'%';
+      sticky.classList.toggle('show',st>400);
+      ticking=false;
+    });ticking=true}
+  });
+  const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('vis');obs.unobserve(x.target)}})},{threshold:.15});
+  document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+})();
+</script>
+</body>
+</html>

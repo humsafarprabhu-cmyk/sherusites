@@ -71,6 +71,8 @@ Each template has its own **fonts, color palette, and vibe**. No two categories 
 | 💪 **gym** | Bebas Neue + Outfit | Dark `#0F0F0F`, neon green `#22C55E`, red accent | Bold, high energy, dark | Gym/fitness |
 | 📸 **photographer** | Cormorant Garamond + Raleway | Pure white, black, minimal gray | Minimal, elegant, full-bleed photos | Photography portfolio |
 | 🔧 **service** | Manrope + Inter | Blue `#2563EB`, slate, white | Professional, trustworthy, clean | Service/handyman |
+| 💒 **wedding** | Playfair Display + Lora + Great Vibes | Deep burgundy `#8B1538`, gold `#D4AF37`, cream `#FDF8F0` | Elegant, romantic, traditional Indian shaadi | Indian wedding `photo-1519741497674-611481863552` |
+| 🎉 **event** | Outfit + DM Sans | Gradient purple-pink `#8B5CF6` to `#EC4899`, dark `#0F0F23`, white | Fun, modern, energetic | Event/conference `photo-1542744173-8e7e53415bb0` |
 
 ---
 
@@ -274,6 +276,22 @@ Every category must have 6 default Unsplash gallery photos. Defined in the templ
 5. `photo-1556740758-90de374c12ad` — Collection
 6. `photo-1567401893414-76b7b1e5a7a5` — Store Front
 
+**Wedding:**
+1. `photo-1519741497674-611481863552` — Indian Wedding
+2. `photo-1606800052052-a08af7148866` — Wedding Ceremony
+3. `photo-1583939003579-730e3918a45a` — Bridal Photography
+4. `photo-1520854221256-17451cc331bf` — Wedding Celebration
+5. `photo-1511285560929-80b456fea0bc` — Wedding Decor
+6. `photo-1525258244477-5a4fb67e7013` — Wedding Rings
+
+**Event:**
+1. `photo-1542744173-8e7e53415bb0` — Corporate Event
+2. `photo-1517457373958-b7bdd4587205` — Conference
+3. `photo-1511578314322-379afb476865` — Networking
+4. `photo-1531538606174-0f90ff5dce83` — Workshop
+5. `photo-1505236858219-8359eb29e329` — Presentation
+6. `photo-1523050854058-8df90110c9d1` — Seminar
+
 > Add new category photos here as templates are built.
 
 ---
@@ -362,3 +380,6 @@ AI agent sometimes returns text + JSON mixed. The parser in `bot/site-agent.ts`:
 
 | 2026-02-25 | SOP created | — |
 | 2026-02-25 | Created store-2026.html with product grid + category tabs | store |
+| 2026-02-25 | Created wedding-2026.html with Playfair + burgundy/gold Indian shaadi theme | wedding |
+| 2026-02-25 | Created event-2026.html with Outfit + purple-pink gradient modern theme | event |
+| 2026-02-25 | Added wedding & event to WhatsApp bot categories | bot |

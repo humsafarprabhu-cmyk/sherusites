@@ -408,7 +408,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       }
 
       if (lower === 'share' || lower === 'btn_share') {
-        const shareText = `${session.data.businessName} ka website dekho: ${session.siteUrl}`;
+        const shareText = `${session.data.businessName} ka website dekho:\n${session.siteUrl}\n\nApna bhi banao — WhatsApp karo: https://wa.me/918210329601`;
         const shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
         const isPaid = session.paid;
         const msg = isPaid

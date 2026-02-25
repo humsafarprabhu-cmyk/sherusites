@@ -328,7 +328,7 @@ export async function generateContent(
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000); // 8 sec max
+    const timeout = setTimeout(() => controller.abort(), 20000); // 20 sec max
 
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -360,7 +360,7 @@ Generate menu/services that MATCH what this specific business would actually off
             content: `Business: "${businessName}" in ${address}. Category: ${category}.${extraInfo ? `\nExtra info: ${extraInfo}` : ''}\n\n${prompt}\n\nAlso generate:\n- reviews: 3 realistic Google-style reviews [{author (Indian name), text (1-2 sentences), rating (4-5), date ("2 weeks ago" etc)}]\n- todaySpecial: one special item {name, description, price as "₹XX", oldPrice as "₹XX" (higher)}\n- heroPhotoQuery: one Unsplash search query (2-4 words) for a perfect hero background photo for THIS specific business (e.g. "north indian thali food" or "luxury hair salon interior" or "electronics store display")\n- galleryPhotoQueries: array of 6 Unsplash search queries for gallery photos matching what this business actually does\n\nOutput JSON with keys: tagline, about, ${getContentKey(category)}, reviews, todaySpecial, heroPhotoQuery, galleryPhotoQueries`
           }
         ],
-        max_tokens: 1500,
+        max_tokens: 1200,
         temperature: 0.7,
       }),
     });

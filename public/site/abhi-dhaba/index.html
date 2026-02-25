@@ -370,7 +370,7 @@ else{obs={observe:function(el){el.classList.add('in')},unobserve:function(){}};}
 
 // Hero
 (function(){
-  var p=D.photos||[];var h=p.find(function(x){return x.type==='hero'})||p[0];
+  var p=D.photos||[];var h=p.find(function(x){return x.type==='hero'});
   if(h){var img=document.getElementById('h-img');if(img)img.src=h.url;}
   if(D.isOpen===false){var o=document.getElementById('h-open');if(o)o.innerHTML='<span class="hero-dot" style="background:var(--chili);box-shadow:0 0 8px var(--chili);animation:none"></span><span style="color:var(--chili)">Closed</span>';}
 })();

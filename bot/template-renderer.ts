@@ -118,6 +118,14 @@ export function renderSite(data: SiteData): string {
     
     // Add promotional banner before closing body
     html = html.replace('</body>', `${promoFooter}\n</body>`);
+  } else {
+    // Premium: subtle "Created by" footer (not fixed, just at bottom)
+    const premiumFooter = `
+    <div style="text-align:center;padding:16px 20px;font-family:system-ui,sans-serif;font-size:12px;color:#9CA3AF;border-top:1px solid #F3F4F6;margin-top:20px;">
+      Created by <a href="https://wa.me/918210329601?text=Hi%2C%20mujhe%20bhi%20website%20chahiye!" style="color:#6366f1;text-decoration:none;font-weight:600;">WhatsWebsite</a> 
+      · <a href="https://wa.me/918210329601?text=Hi%2C%20mujhe%20bhi%20website%20chahiye!" style="color:#6366f1;text-decoration:none;">Create yours 📱</a>
+    </div>`;
+    html = html.replace('</body>', `${premiumFooter}\n</body>`);
   }
 
   // Save

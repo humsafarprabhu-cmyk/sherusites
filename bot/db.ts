@@ -133,7 +133,7 @@ const stmts = {
     @delivery, @delivery_area, @emergency_available, @active_offer, @is_open, @plan, @custom_domain,
     @payment_id, @paid_at, @created_at, @updated_at, @today_special, @reviews, @pending_domain, @pending_plan_price
   )`),
-  getUserSites: db.prepare('SELECT * FROM sites WHERE owner_phone = ?'),
+  getUserSites: db.prepare("SELECT * FROM sites WHERE owner_phone = ? ORDER BY CASE WHEN plan='premium' THEN 0 ELSE 1 END, rowid DESC"),
   listAllSites: db.prepare('SELECT slug FROM sites'),
   checkSlug: db.prepare('SELECT 1 FROM sites WHERE slug = ?'),
 

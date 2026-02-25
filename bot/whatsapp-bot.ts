@@ -723,7 +723,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         deleteSession(phone);
         return handleMessage(phone, message);
       }
-      if (lower === 'skip_gallery' || lower === 'done_gallery') {
+      if (lower === 'skip_gallery' || lower === 'done_gallery' || lower === 'done') {
         // Move to generating
       } else if (lower === '__photo_uploaded__' || message.startsWith('__PHOTO_UPLOADED__')) {
         // Photo saved by server.ts handleWhatsAppImage → session.data.uploadedPhotos
@@ -745,14 +745,12 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         const finalCount = fresh.data.galleryPhotos?.length || count;
         return { replies: [{
           type: 'buttons',
-          body: `✅ ${finalCount} photo${finalCount > 1 ? 's' : ''} added! Aur bhejo ya Done dabao 👇`,
-          buttons: [{ id: 'done_gallery', title: '✅ Done' }]
+          body: `✅ ${finalCount} photo${finalCount > 1 ? 's' : ''} added! Aur bhejo ya "Done" likho 👇`
         }] };
       } else {
         return { replies: [{
           type: 'buttons',
-          body: '🖼️ Photo bhejo ya Done dabao 👇',
-          buttons: [{ id: 'done_gallery', title: '✅ Done' }]
+          body: '🖼️ Photo bhejo ya "Done" likho 👇'
         }] };
       }
 
@@ -955,8 +953,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         const count = sData?.photos?.length || 0;
         return { replies: [{
           type: 'buttons',
-          body: `✅ Photo ${count} added! Aur bhejo ya Done dabao 👇`,
-          buttons: [{ id: 'edit_gallery_done', title: '✅ Done' }]
+          body: `✅ Photo ${count} added! Aur bhejo ya "Done" likho 👇`
         }] };
       }
       const slug = session.slug;

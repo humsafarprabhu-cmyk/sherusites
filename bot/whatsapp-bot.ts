@@ -216,18 +216,18 @@ function welcomeBackMsg(sites: any[]): Reply {
     buttonText: '🏪 Choose Website',
     sections: [
       {
+        title: 'New',
+        rows: [
+          { id: 'wb_new', title: '🆕 Naya Website Banao', description: 'Create a new website' }
+        ]
+      },
+      {
         title: 'Your Websites',
         rows: sites.map(s => ({
           id: `site_${s.slug}`,
           title: s.businessName.substring(0, 24),
           description: `${CATEGORY_DISPLAY[s.category] || s.category} • ${s.plan === 'premium' ? '⭐ Premium' : '🆓 Free'}`
         }))
-      },
-      {
-        title: 'Other',
-        rows: [
-          { id: 'wb_new', title: '🆕 Naya Website Banao', description: 'Create a new website' }
-        ]
       }
     ]
   };

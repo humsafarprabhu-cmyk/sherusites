@@ -176,8 +176,7 @@ function categoryListMsg(): ListMsg {
         { id: 'cat_clinic', title: '🏥 Doctor/Clinic', description: 'Doctor, Dentist, Hospital' },
         { id: 'cat_gym', title: '💪 Gym/Fitness', description: 'Gym, Yoga, CrossFit' },
         { id: 'cat_photographer', title: '📸 Photographer', description: 'Photography, Studio, Video' },
-        { id: 'cat_service', title: '🔧 Service Provider', description: 'Electrician, Plumber, AC Repair' },
-        { id: 'cat_portfolio', title: '💼 Personal Portfolio', description: 'Developer, Designer, Freelancer' },
+        { id: 'cat_service', title: '🔧 Service/Portfolio', description: 'Electrician, Plumber, Developer, Freelancer' },
       ]
     }, {
       title: 'Personal & Events',
@@ -287,9 +286,10 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
   // Global cat_ handler — works from any state
   if (lower.startsWith('cat_') && !session.slug) {
     const category = lower.replace('cat_', '');
-    if (['restaurant','store','salon','tutor','clinic','gym','photographer','service','portfolio'].includes(category)) {
+    const resolvedCategory = category === 'portfolio' ? 'service' : category;
+    if (['restaurant','store','salon','tutor','clinic','gym','photographer','service','wedding','event'].includes(resolvedCategory)) {
       session.state = 'awaiting_name';
-      session.data = { category };
+      session.data = { category: resolvedCategory };
       persistSession(phone, session);
       const catNames: Record<string,string> = {
         restaurant: '🍽️ restaurant/dhaba',
@@ -300,10 +300,11 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         gym: '💪 gym',
         photographer: '📸 studio',
         service: '🔧 business',
-        portfolio: '💼 portfolio',
+        wedding: '💒 wedding',
+        event: '🎉 event',
       };
-      const catLabel = catNames[category] || 'business';
-      return { replies: [`👍 *${category.charAt(0).toUpperCase() + category.slice(1)}!*\n\nApne ${catLabel} ka naam batao 👇`] };
+      const catLabel = catNames[resolvedCategory] || 'business';
+      return { replies: [`👍 *${resolvedCategory.charAt(0).toUpperCase() + resolvedCategory.slice(1)}!*\n\nApne ${catLabel} ka naam batao 👇`] };
     }
   }
 
@@ -578,7 +579,8 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         category = detectCategory(lower);
       }
       
-      if (!category) {
+      if (category === 'portfolio') category = 'service';
+      if (!category || !['restaurant','store','salon','tutor','clinic','gym','photographer','service','wedding','event'].includes(category)) {
         return { replies: [categoryListMsg()] };
       }
 

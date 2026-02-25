@@ -172,6 +172,7 @@ function injectDynamicContent(html: string, data: SiteData): string {
   const jsonData = JSON.stringify({
     slug: data.slug,
     businessName: data.businessName,
+    category: data.category,
     tagline: data.tagline || '',
     about: (data as any).about || '',
     whatsapp: data.whatsapp,
@@ -188,6 +189,10 @@ function injectDynamicContent(html: string, data: SiteData): string {
     photos: allPhotos,
     reviews: (data as any).reviews || [],
     todaySpecial: (data as any).todaySpecial || null,
+    ownerName: (data as any).ownerName || '',
+    experience: (data as any).experience || '',
+    sectionContent: (data as any).sectionContent || {},
+    trustBadges: (data as any).trustBadges || null,
   });
   
   // Replace static placeholders

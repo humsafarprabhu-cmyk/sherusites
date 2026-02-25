@@ -349,6 +349,11 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
   t('svcTitle', sec.servicesTitle || 'Our Products');
   t('svcDesc', sec.servicesDesc || 'Browse our collection');
 
+  // Intersection Observer (declared early for use in renderProducts)
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('vis'); obs.unobserve(e.target); }});
+  }, {threshold:0.15});
+
   // Products — category tabs + grid
   const items = D.services || D.menu || [];
   const $pc = document.getElementById('prodCats');
@@ -491,10 +496,7 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
     }
   });
 
-  // Intersection Observer
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('vis'); obs.unobserve(e.target); }});
-  }, {threshold:0.15});
+  // Observe all fade-up elements
   document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
 })();
 </script>

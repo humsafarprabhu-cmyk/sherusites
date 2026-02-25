@@ -247,6 +247,8 @@ function rowToSite(row: any): SiteData {
     emergencyAvailable: !!row.emergency_available,
     activeOffer: row.active_offer ? JSON.parse(row.active_offer) : undefined,
     isOpen: !!row.is_open,
+    reviews: JSON.parse(row.reviews || '[]'),
+    todaySpecial: row.today_special ? JSON.parse(row.today_special) : null,
     plan: row.plan || 'free',
     customDomain: row.custom_domain,
     pendingDomain: row.pending_domain,

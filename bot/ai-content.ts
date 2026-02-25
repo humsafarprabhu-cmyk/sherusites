@@ -347,37 +347,54 @@ IMPORTANT: Analyze the business name and location to INTELLIGENTLY infer what th
     } catch { clearTimeout(t); return null; }
   }
 
+  const biz = `"${businessName}" in ${address}. Category: ${category}.`;
+  const contentKey = getContentKey(category);
+
   try {
-    // Two parallel calls: content + photo queries
-    const [contentResult, photoResult] = await Promise.all([
+    // 3 parallel lightweight calls — each fast enough to not timeout
+    const [menuResult, metaResult, photoResult] = await Promise.all([
+      // Call 1: Menu/Services only (heaviest, but isolated)
       aiCall(
-        `Business: "${businessName}" in ${address}. Category: ${category}.${extraInfo ? `\nExtra info: ${extraInfo}` : ''}\n\n${prompt}\n\nAlso generate:\n- reviews: 3 realistic Google-style reviews [{author (Indian name), text (1-2 sentences), rating (4-5), date ("2 weeks ago" etc)}]\n- todaySpecial: one special item {name, description, price as "₹XX", oldPrice as "₹XX" (higher)}\n\nOutput JSON with keys: tagline, about, ${getContentKey(category)}, reviews, todaySpecial`,
-        800, 18000
+        `${biz}${extraInfo ? `\nExtra: ${extraInfo}` : ''}\nINFER from the name & location what cuisine/products/services this business offers. "${businessName}" = generate SPECIFIC items matching this business, NOT generic Indian food.\n\n${prompt}\nJSON with key: ${contentKey}`,
+        500, 15000
       ),
+      // Call 2: Tagline + about + reviews + todaySpecial (light)
       aiCall(
-        `Business: "${businessName}" in ${address}. Category: ${category}.\nGenerate:\n- heroPhotoQuery: one Unsplash search query (2-4 words) for hero photo\n- galleryPhotoQueries: 6 Unsplash search queries for gallery\nMatch what THIS business actually serves/sells. JSON only with keys: heroPhotoQuery, galleryPhotoQueries`,
+        `${biz}\nGenerate for this specific business:\n- tagline (catchy, short, Hindi-English OK, NO business name in tagline)\n- about (2-3 lines)\n- reviews: 3 Google-style [{author (Indian name), text (1-2 lines), rating (4-5), date}]\n- todaySpecial: {name, description, price "₹XX", oldPrice "₹XX"}\nJSON only.`,
+        400, 12000
+      ),
+      // Call 3: Photo queries (lightest)
+      aiCall(
+        `${biz}\nGenerate:\n- heroPhotoQuery: Unsplash search (2-4 words) for hero photo\n- galleryPhotoQueries: 6 Unsplash queries for gallery\nMatch what THIS business serves/sells. JSON only.`,
         200, 8000
       ),
     ]);
 
-    if (!contentResult) {
-      console.error('[AI] Content call failed — using defaults');
-      const defaults = getDefaultContent(category, businessName);
-      if (photoResult) {
-        defaults.heroPhotoQuery = photoResult.heroPhotoQuery;
-        defaults.galleryPhotoQueries = photoResult.galleryPhotoQueries;
-      }
-      return defaults;
-    }
+    // Merge results
+    const defaults = getDefaultContent(category, businessName);
+    const result: any = { ...defaults };
 
-    // Merge photo queries into content
+    if (metaResult) {
+      if (metaResult.tagline) result.tagline = metaResult.tagline;
+      if (metaResult.about) result.about = metaResult.about;
+      if (metaResult.reviews?.length) result.reviews = metaResult.reviews;
+      if (metaResult.todaySpecial) result.todaySpecial = metaResult.todaySpecial;
+    }
+    if (menuResult?.[contentKey]) {
+      result[contentKey] = menuResult[contentKey];
+    } else if (menuResult?.menu) {
+      result.menu = menuResult.menu;
+    } else if (menuResult?.services) {
+      result.services = menuResult.services;
+    }
     if (photoResult) {
-      contentResult.heroPhotoQuery = photoResult.heroPhotoQuery;
-      contentResult.galleryPhotoQueries = photoResult.galleryPhotoQueries;
+      result.heroPhotoQuery = photoResult.heroPhotoQuery;
+      result.galleryPhotoQueries = photoResult.galleryPhotoQueries;
     }
 
-    console.log(`[AI] Generated content for ${businessName} (${category})`);
-    return contentResult;
+    const parts = [menuResult ? 'menu' : '', metaResult ? 'meta' : '', photoResult ? 'photos' : ''].filter(Boolean);
+    console.log(`[AI] Generated [${parts.join('+')}] for ${businessName} (${category})`);
+    return result;
   } catch (err: any) {
     console.error(`[AI] Error: ${err.message} — using defaults`);
     return getDefaultContent(category, businessName);

@@ -297,7 +297,18 @@ export async function generateContent(
         messages: [
           {
             role: 'system',
-            content: `You generate realistic business content for Indian small businesses. Output ONLY valid JSON, no markdown. All prices in ₹ (Indian Rupees). Keep descriptions short (under 15 words). Names should feel authentic Indian. Language: English with occasional Hindi words is OK.`
+            content: `You generate realistic business content for Indian small businesses. Output ONLY valid JSON, no markdown. All prices in ₹ (Indian Rupees). Keep descriptions short (under 15 words). Names should feel authentic Indian. Language: English with occasional Hindi words is OK.
+
+IMPORTANT: Analyze the business name and location to INTELLIGENTLY infer what they serve/sell:
+- "Sharma Dhaba" in Patna → North Indian dhaba food (dal, roti, sabzi, thali)
+- "Kumar Electronics" in Delhi → electronics, mobiles, laptops
+- "Priya Beauty Parlour" → women's beauty services (facial, waxing, bridal makeup)
+- "Fish Corner" → seafood specialties
+- "Gupta Kirana Store" → grocery/kirana items
+- A restaurant in Kerala → South Indian food; in Punjab → Punjabi food
+- Name has "Pizza/Burger/Chinese" → that specific cuisine
+
+Generate menu/services that MATCH what this specific business would actually offer based on name + location. Never generate generic placeholder content.`
           },
           {
             role: 'user',

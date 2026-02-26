@@ -197,6 +197,22 @@ function matchBulkPrice(msg: string, lower: string, data: SiteData): PatternResu
   return { matched: false };
 }
 
+// Phone: "change mobile number to X" / "phone update X" / "number badlo X"
+function matchPhone(msg: string, lower: string, data: SiteData): PatternResult {
+  const m = msg.match(/(?:change|update|badlo|set)\s+(?:mobile|phone|contact|whatsapp)?\s*(?:number|no\.?)?\s*(?:to\s+)?(\+?\d[\d\s\-]{8,14})/i)
+    || msg.match(/(?:mobile|phone|contact|whatsapp)\s*(?:number|no\.?)?\s*(?:change|update|badlo|set)\s*(?:to\s+|karo\s+)?(\+?\d[\d\s\-]{8,14})/i)
+    || msg.match(/(?:number|no\.?)\s*(\+?\d{10,13})\s*(?:karo|kar|do|set)?$/i);
+  if (!m) return { matched: false };
+  const raw = m[1].replace(/[\s+\-()]/g, '');
+  const clean = raw.replace(/^91(\d{10})$/, '$1');
+  if (clean.length < 10) return { matched: true, reply: '❌ Phone number chhota hai. 10-digit number bhejo.' };
+  data.phone = clean;
+  data.whatsapp = clean.length === 10 ? `91${clean}` : raw;
+  saveSiteData(data);
+  renderSite(data);
+  return { matched: true, changed: true, reply: `✅ Phone updated: ${clean}\n\n🔗 ${BASE_URL}/site/${data.slug}` };
+}
+
 // Timings: "timing 9 se 9 karo" or "timings update 10 AM - 10 PM"
 function matchTimings(msg: string, lower: string, data: SiteData): PatternResult {
   const patterns = [
@@ -282,6 +298,7 @@ export async function smartRoute(phone: string, message: string, siteSlug: strin
     matchRemoveItem,
     matchPriceChange,
     matchBulkPrice,
+    matchPhone,
     matchTimings,
     matchOffer,
     matchClearOffer,

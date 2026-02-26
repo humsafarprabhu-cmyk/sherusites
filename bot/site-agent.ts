@@ -222,9 +222,12 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
           break;
         }
         case 'update_phone': {
-          siteData.phone = params.phone;
-          siteData.whatsapp = `91${params.phone}`;
-          results.push(`✅ Phone: ${params.phone}`);
+          // Clean phone: strip +, spaces, leading 91 if present
+          const rawPhone = String(params.phone).replace(/[\s+\-()]/g, '');
+          const cleanPhone = rawPhone.replace(/^91(\d{10})$/, '$1');
+          siteData.phone = cleanPhone;
+          siteData.whatsapp = cleanPhone.length === 10 ? `91${cleanPhone}` : rawPhone;
+          results.push(`✅ Phone: ${cleanPhone}`);
           break;
         }
         case 'mark_popular': {

@@ -466,12 +466,12 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       }
 
       if (lower === 'share' || lower === 'btn_share') {
-        const shareText = `${session.data.businessName} ka website dekho:\n${getPublicUrl(session.slug!)}\n\nApna bhi banao — WhatsApp karo: https://wa.me/918210329601`;
+        const shareText = `🏪 ${session.data.businessName} ka website dekho!\n\n${getPublicUrl(session.slug!)}\n\n✅ WhatsApp pe order karo\n✅ Call karo\n✅ Location dekho\n\nApna bhi website banao FREE mein — WhatsApp karo: https://wa.me/918210329601`;
         const shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
         const isPaid = session.paid;
         const msg = isPaid
           ? `👏 *Kya baat!* Aapka website ready hai!\n\n🔗 ${getPublicUrl(session.slug!)}\n\nShare karo apne customers ke saath 👇`
-          : `👏 *Kya baat!* Aapne apna website bana liya hai!\n\n🔗 ${getPublicUrl(session.slug!)}\n\nAbhi aapka apna domain nahi hai — upgrade karke ise apna bana sakte hain! ⭐`;
+          : `👏 *Kya baat!* Aapne apna website bana liya hai!\n\n🔗 ${getPublicUrl(session.slug!)}\n\nShare karo — jitna zyada log dekhenge, utna business badhega! 🚀`;
         
         if (isPaid) {
           return { replies: [{
@@ -958,11 +958,11 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
 
         return { replies: [{
           type: 'buttons',
-          body: `👏 *Kya baat! Aapne apna website bana liya!*\n\n🏪 *${session.data.businessName}*\n🔗 ${getPublicUrl(session.slug!)}\n\n✅ WhatsApp button\n✅ Call button\n✅ Google Maps\n✅ Mobile responsive\n✅ Professional design\n\n⭐ *Premium loge toh apna domain milega!*\n_jaise: ${session.data.businessName.toLowerCase().replace(/\s+/g, '')}.in_`,
+          body: `👏 *Kya baat! Aapne apna website bana liya!* 🎉\n\n🏪 *${session.data.businessName}*\n🔗 ${getPublicUrl(session.slug!)}\n\n✅ WhatsApp button\n✅ Call button\n✅ Google Maps\n✅ Mobile responsive\n✅ Professional design\n\nAb apne customers ko share karo! 👇`,
           buttons: [
+            { id: 'btn_share', title: '📤 Share Karo' },
             { id: 'wb_edit', title: '✏️ Edit Website' },
             { id: 'wb_upgrade', title: '⭐ Premium ₹1,499/yr' },
-            { id: 'btn_share', title: '📤 Share' },
           ]
         }]};
       } catch (err: any) {

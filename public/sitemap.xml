@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc></loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://whatswebsite.com</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://whatswebsite.com/privacy.html</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://whatswebsite.com/terms.html</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
   <url><loc>https://whatswebsite.com/site/sharma-dhaba-2</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://whatswebsite.com/site/priya-beauty-parlour</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://whatswebsite.com/site/tandoori-nights</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>

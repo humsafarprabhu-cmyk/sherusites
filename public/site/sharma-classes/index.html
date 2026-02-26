@@ -392,7 +392,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
   t('svcDesc', sec.servicesDesc || 'Expert coaching for every subject');
 
   // Subjects / Services
-  const items = D.services || D.subjects || D.menu || [];
+  const items = (D.subjects?.length ? D.subjects : null) || (D.services?.length ? D.services : null) || (D.menu?.length ? D.menu : null) || [];
   const $sg = document.getElementById('svcGrid');
   if($sg && items.length){
     $sg.innerHTML = items.map((s,i) => `

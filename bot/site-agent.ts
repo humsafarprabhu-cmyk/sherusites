@@ -523,11 +523,10 @@ OTHER:
 - no_action: {} (just chatting, no website change)
 
 ## Response Format:
-Always return valid JSON:
-{
-  "reply": "Short reply in user's language/tone",
-  "actions": [{"action": "action_name", "params": {...}}]
-}
+CRITICAL: You MUST return ONLY valid JSON. No text before or after. Format:
+{"reply": "Short reply in user's language/tone", "actions": [{"action": "action_name", "params": {...}}]}
+
+If no action needed: {"reply": "your message", "actions": [{"action": "no_action", "params": {}}]}
 
 ## Rules:
 - If user asks about something unrelated to their website, just chat friendly (use no_action)
@@ -553,7 +552,8 @@ Always return valid JSON:
         model: 'gpt-4o-mini',
         messages,
         max_tokens: 500,
-        temperature: 0.7,
+        temperature: 0.3,
+        response_format: { type: 'json_object' },
       }),
     });
 
@@ -574,6 +574,7 @@ Always return valid JSON:
       parsed = JSON.parse(jsonStr);
     } catch {
       // If JSON parse fails, treat the whole response as a reply but strip any JSON fragments
+      console.error(`[Agent] JSON parse failed. Raw: ${raw.slice(0, 200)}`);
       const cleanReply = raw.replace(/\{[\s\S]*\}/g, '').replace(/```[\s\S]*```/g, '').trim();
       addToHistory(phone, 'assistant', cleanReply || raw);
       return cleanReply || raw;

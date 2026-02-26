@@ -374,7 +374,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
   t('planTitle', sec.servicesTitle || 'CHOOSE YOUR PLAN');
   t('planDesc', sec.servicesDesc || 'Train hard. Stay consistent. See results.');
 
-  const items = D.services || D.packages || D.plans || D.menu || [];
+  const items = D.services?.length ? D.services : D.packages?.length ? D.packages : D.plans?.length ? D.plans : D.menu?.length ? D.menu : [];
 
   // Separate plans (have features) vs facilities
   const plans = items.filter(i => i.features?.length || i.price?.includes('/'));

@@ -359,7 +359,7 @@ if(typeof IntersectionObserver!=='undefined'){
 
 // ─── TRUST STRIP ───
 (function(){
-  var menu = D.menu || D.services || D.packages || [];
+  var menu = D.menu?.length ? D.menu : D.services?.length ? D.services : D.packages?.length ? D.packages : [];
   document.getElementById('trust-items').textContent = menu.length;
   document.getElementById('trust-time').textContent = D.timings || 'Call us';
   // Shorten address for trust strip
@@ -421,7 +421,7 @@ if(typeof IntersectionObserver!=='undefined'){
 
 // ─── MENU ───
 (function(){
-  var menu = D.menu || D.services || D.packages || D.subjects || D.plans || [];
+  var menu = D.menu?.length ? D.menu : D.services?.length ? D.services : D.packages?.length ? D.packages : D.subjects?.length ? D.subjects : D.plans?.length ? D.plans : [];
   if(!menu.length){
     document.getElementById('menu-list').innerHTML = '<div class="empty"><div class="empty-icon">📋</div>Menu coming soon!</div>';
     return;

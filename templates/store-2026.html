@@ -355,7 +355,7 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
   }, {threshold:0.15});
 
   // Products — category tabs + grid
-  const items = D.services || D.menu || [];
+  const items = D.services?.length ? D.services : D.menu?.length ? D.menu : [];
   const $pc = document.getElementById('prodCats');
   const $pg = document.getElementById('prodGrid');
 

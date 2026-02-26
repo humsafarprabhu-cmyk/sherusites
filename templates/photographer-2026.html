@@ -358,7 +358,7 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
   t('svcEye', sec.servicesEye || 'PACKAGES');
   t('svcTitle', sec.servicesTitle || 'Investment');
   t('svcDesc', sec.servicesDesc || 'Tailored packages for every occasion');
-  const items = D.services || D.packages || D.menu || [];
+  const items = D.services?.length ? D.services : D.packages?.length ? D.packages : D.menu?.length ? D.menu : [];
   const $sg = document.getElementById('svcGrid');
   if($sg && items.length){
     $sg.innerHTML = items.map((s,i) => `

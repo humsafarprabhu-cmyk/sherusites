@@ -349,7 +349,7 @@ button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:
   t('svcDesc', sec.servicesDesc || 'Professional services tailored for you');
 
   // Services
-  const services = D.services || D.menu || [];
+  const services = D.services?.length ? D.services : D.menu?.length ? D.menu : [];
   const $sg = document.getElementById('svcGrid');
   if($sg && services.length){
     $sg.innerHTML = services.map((s,i) => `

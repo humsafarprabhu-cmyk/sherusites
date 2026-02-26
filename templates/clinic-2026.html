@@ -403,7 +403,7 @@ button{font-family:var(--body);cursor:pointer;border:none;background:none;color:
   t('svcEye', sec.servicesEye || 'OUR SERVICES');
   t('svcTitle', sec.servicesTitle || 'Treatments & Services');
   t('svcDesc', sec.servicesDesc || 'Comprehensive healthcare for you and your family');
-  const items = D.services || D.menu || [];
+  const items = D.services?.length ? D.services : D.menu?.length ? D.menu : [];
   const $sg = document.getElementById('svcGrid');
   if($sg && items.length){
     $sg.innerHTML = items.map((s,i) => `

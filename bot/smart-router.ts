@@ -61,6 +61,37 @@ function matchAddItem(msg: string, lower: string, data: SiteData): PatternResult
     }
   }
   
+  // No-price add: "add X" / "add X in courses/menu/services" / "X add karo"
+  const noPricePatterns = [
+    /(?:add|jodo|dalo)\s+(.+?)(?:\s+(?:in|me|mein|into)\s+(?:courses?|menu|services?|subjects?|packages?|plans?|list))?$/i,
+    /(.+?)\s+(?:add|jodo|dalo)\s*(?:karo|kar|do)?(?:\s+(?:in|me|mein|into)\s+(?:courses?|menu|services?|subjects?|packages?|plans?|list))?$/i,
+  ];
+  
+  for (const pattern of noPricePatterns) {
+    const match = msg.match(pattern);
+    if (match) {
+      const name = match[1].trim().replace(/^(ek|naya|new)\s+/i, '');
+      if (name.length < 2 || name.length > 60) continue;
+      // Skip if it looks like a different command
+      if (/^(remove|hata|delete|price|change|update|edit|show|dikhao)/i.test(name)) continue;
+      
+      const cat = data.category;
+      const items = cat === 'restaurant' || data.menu?.length ? (data.menu = data.menu || []) 
+        : cat === 'tutor' || data.subjects?.length ? (data.subjects = data.subjects || [])
+        : (data.services = data.services || []);
+      
+      // Check duplicate
+      if (items.some((i: any) => i.name.toLowerCase() === name.toLowerCase())) {
+        return { matched: true, changed: false, reply: `"${name}" pehle se list mein hai. Price update karna ho toh batao.` };
+      }
+      
+      items.push({ name, price: cat === 'tutor' ? 0 : '₹0' });
+      saveSiteData(data);
+      renderSite(data);
+      return { matched: true, changed: true, reply: `✅ Added: *${name}* (price set nahi hai — "₹XXX" bhejo to update)\n\n🔗 ${BASE_URL}/site/${data.slug}` };
+    }
+  }
+
   // Multi-line: each line "Name - ₹Price"
   const lines = msg.split('\n').filter(l => l.trim());
   if (lines.length > 1) {

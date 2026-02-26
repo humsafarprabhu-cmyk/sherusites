@@ -324,7 +324,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
     return { replies: [{
       type: 'cta_url',
       body: `🆘 *Need help?*\n\nHumse directly baat karo — hum jaldi reply karenge!\n\n⏰ Response time: 1-2 hours`,
-      url: 'https://wa.me/918210329601?text=Hi%2C%20I%20need%20help%20with%20my%20WhatsWebsite',
+      url: 'https://wa.me/919187578351?text=Hi%2C%20I%20need%20help%20with%20my%20WhatsWebsite',
       buttonText: '💬 Chat with Support',
     }] };
   }
@@ -466,7 +466,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       }
 
       if (lower === 'share' || lower === 'btn_share') {
-        const shareText = `🏪 ${session.data.businessName} ka website dekho!\n\n${getPublicUrl(session.slug!)}\n\n✅ WhatsApp pe order karo\n✅ Call karo\n✅ Location dekho\n\nApna bhi website banao FREE mein — WhatsApp karo: https://wa.me/918210329601`;
+        const shareText = `🏪 ${session.data.businessName} ka website dekho!\n\n${getPublicUrl(session.slug!)}\n\n✅ WhatsApp pe order karo\n✅ Call karo\n✅ Location dekho\n\nApna bhi website banao FREE mein — WhatsApp karo: https://wa.me/919187578351`;
         const shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
         const isPaid = session.paid;
         const msg = isPaid

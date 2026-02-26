@@ -352,7 +352,7 @@ async function waitForDns(domain: string, phone: string): Promise<boolean> {
       const { getSiteData: getSD } = await import('./db.ts');
       const sd = getSD(slug);
       const bizName = sd?.businessName || domain;
-      const shareText = `🏪 ${bizName} ka website dekho!\n\nhttps://${domain}\n\n✅ WhatsApp pe order karo\n✅ Call karo\n✅ Location dekho\n\nApna bhi website banao FREE mein — WhatsApp karo: https://wa.me/918210329601`;
+      const shareText = `🏪 ${bizName} ka website dekho!\n\nhttps://${domain}\n\n✅ WhatsApp pe order karo\n✅ Call karo\n✅ Location dekho\n\nApna bhi website banao FREE mein — WhatsApp karo: https://wa.me/919187578351`;
       const shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
       
       // Send live message + share CTA

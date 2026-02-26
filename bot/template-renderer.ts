@@ -108,7 +108,7 @@ export function renderSite(data: SiteData): string {
   }
   
   // WhatsApp number — single source of truth
-  const WA_NUMBER = '918210329601';
+  const WA_NUMBER = '919187578351';
   const WA_LINK = `https://wa.me/${WA_NUMBER}?text=Hi%2C%20mujhe%20bhi%20website%20chahiye!`;
 
   // Add promotional footer for free sites

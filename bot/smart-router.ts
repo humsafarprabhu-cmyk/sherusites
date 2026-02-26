@@ -145,7 +145,7 @@ function matchPriceChange(msg: string, lower: string, data: SiteData): PatternRe
     if (match) {
       const name = match[1].trim();
       const newPrice = '₹' + match[2].replace(/,/g, '');
-      const allItems = [...(data.menu || []), ...(data.services || []), ...(data.packages || []), ...(data.plans || [])];
+      const allItems = [...(data.menu || []), ...(data.services || []), ...(data.packages || []), ...(data.plans || []), ...(data.subjects || [])];
       const item = allItems.find(i => i.name.toLowerCase().includes(name.toLowerCase()));
       if (item) {
         const old = item.price;
@@ -167,7 +167,7 @@ function matchBulkPrice(msg: string, lower: string, data: SiteData): PatternResu
     let percent = parseInt(match[1]);
     if (match[2].match(/kam|decrease|neeche|ghatao/)) percent = -percent;
     
-    const allItems = [...(data.menu || []), ...(data.services || []), ...(data.packages || []), ...(data.plans || [])];
+    const allItems = [...(data.menu || []), ...(data.services || []), ...(data.packages || []), ...(data.plans || []), ...(data.subjects || [])];
     let changed = 0;
     for (const item of allItems) {
       const num = parseInt(item.price.replace(/[₹,\s]/g, '').replace(/from\s*/i, ''));

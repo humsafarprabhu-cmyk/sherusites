@@ -105,6 +105,60 @@ app.use((req, res, next) => {
 const PUBLIC_DIR = path.join(__dirname, 'public');
 app.use(express.static(PUBLIC_DIR, { maxAge: '30d' }));
 
+// ─── PROGRAMMATIC SEO PAGES ──────────────────────────────────────────────────
+
+// Dynamic /free-website/:category/:city pages (300 pages)
+app.get('/free-website/:category/:city', (req, res) => {
+  import('./bot/seo-pages.ts').then(({ generateSeoPage, CATEGORIES, CITIES }) => {
+    const { category, city } = req.params;
+    const html = generateSeoPage(category.toLowerCase(), city.toLowerCase());
+    if (!html) {
+      return res.status(404).send(`<html><body style="background:#030712;color:#e5e7eb;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;"><div style="text-align:center;"><h1>Page not found</h1><p><a href="/" style="color:#25D366;">← Back to WhatsWebsite</a></p></div></body></html>`);
+    }
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+    res.send(html);
+  }).catch(err => {
+    console.error('[SEO] Error generating page:', err.message);
+    res.status(500).send('Error generating page');
+  });
+});
+
+// Category index page — redirect to most popular city or show category list
+app.get('/free-website/:category', (req, res) => {
+  const { category } = req.params;
+  const validCats = ['restaurant', 'salon', 'gym', 'tutor', 'clinic', 'store', 'photographer', 'service', 'wedding', 'event'];
+  if (!validCats.includes(category.toLowerCase())) {
+    return res.redirect(301, '/');
+  }
+  // Redirect to the category sitemap or a representative page
+  res.redirect(301, `/free-website/${category.toLowerCase()}/mumbai`);
+});
+
+// Sitemap for SEO pages
+app.get('/sitemap-seo.xml', (_req, res) => {
+  import('./bot/seo-pages.ts').then(({ generateSeoSitemap }) => {
+    const xml = generateSeoSitemap();
+    res.setHeader('Content-Type', 'application/xml');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(xml);
+  }).catch(err => {
+    console.error('[Sitemap] Error:', err.message);
+    res.status(500).send('Error generating sitemap');
+  });
+});
+
+// Master sitemap index (points to main + seo sitemaps)
+app.get('/sitemap-index.xml', (_req, res) => {
+  const today = new Date().toISOString().split('T')[0];
+  res.setHeader('Content-Type', 'application/xml');
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap><loc>https://whatswebsite.com/sitemap.xml</loc><lastmod>${today}</lastmod></sitemap>
+  <sitemap><loc>https://whatswebsite.com/sitemap-seo.xml</loc><lastmod>${today}</lastmod></sitemap>
+</sitemapindex>`);
+});
+
 // ─── HEALTH ──────────────────────────────────────────────────────────────────
 
 app.get('/health', (_req, res) => {

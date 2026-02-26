@@ -564,6 +564,7 @@ async function sendBotResponse(to: string, response: any) {
     if (typeof reply === 'string') {
       await sendTextMessage(to, reply);
     } else if (reply.type === 'buttons') {
+      if (!reply.buttons?.length) { await sendTextMessage(to, reply.body); continue; }
       await sendInteractiveMessage(to, {
         type: 'button',
         body: { text: reply.body },

@@ -835,12 +835,14 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         const finalCount = fresh.data.galleryPhotos?.length || count;
         return { replies: [{
           type: 'buttons',
-          body: `✅ ${finalCount} photo${finalCount > 1 ? 's' : ''} added! Aur bhejo ya "Done" likho 👇`
+          body: `✅ ${finalCount} photo${finalCount > 1 ? 's' : ''} added! Aur bhejo ya Done dabao 👇`,
+          buttons: [{ id: 'done_gallery', title: '✅ Done' }, { id: 'skip_gallery', title: '⏭️ Skip' }]
         }] };
       } else {
         return { replies: [{
           type: 'buttons',
-          body: '🖼️ Photo bhejo ya "Done" likho 👇'
+          body: '🖼️ Photo bhejo ya Done dabao 👇',
+          buttons: [{ id: 'done_gallery', title: '✅ Done' }, { id: 'skip_gallery', title: '⏭️ Skip' }]
         }] };
       }
 

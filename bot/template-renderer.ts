@@ -129,13 +129,10 @@ export function renderSite(data: SiteData): string {
       html = html.replace('</body>', `${promoFooter}\n</body>`);
     }
   } else {
-    // Premium: "Made with WhatsWebsite" static text in footer (no fixed banner)
-    const credit = `<div style="text-align:center;padding:16px 20px 64px;font-family:system-ui,sans-serif;font-size:11px;color:#9CA3AF;">Made with <a href="${WA_LINK}" style="color:#6366f1;text-decoration:none;font-weight:500;">WhatsWebsite</a></div>`;
-    if (html.includes('<!-- __PAGE_END__ -->')) {
-      html = html.replace('<!-- __PAGE_END__ -->', `${credit}\n<!-- __PAGE_END__ -->`);
-    } else {
-      html = html.replace('</body>', `${credit}\n</body>`);
-    }
+    // Premium: "Made with WhatsWebsite" below copyright inside footer
+    const creditLine = `<div style="margin-top:8px;font-family:system-ui,sans-serif;font-size:11px;color:rgba(255,255,255,.25);">Made with <a href="${WA_LINK}" style="color:rgba(255,255,255,.35);text-decoration:none;">WhatsWebsite</a></div>`;
+    // Insert after the ftr-copy div (copyright line)
+    html = html.replace(/(id="ftrCopy">[^<]*<\/span>[^<]*<\/div>)/i, `$1\n    ${creditLine}`);
   }
 
   // Save

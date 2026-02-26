@@ -23,7 +23,9 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_ALERT_CHAT_ID || '1038264809';
 
 // WhatsApp send function — injected from server.ts
 let _sendWhatsApp: ((to: string, text: string) => Promise<void>) | null = null;
+let _sendCtaUrl: ((to: string, body: string, url: string, buttonText: string) => Promise<void>) | null = null;
 export function setSendWhatsApp(fn: (to: string, text: string) => Promise<void>) { _sendWhatsApp = fn; }
+export function setSendCtaUrl(fn: (to: string, body: string, url: string, buttonText: string) => Promise<void>) { _sendCtaUrl = fn; }
 async function wa(phone: string, msg: string) { if (_sendWhatsApp) await _sendWhatsApp(phone, msg); }
 
 // ─── TLD COSTS & PRICING ────────────────────────────────────────────────────
@@ -347,12 +349,18 @@ async function waitForDns(domain: string, phone: string): Promise<boolean> {
     await new Promise(r => setTimeout(r, mins * 60 * 1000));
     const ok = await checkDnsResolves(domain);
     if (ok) {
-      await wa(phone, `🎉 *${domain} is LIVE!*\n\nAapka custom domain ready hai! Ab duniya ko dikhao 🌍\n\n🔗 https://${domain}`);
-      // Send share link
       const { getSiteData: getSD } = await import('./db.ts');
       const sd = getSD(slug);
-      const shareText = `${sd?.businessName || domain} ka website dekho: https://${domain}`;
-      await wa(phone, `📤 *Share karo:*\n\n👇 Ye link tap karo, contact choose karo, send!\n\nhttps://wa.me/?text=${encodeURIComponent(shareText)}`);
+      const bizName = sd?.businessName || domain;
+      const shareText = `🏪 ${bizName} ka website dekho!\n\nhttps://${domain}\n\n✅ WhatsApp pe order karo\n✅ Call karo\n✅ Location dekho\n\nApna bhi website banao FREE mein — WhatsApp karo: https://wa.me/918210329601`;
+      const shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+      
+      // Send live message + share CTA
+      if (_sendCtaUrl) {
+        await _sendCtaUrl(phone, `🎉 *${domain} is LIVE!*\n\n👏 *Kya baat! Aapka premium website ready hai!*\n\n🔗 https://${domain}\n\nAb share karo apne customers ke saath! 👇`, shareUrl, '📤 Share Karo');
+      } else {
+        await wa(phone, `🎉 *${domain} is LIVE!*\n\n👏 *Kya baat! Aapka premium website ready hai!*\n\n🔗 https://${domain}\n\nShare karo: ${shareUrl}`);
+      }
       await sendTelegramAlert(`✅ DNS live: ${domain} (after ${mins} min)`);
       return true;
     }

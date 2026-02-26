@@ -13,7 +13,7 @@ import rateLimit from 'express-rate-limit';
 import { handleMessage, setBaseUrl, getBaseUrl, setBotSendCallback } from './bot/whatsapp-bot.ts';
 import { createOrder, verifyPayment, markPaid, getPaymentPageHTML } from './bot/payment.ts';
 import { listAllSites, getSiteData, saveSiteData, findSiteByDomain, findSiteByPendingDomain } from './bot/db.ts';
-import { provisionDomain, sendTelegramAlert, setSendWhatsApp, getSetupPageHTML } from './bot/domain.ts';
+import { provisionDomain, sendTelegramAlert, setSendWhatsApp, setSendCtaUrl, getSetupPageHTML } from './bot/domain.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -613,6 +613,13 @@ process.on('unhandledRejection', (err: any) => {
 // Wire up WhatsApp sender for domain.ts
 setSendWhatsApp(async (to: string, text: string) => {
   await sendTextMessage(to, text);
+});
+setSendCtaUrl(async (to: string, body: string, url: string, buttonText: string) => {
+  await sendInteractiveMessage(to, {
+    type: 'cta_url',
+    body: { text: body },
+    action: { name: 'cta_url', parameters: { display_text: buttonText, url } }
+  });
 });
 setBotSendCallback(async (to: string, text: string) => {
   await sendTextMessage(to, text);

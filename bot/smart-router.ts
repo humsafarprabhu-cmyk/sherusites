@@ -39,14 +39,21 @@ function matchAddItem(msg: string, lower: string, data: SiteData): PatternResult
     const match = msg.match(pattern);
     if (match) {
       const name = match[1].trim().replace(/^(ek|naya|new)\s+/i, '');
-      const price = '₹' + match[2].replace(/,/g, '');
+      const rawPrice = match[2].replace(/,/g, '');
+      // Store as number for tutor (subjects use int), else ₹string
+      const price = data.category === 'tutor' ? parseInt(rawPrice) : '₹' + rawPrice;
       
-      if (data.menu) {
+      // Add to the correct list based on category
+      const cat = data.category;
+      if (cat === 'restaurant' || data.menu?.length) {
+        if (!data.menu) data.menu = [];
         data.menu.push({ name, price });
-      } else if (data.services) {
+      } else if (cat === 'tutor' || data.subjects?.length) {
+        if (!data.subjects) data.subjects = [];
+        data.subjects.push({ name, price });
+      } else {
+        if (!data.services) data.services = [];
         data.services.push({ name, price });
-      } else if (data.packages) {
-        data.packages.push({ name, price });
       }
       saveSiteData(data);
       renderSite(data);
@@ -63,8 +70,10 @@ function matchAddItem(msg: string, lower: string, data: SiteData): PatternResult
       if (m) {
         const name = m[1].trim();
         const price = '₹' + m[2].replace(/,/g, '');
-        if (data.menu) data.menu.push({ name, price });
-        else if (data.services) data.services.push({ name, price });
+        const c = data.category;
+        if (c === 'restaurant' || data.menu?.length) { if (!data.menu) data.menu = []; data.menu.push({ name, price }); }
+        else if (c === 'tutor' || data.subjects?.length) { if (!data.subjects) data.subjects = []; data.subjects.push({ name, price }); }
+        else { if (!data.services) data.services = []; data.services.push({ name, price }); }
         added++;
       }
     }
@@ -148,15 +157,16 @@ function matchPriceChange(msg: string, lower: string, data: SiteData): PatternRe
     const match = msg.match(pattern);
     if (match) {
       const name = match[1].trim();
-      const newPrice = '₹' + match[2].replace(/,/g, '');
+      const rawNum = match[2].replace(/,/g, '');
       const allItems = [...(data.menu || []), ...(data.services || []), ...(data.packages || []), ...(data.plans || []), ...(data.subjects || [])];
       const item = allItems.find(i => i.name.toLowerCase().includes(name.toLowerCase()));
       if (item) {
         const old = item.price;
-        item.price = newPrice;
+        // Match the type of existing price (number vs ₹string)
+        item.price = (typeof old === 'number' || /^\d+$/.test(String(old))) ? parseInt(rawNum) : '₹' + rawNum;
         saveSiteData(data);
         renderSite(data);
-        return { matched: true, changed: true, reply: `✅ *${item.name}*: ${old} → ${newPrice}\n\n🔗 ${BASE_URL}/site/${data.slug}` };
+        return { matched: true, changed: true, reply: `✅ *${item.name}*: ${old} → ${item.price}\n\n🔗 ${BASE_URL}/site/${data.slug}` };
       }
       return { matched: true, reply: `❌ "${name}" nahi mila.` };
     }

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+<title>Rai Classes</title>
+<meta name="description" content="Education ka naya safar, humare saath!">
+<meta property="og:title" content="Rai Classes">
+<meta property="og:description" content="Education ka naya safar, humare saath!">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --amber:#F59E0B;--amber-light:#FCD34D;--amber-glow:rgba(245,158,11,.12);
+  --teal:#14B8A6;--teal-dark:#0D9488;--teal-glow:rgba(20,184,166,.1);
+  --warm:#FFFBF0;--cream:#FFF8E7;--white:#FFFFFF;
+  --text:#1E293B;--text2:#64748B;--text3:#94A3B8;
+  --border:rgba(245,158,11,.15);
+  --shadow-s:0 2px 8px rgba(30,41,59,.05);
+  --shadow-m:0 8px 30px rgba(30,41,59,.08);
+  --shadow-l:0 20px 60px rgba(30,41,59,.1);
+  --ease:cubic-bezier(.22,1,.36,1);
+  --head:'Nunito',sans-serif;
+  --body:'Source Sans 3','Segoe UI',sans-serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--body);background:var(--warm);color:var(--text);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font-family:var(--body);cursor:pointer;border:none;background:none;color:inherit}
+
+/* === SCROLL PROGRESS === */
+.scroll-prog{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--amber),var(--teal));z-index:1000;transition:width .15s;width:0}
+
+/* === HEADER === */
+.hdr{position:fixed;top:0;left:0;right:0;z-index:100;transition:all .4s var(--ease);padding:16px 20px}
+.hdr.scrolled{background:rgba(255,251,240,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:var(--shadow-s);padding:10px 20px}
+.hdr-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.hdr-name{font-family:var(--head);font-size:1.1rem;font-weight:700;color:#fff;transition:color .35s}
+.hdr.scrolled .hdr-name{color:var(--text)}
+.hdr-b{padding:8px 18px;border-radius:50px;font-size:.78rem;font-weight:600;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(10px);transition:all .25s var(--ease)}
+.hdr.scrolled .hdr-b{background:var(--teal);color:#fff;border-color:var(--teal)}
+.hdr-b:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(20,184,166,.3)}
+
+/* === HERO === */
+.hero{position:relative;min-height:90vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:var(--cream)}
+.hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden}
+.hero-bg img{width:100%;height:100%;object-fit:cover;animation:ken-burns 20s ease-in-out infinite alternate}
+.hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(15,23,42,.8) 0%,rgba(13,148,136,.5) 40%,rgba(15,23,42,.85) 100%);z-index:1}
+@keyframes ken-burns{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.08) translate(-1%,-1%)}}
+.hero-content{position:relative;z-index:2;padding:40px 24px;max-width:640px}
+.hero h1{font-family:var(--head);font-size:clamp(2.4rem,7vw,3.8rem);color:#fff;font-weight:800;line-height:1.1;margin-bottom:12px}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.3);color:var(--amber-light);font-size:.72rem;font-weight:700;padding:6px 14px;border-radius:50px;margin-bottom:16px;text-transform:uppercase;letter-spacing:1.5px}
+.hero-tagline{font-size:1rem;color:rgba(255,255,255,.7);font-weight:300;margin-bottom:32px;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.6}
+.hero-open{display:inline-flex;align-items:center;gap:6px;margin-bottom:20px}
+.hero-open .dot{width:8px;height:8px;border-radius:50%;background:#4ADE80;box-shadow:0 0 12px rgba(74,222,128,.5);animation:pulse-dot 2s infinite}
+.hero-open span{font-size:.72rem;font-weight:600;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:1.5px}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-book{display:inline-flex;align-items:center;gap:8px;padding:15px 30px;border-radius:50px;background:var(--amber);color:#1E293B;font-weight:700;font-size:.88rem;position:relative;overflow:hidden;transition:all .3s var(--ease);box-shadow:0 4px 20px rgba(245,158,11,.35)}
+.btn-book:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(245,158,11,.45)}
+.btn-ghost{display:inline-flex;align-items:center;gap:6px;padding:15px 24px;border-radius:50px;color:#fff;border:1.5px solid rgba(255,255,255,.2);font-weight:500;font-size:.86rem;transition:all .3s var(--ease)}
+.btn-ghost:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35);transform:translateY(-1px)}
+
+/* === STATS STRIP === */
+.stats{padding:0 20px;margin-top:-40px;position:relative;z-index:3}
+.stats-inner{max-width:700px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);background:var(--white);border-radius:16px;box-shadow:var(--shadow-m);overflow:hidden}
+.stat-item{padding:24px 16px;text-align:center;border-right:1px solid var(--border)}
+.stat-item:last-child{border-right:none}
+.stat-num{font-family:var(--head);font-size:clamp(1.6rem,4vw,2rem);font-weight:800;color:var(--teal);margin-bottom:2px}
+.stat-label{font-size:.7rem;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+
+/* === SECTIONS === */
+.section{padding:64px 20px}
+.sec-hdr{text-align:center;margin-bottom:40px}
+.sec-eye{font-size:.72rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px}
+.sec-t{font-family:var(--head);font-size:clamp(1.6rem,5vw,2.2rem);color:var(--text);margin-bottom:6px;line-height:1.15;font-weight:800}
+.sec-desc{font-size:.85rem;color:var(--text2);max-width:420px;margin:0 auto}
+.sec-inner{max-width:900px;margin:0 auto}
+
+/* === SUBJECTS / COURSES === */
+.subj-grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:640px){.subj-grid{grid-template-columns:1fr 1fr}}
+.subj-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:24px;transition:all .35s var(--ease);position:relative;overflow:hidden}
+.subj-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-m);border-color:var(--amber-light)}
+.subj-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--amber),var(--teal));opacity:0;transition:opacity .3s}
+.subj-card:hover::before{opacity:1}
+.subj-icon{width:44px;height:44px;border-radius:12px;background:var(--amber-glow);display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:14px}
+.subj-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.subj-name{font-family:var(--head);font-size:1.05rem;color:var(--text);font-weight:700}
+.subj-price{font-weight:700;color:var(--teal);font-size:.95rem;white-space:nowrap}
+.subj-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.subj-tag{font-size:.68rem;padding:3px 10px;border-radius:50px;font-weight:600}
+.subj-tag.level{background:var(--teal-glow);color:var(--teal-dark)}
+.subj-tag.mode{background:var(--amber-glow);color:#B45309}
+.subj-tag.duration{background:rgba(100,116,139,.08);color:var(--text2)}
+.subj-desc{font-size:.8rem;color:var(--text2);line-height:1.5}
+.subj-popular{position:absolute;top:14px;right:14px;background:var(--amber);color:#1E293B;font-size:.6rem;font-weight:700;padding:3px 10px;border-radius:50px;text-transform:uppercase;letter-spacing:.5px}
+.subj-cta{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:8px 16px;border-radius:50px;background:var(--teal-glow);color:var(--teal-dark);font-weight:600;font-size:.76rem;transition:all .25s var(--ease);border:1px solid transparent}
+.subj-cta:hover{background:var(--teal);color:#fff;transform:translateY(-1px)}
+
+/* === TRUST STRIP === */
+.trust{padding:32px 20px;background:var(--cream);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.trust-inner{max-width:900px;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.trust-pill{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:50px;background:var(--white);border:1px solid var(--border);font-size:.76rem;font-weight:500;color:var(--text);box-shadow:var(--shadow-s)}
+
+/* === OFFER BANNER === */
+.offer{background:linear-gradient(135deg,var(--amber),#F97316);padding:24px 20px;text-align:center;position:relative;overflow:hidden}
+.offer::before{content:'🎯';position:absolute;top:8px;left:20px;font-size:1.5rem;opacity:.3;animation:float 3s ease-in-out infinite}
+.offer::after{content:'📝';position:absolute;bottom:8px;right:20px;font-size:1.5rem;opacity:.3;animation:float 3s ease-in-out infinite .5s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.offer-t{font-family:var(--head);font-size:1.2rem;color:#fff;font-weight:700;margin-bottom:4px}
+.offer-d{font-size:.8rem;color:rgba(255,255,255,.85)}
+
+/* === GALLERY === */
+.gallery-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:640px){.gallery-grid{grid-template-columns:repeat(3,1fr)}}
+.gal-item{aspect-ratio:1;border-radius:14px;overflow:hidden;position:relative;cursor:pointer}
+.gal-item img{width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+.gal-item:hover img{transform:scale(1.08)}
+.gal-item::after{content:'';position:absolute;inset:0;background:linear-gradient(transparent 60%,rgba(15,23,42,.3));opacity:0;transition:opacity .3s}
+.gal-item:hover::after{opacity:1}
+.gal-more{display:flex;align-items:center;justify-content:center;background:var(--cream);border:2px dashed var(--border);border-radius:14px;aspect-ratio:1;font-family:var(--head);font-size:.95rem;color:var(--teal);font-weight:700;transition:all .3s var(--ease)}
+.gal-more:hover{background:var(--teal-glow);border-color:var(--teal)}
+
+/* === ABOUT === */
+.about-card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:32px 24px;text-align:center;box-shadow:var(--shadow-s)}
+.about-text{font-size:.88rem;color:var(--text2);line-height:1.7;margin-bottom:20px}
+.about-owner{font-family:var(--head);font-size:1rem;color:var(--text);font-weight:700;margin-bottom:2px}
+.about-exp{font-size:.75rem;color:var(--text3)}
+
+/* === REVIEWS === */
+.rev-list{display:flex;flex-direction:column;gap:14px}
+.rev-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:20px;transition:all .3s var(--ease)}
+.rev-card:hover{box-shadow:var(--shadow-m)}
+.rev-stars{color:var(--amber);font-size:.9rem;margin-bottom:8px;letter-spacing:2px}
+.rev-text{font-size:.84rem;color:var(--text2);line-height:1.6;margin-bottom:10px;font-style:italic}
+.rev-author{font-weight:600;font-size:.78rem;color:var(--text)}
+
+/* === LOCATION === */
+.loc-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center;box-shadow:var(--shadow-s)}
+.loc-map{width:100%;height:200px;border-radius:12px;overflow:hidden;margin-bottom:16px;background:var(--cream)}
+.loc-map iframe{width:100%;height:100%;border:0}
+.loc-addr{font-size:.88rem;color:var(--text2);margin-bottom:4px;line-height:1.6}
+.loc-time{font-size:.82rem;color:var(--text3);margin-bottom:16px}
+.loc-btn{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;border-radius:50px;background:var(--cream);color:var(--teal);font-weight:600;font-size:.82rem;border:1px solid var(--border);transition:all .3s var(--ease)}
+.loc-btn:hover{background:var(--teal);color:#fff;transform:translateY(-1px)}
+
+/* === FOOTER === */
+.ftr{background:var(--text);padding:32px 20px;text-align:center}
+.ftr-name{font-family:var(--head);font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:4px}
+.ftr-tag{font-size:.85rem;color:var(--amber-light);margin-bottom:16px}
+.ftr-links{display:flex;gap:16px;justify-content:center;margin-bottom:16px}
+.ftr-links a{color:rgba(255,255,255,.6);font-size:.78rem;transition:color .3s}
+.ftr-links a:hover{color:var(--amber-light)}
+.ftr-copy{font-size:.65rem;color:rgba(255,255,255,.3)}
+
+/* === STICKY CTA === */
+.sticky-cta{position:fixed;bottom:0;left:0;right:0;z-index:90;background:rgba(255,251,240,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:12px 20px;transform:translateY(100%);transition:transform .4s var(--ease);display:flex;align-items:center;justify-content:center;gap:10px}
+.sticky-cta.show{transform:translateY(0)}
+.sticky-cta .btn-book{padding:12px 28px;font-size:.84rem}
+
+/* === ANIMATIONS === */
+.fade-up{opacity:0;transform:translateY(25px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.fade-up.vis{opacity:1;transform:translateY(0)}
+
+@media(max-width:480px){
+  .hero{min-height:85vh}
+  .section{padding:48px 16px}
+  .subj-card{padding:18px}
+  .stats-inner{grid-template-columns:repeat(3,1fr)}
+  .stat-item{padding:16px 8px}
+  .stat-num{font-size:1.3rem}
+}
+</style>
+</head>
+<body>
+<!-- Scroll Progress -->
+<div class="scroll-prog" id="prog"></div>
+
+<!-- Header -->
+<header class="hdr" id="hdr">
+  <div class="hdr-inner">
+    <span class="hdr-name" id="hdrName">Rai Classes</span>
+    <a class="hdr-b" id="hdrBook" href="#">Enquire Now</a>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero" id="heroSection">
+  <div class="hero-bg"><img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1400&q=80" alt="" id="heroImg"></div>
+  <div class="hero-content">
+    <div class="hero-open" id="heroOpen"><div class="dot"></div><span>Admissions Open</span></div>
+    <h1 id="heroName">Rai Classes</h1>
+    <p class="hero-tagline" id="heroTagline">Education ka naya safar, humare saath!</p>
+    <div class="hero-btns">
+      <a class="btn-book" id="heroBook" href="#">📞 Enquire Now</a>
+      <a class="btn-ghost" href="#subjects">Our Courses ↓</a>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Strip -->
+<div class="stats">
+  <div class="stats-inner" id="statsStrip"></div>
+</div>
+
+<!-- Trust Strip -->
+<div class="trust" style="margin-top:32px">
+  <div class="trust-inner" id="trustStrip"></div>
+</div>
+
+<!-- Offer -->
+<section class="offer" id="offerSection" style="display:none">
+  <div class="offer-t" id="offerTitle"></div>
+  <div class="offer-d" id="offerDesc"></div>
+</section>
+
+<!-- Subjects / Courses -->
+<section class="section" id="subjects">
+  <div class="sec-hdr fade-up">
+    <div class="sec-eye" id="svcEye"></div>
+    <h2 class="sec-t" id="svcTitle"></h2>
+    <p class="sec-desc" id="svcDesc"></p>
+  </div>
+  <div class="sec-inner">
+    <div class="subj-grid" id="svcGrid"></div>
+  </div>
+</section>
+
+<!-- Gallery -->
+<section class="section" id="gallerySection" style="background:var(--cream)">
+  <div class="sec-hdr fade-up">
+    <div class="sec-eye" id="galEye"></div>
+    <h2 class="sec-t" id="galTitle"></h2>
+    <p class="sec-desc" id="galDesc"></p>
+  </div>
+  <div class="sec-inner">
+    <div class="gallery-grid" id="galGrid"></div>
+  </div>
+</section>
+
+<!-- About -->
+<section class="section" id="aboutSection">
+  <div class="sec-hdr fade-up">
+    <div class="sec-eye" id="aboutEye"></div>
+    <h2 class="sec-t" id="aboutTitle"></h2>
+  </div>
+  <div class="sec-inner">
+    <div class="about-card fade-up" id="aboutCard">
+      <p class="about-text" id="aboutText"></p>
+      <div class="about-owner" id="aboutOwner"></div>
+      <div class="about-exp" id="aboutExp"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Reviews -->
+<section class="section" style="background:var(--cream)" id="reviewSection">
+  <div class="sec-hdr fade-up">
+    <div class="sec-eye" id="revEye"></div>
+    <h2 class="sec-t" id="revTitle"></h2>
+  </div>
+  <div class="sec-inner">
+    <div class="rev-list" id="revList"></div>
+  </div>
+</section>
+
+<!-- Location -->
+<section class="section" id="locSection">
+  <div class="sec-hdr fade-up">
+    <div class="sec-eye" id="locEye"></div>
+    <h2 class="sec-t" id="locTitle"></h2>
+  </div>
+  <div class="sec-inner">
+    <div class="loc-card fade-up">
+      <div class="loc-map" id="locMap"></div>
+      <p class="loc-addr" id="locAddr">Madan Mahal Jabalpur</p>
+      <p class="loc-time" id="locTime">10:00 AM - 9:00 PM</p>
+      <a class="loc-btn" id="locBtn" href="#">📍 Get Directions</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="ftr">
+  <div class="ftr-name" id="ftrName">Rai Classes</div>
+  <div class="ftr-tag" id="ftrTag">Education ka naya safar, humare saath!</div>
+  <div class="ftr-links">
+    <a href="#subjects">Courses</a>
+    <a href="#gallerySection">Gallery</a>
+    <a href="#reviewSection">Reviews</a>
+    <a href="#locSection">Visit</a>
+  </div>
+  <div class="ftr-copy">© 2026 <span id="ftrCopy">Rai Classes</span>. All rights reserved.</div>
+</footer>
+<!-- __PAGE_END__ -->
+
+<!-- Sticky CTA -->
+<div class="sticky-cta" id="stickyCta">
+  <a class="btn-book" id="stickyBook" href="#">📞 Enquire Now</a>
+</div>
+
+
+  <script>window.__SITE_DATA__ = {"slug":"rai-classes","businessName":"Rai Classes","category":"tutor","tagline":"Education ka naya safar, humare saath!","about":"Expert tutors providing personalized learning for all subjects. We focus on student success.","whatsapp":"918210329601","phone":"8210329601","address":"Madan Mahal Jabalpur","timings":"10:00 AM - 9:00 PM","isOpen":true,"activeOffer":null,"menu":[],"services":[],"packages":[],"plans":[],"subjects":[{"name":"Mathematics","price":1500,"duration":"1 month","description":"Concepts from basic to advanced levels."},{"name":"Science","price":1500,"duration":"1 month","description":"Physics, Chemistry, and Biology fundamentals."},{"name":"English Language","price":1200,"duration":"1 month","description":"Grammar, vocabulary, and communication skills."},{"name":"Hindi Language","price":1200,"duration":"1 month","description":"Literature and language proficiency."},{"name":"Social Studies","price":1000,"duration":"1 month","description":"History, Geography, and Civics."},{"name":"Computer Science","price":1800,"duration":"1 month","description":"Basics of programming and IT skills."},{"name":"Accountancy","price":1500,"duration":"1 month","description":"Financial principles and bookkeeping."},{"name":"Test Preparation","price":2000,"duration":"1 month","description":"Coaching for competitive exams like JEE, NEET."}],"photos":[{"url":"/site/rai-classes/images/hero-unsplash.jpg","caption":"Rai Classes","type":"hero"},{"url":"/site/rai-classes/images/gallery-1.jpg","caption":"Rai Classes","type":"gallery"},{"url":"/site/rai-classes/images/gallery-2.jpg","caption":"Rai Classes","type":"gallery"},{"url":"/site/rai-classes/images/gallery-3.jpg","caption":"Rai Classes","type":"gallery"},{"url":"/site/rai-classes/images/gallery-4.jpg","caption":"Rai Classes","type":"gallery"},{"url":"/site/rai-classes/images/gallery-5.jpg","caption":"Rai Classes","type":"gallery"},{"url":"/site/rai-classes/images/gallery-6.jpg","caption":"Rai Classes","type":"gallery"},{"url":"/site/rai-classes/images/hero.jpg","caption":"Rai Classes","type":"hero"},{"url":"/site/rai-classes/images/gallery-1.jpg","caption":"Rai Classes gallery","type":"gallery"},{"url":"/site/rai-classes/images/gallery-2.jpg","caption":"Rai Classes gallery","type":"gallery"},{"url":"/site/rai-classes/images/gallery-3.jpg","caption":"Rai Classes gallery","type":"gallery"},{"url":"/site/rai-classes/images/gallery-4.jpg","caption":"Rai Classes gallery","type":"gallery"}],"reviews":[{"author":"Aarti Sharma","text":"Great teaching methods! My grades improved significantly.","rating":5,"date":"2023-09-15"},{"author":"Rahul Verma","text":"Dedicated teachers, very supportive environment.","rating":4,"date":"2023-08-22"},{"author":"Sneha Patel","text":"Excellent coaching for competitive exams.","rating":5,"date":"2023-09-10"}],"todaySpecial":{"name":"Math Mastery Workshop","description":"Intensive session to strengthen math skills.","price":"₹500","oldPrice":"₹750"},"ownerName":"","experience":"","sectionContent":{},"trustBadges":null,"brideName":null,"groomName":null,"weddingDate":null,"bridePhoto":null,"groomPhoto":null,"brideDescription":null,"groomDescription":null};</script>
+<script>
+(function(){
+  const D = window.__SITE_DATA__ || {};
+  const phone = D.whatsapp || D.phone || '';
+  const waLink = 'https://wa.me/' + phone.replace(/\D/g,'') + '?text=Hi! I want to enquire about coaching/tuition';
+  const mapLink = 'https://maps.google.com/?q=' + encodeURIComponent(D.address || '');
+  const sec = D.sectionContent || {};
+
+  function t(id,v){const e=document.getElementById(id);if(e&&v)e.textContent=v;return e}
+
+  // Subject icon mapping
+  const subjectIcons = {
+    'math':'📐','mathematics':'📐','maths':'📐','algebra':'📐','geometry':'📐','calculus':'📐',
+    'science':'🔬','physics':'⚡','chemistry':'🧪','biology':'🧬','pcb':'🔬','pcm':'🔬',
+    'english':'📖','hindi':'📝','sanskrit':'📜','urdu':'📝',
+    'history':'🏛️','geography':'🌍','civics':'⚖️','economics':'💰','social':'🌐','sst':'🌐',
+    'computer':'💻','coding':'👨‍💻','programming':'👨‍💻','python':'🐍','java':'☕','web':'🌐',
+    'spoken':'🗣️','communication':'🗣️',
+    'art':'🎨','drawing':'✏️','music':'🎵',
+    'accounting':'📊','commerce':'📊','business':'📈',
+    'gk':'🧠','reasoning':'🧩','aptitude':'🧩',
+    'ielts':'🌍','toefl':'🌍','competitive':'🏆','jee':'🏆','neet':'🏥','upsc':'🏛️','ssc':'📋',
+  };
+  function getIcon(name){
+    const n = (name||'').toLowerCase();
+    for(const [k,v] of Object.entries(subjectIcons)){if(n.includes(k))return v}
+    return '📚';
+  }
+
+  // Header
+  t('hdrName', D.businessName);
+  document.querySelectorAll('#hdrBook,#heroBook,#stickyBook').forEach(el => el.href = waLink);
+
+  // Hero
+  t('heroName', D.businessName);
+  t('heroTagline', D.tagline);
+  const photos = D.photos || [];
+  const heroPhoto = photos.find(p => p.type === 'hero');
+  if(heroPhoto){document.getElementById('heroImg').src = heroPhoto.url}
+
+  // Open status
+  const $open = document.getElementById('heroOpen');
+  if($open && D.isOpen === false){
+    $open.querySelector('.dot').style.background='#EF4444';
+    $open.querySelector('.dot').style.boxShadow='0 0 12px rgba(239,68,68,.5)';
+    $open.querySelector('span').textContent='Admissions Closed';
+  }
+
+  // Stats (from DB or hide)
+  const stats = D.stats || sec.stats || null;
+  const $ss = document.getElementById('statsStrip');
+  if($ss && stats && stats.length){
+    $ss.innerHTML = stats.map(s => `<div class="stat-item"><div class="stat-num">${s.value}</div><div class="stat-label">${s.label}</div></div>`).join('');
+  } else if($ss){
+    $ss.parentElement.style.display='none';
+  }
+
+  // Trust strip
+  const trustPills = D.trustBadges || sec.trustBadges || [
+    {icon:'🎓',text:'Qualified Teachers'},
+    {icon:'📊',text:'Proven Results'},
+    {icon:'👥',text:'Small Batches'},
+    {icon:'📝',text:'Practice Tests'}
+  ];
+  const $ts = document.getElementById('trustStrip');
+  if($ts) $ts.innerHTML = trustPills.map(p => `<div class="trust-pill">${p.icon||''} ${p.text}</div>`).join('');
+
+  // Offer
+  if(D.activeOffer){
+    const $os = document.getElementById('offerSection');
+    if($os){$os.style.display='block';t('offerTitle',D.activeOffer.title);t('offerDesc',D.activeOffer.description)}
+  }
+
+  // Subjects section header
+  t('svcEye', sec.servicesEye || 'COURSES OFFERED');
+  t('svcTitle', sec.servicesTitle || 'What We Teach');
+  t('svcDesc', sec.servicesDesc || 'Expert coaching for every subject');
+
+  // Subjects / Services
+  const items = D.services || D.subjects || D.menu || [];
+  const $sg = document.getElementById('svcGrid');
+  if($sg && items.length){
+    $sg.innerHTML = items.map((s,i) => `
+      <div class="subj-card fade-up" style="transition-delay:${i*60}ms">
+        ${s.popular ? '<div class="subj-popular">⭐ Popular</div>' : ''}
+        <div class="subj-icon">${getIcon(s.name)}</div>
+        <div class="subj-top">
+          <div class="subj-name">${s.name}</div>
+          <div class="subj-price">${s.price || ''}</div>
+        </div>
+        <div class="subj-meta">
+          ${s.level ? `<span class="subj-tag level">${s.level}</span>` : ''}
+          ${s.mode ? `<span class="subj-tag mode">${s.mode}</span>` : ''}
+          ${s.duration ? `<span class="subj-tag duration">🕐 ${s.duration}</span>` : ''}
+          ${s.category ? `<span class="subj-tag level">${s.category}</span>` : ''}
+        </div>
+        ${s.description ? `<div class="subj-desc">${s.description}</div>` : ''}
+        <a class="subj-cta" href="${waLink}">Enquire →</a>
+      </div>
+    `).join('');
+  }
+
+  // Gallery
+  t('galEye', sec.galleryEye || 'OUR CENTRE');
+  t('galTitle', sec.galleryTitle || 'Gallery');
+  t('galDesc', sec.galleryDesc || 'A glimpse of our learning environment');
+  const defaultGallery = [
+    {url:'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=600&q=80',caption:'Classroom'},
+    {url:'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&q=80',caption:'Study'},
+    {url:'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&q=80',caption:'Students'},
+    {url:'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&q=80',caption:'Learning'},
+    {url:'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&q=80',caption:'Teaching'},
+    {url:'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600&q=80',caption:'Results'},
+  ];
+  let galPhotos = photos.filter(p => p.type === 'gallery' || !p.type);
+  if(!galPhotos.length) galPhotos = defaultGallery;
+  const $gg = document.getElementById('galGrid');
+  const $gs = document.getElementById('gallerySection');
+  if(galPhotos.length && $gg){
+    const show = galPhotos.slice(0,6);
+    $gg.innerHTML = show.map((p,i) => `
+      <div class="gal-item fade-up" style="transition-delay:${i*80}ms">
+        <img src="${p.url}" alt="${p.caption||''}" loading="lazy">
+      </div>
+    `).join('') + (galPhotos.length > 6 ? `<a class="gal-more fade-up" href="/site/${D.slug}/gallery">See All →</a>` : '');
+  } else if($gs){$gs.style.display='none'}
+
+  // About
+  t('aboutEye', sec.aboutEye || 'ABOUT US');
+  t('aboutTitle', sec.aboutTitle || 'Why Choose Us');
+  t('aboutText', D.about || '');
+  t('aboutOwner', D.ownerName ? '— ' + D.ownerName : '');
+  t('aboutExp', D.experience || '');
+
+  // Reviews
+  t('revEye', sec.reviewsEye || 'TESTIMONIALS');
+  t('revTitle', sec.reviewsTitle || 'What Students Say');
+  const reviews = D.reviews || [];
+  const $rl = document.getElementById('revList');
+  const $rs = document.getElementById('reviewSection');
+  if(reviews.length && $rl){
+    $rl.innerHTML = reviews.map((r,i) => `
+      <div class="rev-card fade-up" style="transition-delay:${i*80}ms">
+        <div class="rev-stars">${'★'.repeat(r.rating||5)}</div>
+        <div class="rev-text">"${r.text}"</div>
+        <div class="rev-author">— ${r.author || r.name}</div>
+      </div>
+    `).join('');
+  } else if($rs){$rs.style.display='none'}
+
+  // Location
+  t('locEye', sec.locationEye || 'FIND US');
+  t('locTitle', sec.locationTitle || 'Visit Our Centre');
+  const $map = document.getElementById('locMap');
+  if($map && D.address){
+    const q = encodeURIComponent(D.businessName+', '+D.address);
+    $map.innerHTML = `<iframe src="https://maps.google.com/maps?q=${q}&output=embed&z=15" allowfullscreen loading="lazy"></iframe>`;
+  }
+  t('locAddr', D.address);
+  const $lt = document.getElementById('locTime');
+  if($lt && D.timings) $lt.textContent = '🕐 ' + D.timings;
+  const $lb = document.getElementById('locBtn');
+  if($lb) $lb.href = mapLink;
+
+  // Footer
+  t('ftrName', D.businessName);
+  t('ftrTag', D.tagline);
+  t('ftrCopy', D.businessName);
+  if(D.businessName) document.title = D.businessName + ' | Coaching & Tuition';
+
+  // === SCROLL EFFECTS === //
+  const hdr = document.getElementById('hdr');
+  const prog = document.getElementById('prog');
+  const sticky = document.getElementById('stickyCta');
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if(!ticking){
+      requestAnimationFrame(() => {
+        const st = window.scrollY;
+        const maxS = document.documentElement.scrollHeight - window.innerHeight;
+        hdr.classList.toggle('scrolled', st > 60);
+        prog.style.width = (st/maxS*100) + '%';
+        sticky.classList.toggle('show', st > 400);
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  // Intersection Observer
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {if(e.isIntersecting){e.target.classList.add('vis');obs.unobserve(e.target)}});
+  }, {threshold:0.15});
+  document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+})();
+</script>
+</body>
+</html>

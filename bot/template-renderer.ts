@@ -128,20 +128,8 @@ export function renderSite(data: SiteData): string {
     } else {
       html = html.replace('</body>', `${promoFooter}\n</body>`);
     }
-  } else {
-    // Premium: subtle "Created by" footer (not fixed, just at bottom)
-    const premiumFooter = `
-    <div style="text-align:center;padding:16px 20px;font-family:system-ui,sans-serif;font-size:11px;color:#9CA3AF;">
-      Made with <a href="${WA_LINK}" style="color:#6366f1;text-decoration:none;font-weight:500;">WhatsWebsite</a>
-    </div>`;
-    if (html.includes('</div><!-- __PAGE_END__ -->')) {
-      html = html.replace('</div><!-- __PAGE_END__ -->', `${premiumFooter}\n</div><!-- __PAGE_END__ -->`);
-    } else if (html.includes('<!-- __PAGE_END__ -->')) {
-      html = html.replace('<!-- __PAGE_END__ -->', `${premiumFooter}\n<!-- __PAGE_END__ -->`);
-    } else {
-      html = html.replace('</body>', `${premiumFooter}\n</body>`);
-    }
   }
+  // Premium sites: NO branding at all — clean experience
 
   // Save
   const siteDir = path.join(SITES_DIR, data.slug);
@@ -354,7 +342,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-he
 
 
 
-<div class="g-footer">⚡ Website by <a href="https://whatswebsite.com">WhatsWebsite</a></div>
+${data.plan !== 'premium' ? '<div class="g-footer">⚡ Website by <a href="https://whatswebsite.com">WhatsWebsite</a></div>' : ''}
 
 <!-- Lightbox -->
 <div class="lightbox" id="lightbox">

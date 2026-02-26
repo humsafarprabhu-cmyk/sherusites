@@ -960,11 +960,11 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
 
         return { replies: [{
           type: 'buttons',
-          body: `👏 *Kya baat! Aapne apna website bana liya!* 🎉\n\n🏪 *${session.data.businessName}*\n🔗 ${getPublicUrl(session.slug!)}\n\n✅ WhatsApp button\n✅ Call button\n✅ Google Maps\n✅ Mobile responsive\n✅ Professional design\n\nAb apne customers ko share karo! 👇`,
+          body: `👏 *Kya baat! Aapne apna website bana liya!* 🎉\n\n🏪 *${session.data.businessName}*\n🔗 ${getPublicUrl(session.slug!)}\n\n✅ WhatsApp button\n✅ Call button\n✅ Google Maps\n✅ Mobile responsive\n✅ Professional design\n\n⭐ *Premium loge toh apna domain milega!*\n_jaise: ${session.data.businessName!.toLowerCase().replace(/\s+/g, '')}.in_`,
           buttons: [
-            { id: 'btn_share', title: '📤 Share Karo' },
-            { id: 'wb_edit', title: '✏️ Edit Website' },
             { id: 'wb_upgrade', title: '⭐ Premium ₹1,499/yr' },
+            { id: 'wb_edit', title: '✏️ Edit Website' },
+            { id: 'btn_share', title: '📤 Share Karo' },
           ]
         }]};
       } catch (err: any) {

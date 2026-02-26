@@ -63,7 +63,7 @@ function matchAddItem(msg: string, lower: string, data: SiteData): PatternResult
   
   // No-price add: "add X" / "add X in courses/menu/services" / "X add karo"
   const noPricePatterns = [
-    /(.+?)\s+(?:add|jodo|dalo)\s*(?:karo|kar|do)?(?:\s+(?:in|me|mein|into)\s+(?:courses?|menu|services?|subjects?|packages?|plans?|list))?$/i,
+    /(.+)\s+(?:add|jodo|dalo)\s*(?:karo|kar\s*do|kar|do)?(?:\s+(?:in|me|mein|into)\s+(?:courses?|menu|services?|subjects?|packages?|plans?|list))?$/i,
     /(?:add|jodo|dalo)\s+(.+?)(?:\s+(?:in|me|mein|into)\s+(?:courses?|menu|services?|subjects?|packages?|plans?|list))$/i,
     /(?:add|jodo|dalo)\s+(.+)/i,
   ];

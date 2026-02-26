@@ -53,8 +53,24 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
   if (!siteData) return ['Site data not found'];
   
   // Helper: get the active items list (menu for restaurants, services for others)
-  const getItems = () => siteData!.menu?.length ? siteData!.menu! : siteData!.services?.length ? siteData!.services! : [];
-  const setItems = (items: any[]) => { if (siteData!.menu?.length) siteData!.menu = items; else siteData!.services = items; };
+  const getItems = () => {
+    if (siteData!.menu?.length) return siteData!.menu!;
+    if (siteData!.subjects?.length) return siteData!.subjects!;
+    if (siteData!.services?.length) return siteData!.services!;
+    if (siteData!.packages?.length) return siteData!.packages!;
+    if (siteData!.plans?.length) return siteData!.plans!;
+    // Default based on category
+    if (siteData!.category === 'restaurant') return siteData!.menu = siteData!.menu || [];
+    if (siteData!.category === 'tutor') return siteData!.subjects = siteData!.subjects || [];
+    return siteData!.services = siteData!.services || [];
+  };
+  const setItems = (items: any[]) => {
+    if (siteData!.menu?.length || siteData!.category === 'restaurant') { siteData!.menu = items; return; }
+    if (siteData!.subjects?.length || siteData!.category === 'tutor') { siteData!.subjects = items; return; }
+    if (siteData!.packages?.length) { siteData!.packages = items; return; }
+    if (siteData!.plans?.length) { siteData!.plans = items; return; }
+    siteData!.services = items;
+  };
 
   for (const { action, params } of actions) {
     try {

@@ -465,7 +465,7 @@ export async function provisionDomain(
     (siteData as any).customDomain = domain;
     (siteData as any).pendingDomain = undefined; // Clear pending — provisioning complete
     siteData.plan = 'premium';
-    saveSiteData(siteData, phone);
+    saveSiteData(siteData); // Don't override owner_phone — keep original creator's WhatsApp
   }
 
   await wa(phone, `✅ Almost done!\n⏳ Step 5/5: Waiting for DNS propagation (5-30 min)...\n\n🔗 Your site is already live at:\nhttps://whatswebsite.com/site/${slug}`);

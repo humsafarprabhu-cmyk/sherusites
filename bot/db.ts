@@ -17,6 +17,7 @@ const dataDir = path.join(__dirname, '..', 'data');
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
 const db = new Database(DB_PATH);
+export function getDb() { return db; }
 db.pragma('journal_mode = WAL');
 db.pragma('busy_timeout = 5000');
 

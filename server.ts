@@ -310,7 +310,10 @@ async function triggerProvisionIfNeeded(slug: string, paymentId?: string) {
     return;
   }
 
-  const whatsapp = site.whatsapp || `91${site.phone}`;
+  // Use the owner's WhatsApp (from users table), not the business phone
+  const { getDb } = await import('./bot/db.ts');
+  const ownerRow = getDb().prepare("SELECT phone FROM users WHERE sites LIKE ?").get(`%${slug}%`) as any;
+  const whatsapp = ownerRow?.phone || site.whatsapp || `91${site.phone}`;
   const pendingDomain = (site as any).pendingDomain;
 
   // Mark as paid if not already

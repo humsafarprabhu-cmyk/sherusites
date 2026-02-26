@@ -43,6 +43,7 @@ const CATEGORY_TEMPLATE: Record<string, string> = {
 };
 
 export function renderSite(data: SiteData): string {
+  console.log(`[Render] ${data.slug} (${data.category}) — subjects:${(data as any).subjects?.length||0} services:${(data as any).services?.length||0}`);
   const templateFile = CATEGORY_TEMPLATE[data.category] || 'restaurant.html';
   const templatePath = path.join(TEMPLATES_DIR, templateFile);
   

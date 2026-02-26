@@ -128,8 +128,15 @@ export function renderSite(data: SiteData): string {
     } else {
       html = html.replace('</body>', `${promoFooter}\n</body>`);
     }
+  } else {
+    // Premium: "Made with WhatsWebsite" static text in footer (no fixed banner)
+    const credit = `<div style="text-align:center;padding:16px 20px;font-family:system-ui,sans-serif;font-size:11px;color:#9CA3AF;">Made with <a href="${WA_LINK}" style="color:#6366f1;text-decoration:none;font-weight:500;">WhatsWebsite</a></div>`;
+    if (html.includes('<!-- __PAGE_END__ -->')) {
+      html = html.replace('<!-- __PAGE_END__ -->', `${credit}\n<!-- __PAGE_END__ -->`);
+    } else {
+      html = html.replace('</body>', `${credit}\n</body>`);
+    }
   }
-  // Premium: completely clean — no branding, no banner
 
   // Save
   const siteDir = path.join(SITES_DIR, data.slug);

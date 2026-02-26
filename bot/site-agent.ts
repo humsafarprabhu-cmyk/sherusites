@@ -573,8 +573,14 @@ If no action needed: {"reply": "your message", "actions": [{"action": "no_action
       const jsonStr = (jsonMatch ? jsonMatch[0] : raw).replace(/```json?\n?/g, '').replace(/```/g, '').trim();
       parsed = JSON.parse(jsonStr);
     } catch {
-      // If JSON parse fails, treat the whole response as a reply but strip any JSON fragments
-      console.error(`[Agent] JSON parse failed. Raw: ${raw.slice(0, 200)}`);
+      console.error(`[Agent] JSON parse failed. Raw: ${raw.slice(0, 300)}`);
+      // DON'T forward AI's text — it might claim success without doing anything
+      // Check if the raw text contains action-like words (add/remove/update/change)
+      const looksLikeAction = /add|remove|hata|update|change|price|delete/i.test(message);
+      if (looksLikeAction) {
+        return '❌ Action execute nahi ho paya. Simple command try karo:\n• "add [item] ₹[price]"\n• "remove [item]"\n• "[item] ka price [amount] karo"';
+      }
+      // For chat/questions, forward AI's reply
       const cleanReply = raw.replace(/\{[\s\S]*\}/g, '').replace(/```[\s\S]*```/g, '').trim();
       addToHistory(phone, 'assistant', cleanReply || raw);
       return cleanReply || raw;

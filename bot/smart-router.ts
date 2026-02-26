@@ -63,14 +63,19 @@ function matchAddItem(msg: string, lower: string, data: SiteData): PatternResult
   
   // No-price add: "add X" / "add X in courses/menu/services" / "X add karo"
   const noPricePatterns = [
-    /(?:add|jodo|dalo)\s+(.+?)(?:\s+(?:in|me|mein|into)\s+(?:courses?|menu|services?|subjects?|packages?|plans?|list))?$/i,
     /(.+?)\s+(?:add|jodo|dalo)\s*(?:karo|kar|do)?(?:\s+(?:in|me|mein|into)\s+(?:courses?|menu|services?|subjects?|packages?|plans?|list))?$/i,
+    /(?:add|jodo|dalo)\s+(.+?)(?:\s+(?:in|me|mein|into)\s+(?:courses?|menu|services?|subjects?|packages?|plans?|list))$/i,
+    /(?:add|jodo|dalo)\s+(.+)/i,
   ];
   
   for (const pattern of noPricePatterns) {
     const match = msg.match(pattern);
     if (match) {
-      const name = match[1].trim().replace(/^(ek|naya|new)\s+/i, '');
+      let name = match[1].trim()
+        .replace(/^(ek|naya|new)\s+/i, '')
+        .replace(/\s+(add|jodo|dalo|karo|kar|do|in|me|mein|into|courses?|menu|services?|subjects?|packages?|plans?|list)\s*$/i, '')
+        .replace(/\s+(add|jodo|dalo|karo|kar|do)\s*/gi, ' ')
+        .trim();
       if (name.length < 2 || name.length > 60) continue;
       // Skip if it looks like a different command
       if (/^(remove|hata|delete|price|change|update|edit|show|dikhao)/i.test(name)) continue;
@@ -145,6 +150,21 @@ function matchRemoveItem(msg: string, lower: string, data: SiteData): PatternRes
   if (/photo|gallery|gallary|image|hero|pic/i.test(msg)) return { matched: false };
   // Skip if message mentions category — let category handler handle
   if (/category|section|group/i.test(msg)) return { matched: false };
+  // Pronoun support: "ise hatao", "ye hatao", "last wala hatao", "usko delete karo"
+  if (/^(ise|isko|ye|yeh|wo|woh|usko|usse|last\s*wala|pichla|abhi\s*wala)\s+(hatao|hata do|remove|delete|nikalo|nikaal do)/i.test(msg)
+    || /^(hatao|hata do|remove|delete|nikalo)\s+(ise|isko|ye|yeh|wo|woh|usko|last\s*wala|pichla)/i.test(msg)) {
+    const allLists = [data.menu, data.services, data.packages, data.plans, data.subjects].filter(Boolean).filter(l => l!.length > 0);
+    if (allLists.length > 0) {
+      // Find the longest list (most likely the active one) and remove last item
+      const list = allLists.reduce((a, b) => (a!.length >= b!.length ? a : b))!;
+      const removed = list.pop()!;
+      saveSiteData(data);
+      renderSite(data);
+      return { matched: true, changed: true, reply: `✅ *${removed.name}* hata diya!\n\n🔗 ${BASE_URL}/site/${data.slug}` };
+    }
+    return { matched: true, reply: `❌ List empty hai, kuch hatane ko nahi hai.` };
+  }
+
   const patterns = [
     // Suffix first: "Litti chokha delete karo", "samosa hatao", "dal ko nikaal do"
     /(.+?)\s+(?:ko\s+)?(?:hatao|hata do|remove karo|remove kar|remove|delete karo|delete kar|delete|nikalo|nikaal do|nikaal)$/i,

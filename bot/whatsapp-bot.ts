@@ -1078,7 +1078,8 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         const count = sData?.photos?.length || 0;
         return { replies: [{
           type: 'buttons',
-          body: `✅ Photo ${count} added! Aur bhejo ya "Done" likho 👇`
+          body: `✅ Photo ${count} added! Aur bhejo ya Done dabao 👇`,
+          buttons: [{ id: 'done_gallery', title: '✅ Done' }]
         }] };
       }
       const slug = session.slug;

@@ -107,9 +107,27 @@ app.use(express.static(PUBLIC_DIR, { maxAge: '30d' }));
 
 // ─── PROGRAMMATIC SEO PAGES ──────────────────────────────────────────────────
 
-// Dynamic /free-website/:category/:city pages (300 pages)
+// ─── LEVEL 2: Area pages /free-website/:category/:city/:area (1500 pages) ───
+// Must be registered BEFORE the city route (more specific path wins)
+app.get('/free-website/:category/:city/:area', (req, res) => {
+  import('./bot/seo-pages.ts').then(({ generateAreaSeoPage }) => {
+    const { category, city, area } = req.params;
+    const html = generateAreaSeoPage(category.toLowerCase(), city.toLowerCase(), area.toLowerCase());
+    if (!html) {
+      return res.status(404).send(`<html><body style="background:#030712;color:#e5e7eb;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;"><div style="text-align:center;"><h1>Page not found</h1><p><a href="/" style="color:#25D366;">← Back to WhatsWebsite</a></p></div></body></html>`);
+    }
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+    res.send(html);
+  }).catch(err => {
+    console.error('[SEO Area] Error generating page:', err.message);
+    res.status(500).send('Error generating page');
+  });
+});
+
+// ─── LEVEL 1: City pages /free-website/:category/:city (300 pages) ──────────
 app.get('/free-website/:category/:city', (req, res) => {
-  import('./bot/seo-pages.ts').then(({ generateSeoPage, CATEGORIES, CITIES }) => {
+  import('./bot/seo-pages.ts').then(({ generateSeoPage }) => {
     const { category, city } = req.params;
     const html = generateSeoPage(category.toLowerCase(), city.toLowerCase());
     if (!html) {
@@ -135,7 +153,7 @@ app.get('/free-website/:category', (req, res) => {
   res.redirect(301, `/free-website/${category.toLowerCase()}/mumbai`);
 });
 
-// Sitemap for SEO pages
+// Sitemap for Level 1 SEO city pages (300 URLs)
 app.get('/sitemap-seo.xml', (_req, res) => {
   import('./bot/seo-pages.ts').then(({ generateSeoSitemap }) => {
     const xml = generateSeoSitemap();
@@ -148,7 +166,20 @@ app.get('/sitemap-seo.xml', (_req, res) => {
   });
 });
 
-// Master sitemap index (points to main + seo sitemaps)
+// Sitemap for Level 2 SEO area pages (1500 URLs)
+app.get('/sitemap-seo-areas.xml', (_req, res) => {
+  import('./bot/seo-pages.ts').then(({ generateAreasSitemap }) => {
+    const xml = generateAreasSitemap();
+    res.setHeader('Content-Type', 'application/xml');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(xml);
+  }).catch(err => {
+    console.error('[Sitemap Areas] Error:', err.message);
+    res.status(500).send('Error generating areas sitemap');
+  });
+});
+
+// Master sitemap index (points to all sitemaps)
 app.get('/sitemap-index.xml', (_req, res) => {
   const today = new Date().toISOString().split('T')[0];
   res.setHeader('Content-Type', 'application/xml');
@@ -156,6 +187,7 @@ app.get('/sitemap-index.xml', (_req, res) => {
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap><loc>https://whatswebsite.com/sitemap.xml</loc><lastmod>${today}</lastmod></sitemap>
   <sitemap><loc>https://whatswebsite.com/sitemap-seo.xml</loc><lastmod>${today}</lastmod></sitemap>
+  <sitemap><loc>https://whatswebsite.com/sitemap-seo-areas.xml</loc><lastmod>${today}</lastmod></sitemap>
 </sitemapindex>`);
 });
 

@@ -263,7 +263,7 @@ Each template has its own **fonts, color palette, and vibe**. No two categories 
 
 ## 8. WhatsApp Number (Single Source of Truth)
 
-- **Location**: `bot/template-renderer.ts` → `const WA_NUMBER = '918210329601'`
+- **Location**: `bot/template-renderer.ts` → `const WA_NUMBER = '919187578351'`
 - Used in: promo footer (free), credit footer (premium)
 - Change here → all sites get updated on next re-render
 

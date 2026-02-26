@@ -129,10 +129,15 @@ export function renderSite(data: SiteData): string {
       html = html.replace('</body>', `${promoFooter}\n</body>`);
     }
   } else {
-    // Premium: "Made with WhatsWebsite" below copyright inside footer
+    // Premium: "Made with WhatsWebsite" below copyright inside footer + spacer for sticky CTA
     const creditLine = `<div style="margin-top:8px;font-family:system-ui,sans-serif;font-size:11px;color:rgba(255,255,255,.25);">Made with <a href="${WA_LINK}" style="color:rgba(255,255,255,.35);text-decoration:none;">WhatsWebsite</a></div>`;
-    // Insert after the ftr-copy div (copyright line)
     html = html.replace(/(id="ftrCopy">[^<]*<\/span>[^<]*<\/div>)/i, `$1\n    ${creditLine}`);
+    // Add spacer so sticky CTA doesn't cover footer
+    if (html.includes('<!-- __PAGE_END__ -->')) {
+      html = html.replace('<!-- __PAGE_END__ -->', `<div style="height:56px"></div>\n<!-- __PAGE_END__ -->`);
+    } else {
+      html = html.replace('</body>', `<div style="height:56px"></div>\n</body>`);
+    }
   }
 
   // Save

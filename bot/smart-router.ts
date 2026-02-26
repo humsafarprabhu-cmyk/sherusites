@@ -138,6 +138,10 @@ function matchPriceChange(msg: string, lower: string, data: SiteData): PatternRe
     /(.+?)\s*(?:ka|ki|ke)\s*(?:price|rate|daam|kimat)\s*(?:₹|rs\.?|inr)?\s*(\d+[\d,]*)\s*(?:karo|kar|kardo|rakh|rakho)?/i,
     /(.+?)\s*(?:price|rate|daam)\s*(?:change|badal|update)\s*(?:₹|rs\.?|inr)?\s*(\d+[\d,]*)/i,
     /(?:price|rate)\s+(?:of\s+)?(.+?)\s*(?:to|=|:)\s*(?:₹|rs\.?|inr)?\s*(\d+[\d,]*)/i,
+    // "X update price to Y" / "X change price to Y" / "X set price Y"
+    /(.+?)\s+(?:update|change|set)\s+(?:the\s+)?(?:price|rate)\s+(?:to\s+)?(?:₹|rs\.?|inr)?\s*(\d+[\d,]*)/i,
+    // "update price of X to Y"
+    /(?:update|change|set)\s+(?:the\s+)?(?:price|rate)\s+(?:of\s+)?(.+?)\s+(?:to\s+)?(?:₹|rs\.?|inr)?\s*(\d+[\d,]*)/i,
   ];
   
   for (const pattern of patterns) {

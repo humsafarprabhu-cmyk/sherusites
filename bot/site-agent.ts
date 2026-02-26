@@ -159,8 +159,8 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
           break;
         }
         case 'add_service': {
-          if (!siteData.services) siteData.services = [];
-          siteData.services.push({
+          const svcList = getItems();
+          svcList.push({
             name: params.name,
             price: params.price,
             duration: params.duration || '',
@@ -170,10 +170,11 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
           break;
         }
         case 'remove_service': {
-          if (!siteData.services) break;
-          const idx = siteData.services.findIndex(s => s.name.toLowerCase().includes(params.name.toLowerCase()));
+          const rmList = getItems();
+          if (!rmList.length) break;
+          const idx = rmList.findIndex(s => s.name.toLowerCase().includes(params.name.toLowerCase()));
           if (idx >= 0) {
-            const removed = siteData.services.splice(idx, 1)[0];
+            const removed = rmList.splice(idx, 1)[0];
             results.push(`✅ Removed: ${removed.name}`);
           } else {
             results.push(`❌ "${params.name}" nahi mila`);
@@ -417,6 +418,7 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
 
   // Save and re-render
   if (actions.some(a => a.action !== 'no_action')) {
+    console.log(`[Agent] Saving ${siteData.slug}: actions=${JSON.stringify(actions.map(a=>a.action))}, subjects=${siteData.subjects?.length||0}`);
     saveSiteData(siteData);
     renderSite(siteData);
   }

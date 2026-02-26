@@ -130,7 +130,7 @@ export function renderSite(data: SiteData): string {
     }
   } else {
     // Premium: "Made with WhatsWebsite" below copyright inside footer + spacer for sticky CTA
-    const creditLine = `<div style="margin-top:8px;font-family:system-ui,sans-serif;font-size:11px;color:rgba(255,255,255,.25);">Made with <a href="${WA_LINK}" style="color:rgba(255,255,255,.35);text-decoration:none;">WhatsWebsite</a></div>`;
+    const creditLine = `<div style="margin-top:12px;display:flex;align-items:center;justify-content:center;gap:6px;font-family:system-ui,sans-serif;font-size:11px;color:rgba(255,255,255,.3);"><span>⚡</span> Built with <a href="${WA_LINK}" style="background:linear-gradient(135deg,rgba(99,102,241,.4),rgba(168,85,247,.4));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:600;text-decoration:none;letter-spacing:.02em;">WhatsWebsite.com</a></div>`;
     html = html.replace(/(id="ftrCopy">[^<]*<\/span>[^<]*<\/div>)/i, `$1\n    ${creditLine}`);
     // Add spacer so sticky CTA doesn't cover footer
     if (html.includes('<!-- __PAGE_END__ -->')) {

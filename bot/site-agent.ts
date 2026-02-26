@@ -76,7 +76,7 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
     try {
       switch (action) {
         case 'add_menu_item': {
-          const addList = siteData.menu?.length ? siteData.menu : (siteData.services || (siteData.services = []));
+          const addList = getItems();
           addList.push({
             name: params.name,
             price: params.price,
@@ -88,8 +88,8 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
           break;
         }
         case 'remove_menu_item': {
-          const list = siteData.menu?.length ? siteData.menu : siteData.services?.length ? siteData.services : null;
-          if (!list) break;
+          const list = getItems();
+          if (!list.length) break;
           const idx = list.findIndex(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
           if (idx >= 0) {
             const removed = list.splice(idx, 1)[0];
@@ -132,7 +132,7 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
           break;
         }
         case 'update_price': {
-          const allItems = [...(siteData.menu || []), ...(siteData.services || []), ...(siteData.packages || []), ...(siteData.plans || [])];
+          const allItems = [...(siteData.menu || []), ...(siteData.services || []), ...(siteData.packages || []), ...(siteData.plans || []), ...(siteData.subjects || [])];
           const item = allItems.find(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
           if (item) {
             const oldPrice = item.price;
@@ -144,7 +144,7 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
           break;
         }
         case 'bulk_price_change': {
-          const items = [...(siteData.menu || []), ...(siteData.services || [])];
+          const items = [...(siteData.menu || []), ...(siteData.services || []), ...(siteData.subjects || []), ...(siteData.packages || []), ...(siteData.plans || [])];
           const percent = params.percent || 0;
           let changed = 0;
           for (const item of items) {
@@ -303,7 +303,7 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
           break;
         }
         case 'update_item_description': {
-          const allItems = [...(siteData.menu || []), ...(siteData.services || [])];
+          const allItems = getItems();
           const item = allItems.find(m => m.name.toLowerCase().includes(params.name.toLowerCase()));
           if (item) { item.description = params.description; results.push(`✅ ${item.name} description updated`); }
           else results.push(`❌ "${params.name}" nahi mila`);

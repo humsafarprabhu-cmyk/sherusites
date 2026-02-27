@@ -73,34 +73,37 @@ function generateCandidates(businessName: string, city?: string): string[] {
   const cityClean = city?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
   const candidates: string[] = [];
 
-  // Full name joined
+  // Hyphenated full name (e.g. kumar-electronics)
+  const hyphenated = words.join('-');
+  if (hyphenated.length <= 25) candidates.push(hyphenated);
+
+  // Full name joined (e.g. kumarelectronics)
   const full = words.join('');
   if (full.length <= 25) candidates.push(full);
 
-  // Full name with city (e.g. kumarelectronicspatna)
-  if (cityClean && (full + cityClean).length <= 25) candidates.push(full + cityClean);
-
-  // First word + city (e.g. kumarpatna)
-  if (words[0] && cityClean && (words[0] + cityClean).length <= 25) candidates.push(words[0] + cityClean);
-
-  // Abbreviation: first letters + last word
-  if (words.length >= 2) {
-    const abbr = words.slice(0, -1).map(w => w[0]).join('') + words[words.length - 1];
-    candidates.push(abbr);
-    if (cityClean && (abbr + cityClean).length <= 25) candidates.push(abbr + cityClean);
+  // First two words joined (e.g. kumarelectronics from "Kumar Electronics And More")
+  if (words.length > 2) {
+    const first2 = words.slice(0, 2).join('');
+    if (first2.length >= 5 && first2.length <= 25) candidates.push(first2);
   }
 
-  // First word only
-  if (words[0] && words[0].length >= 3) candidates.push(words[0]);
+  // With city: hyphenated (kumar-electronics-patna)
+  if (cityClean) {
+    if ((hyphenated + '-' + cityClean).length <= 25) candidates.push(hyphenated + '-' + cityClean);
+    if ((full + cityClean).length <= 25) candidates.push(full + cityClean);
+    if (words[0] && (words[0] + cityClean).length <= 25) candidates.push(words[0] + cityClean);
+  }
 
-  // Variations with suffixes
-  const base = candidates[0] || full;
-  const suffixes = ['online', 'shop', 'hub', 'wala', 'india', 'store', 'site', 'the'];
+  // First word only (if meaningful, 4+ chars)
+  if (words[0] && words[0].length >= 4) candidates.push(words[0]);
+
+  // Prefixes & suffixes on full joined name
+  const base = full || words[0] || '';
+  const suffixes = ['online', 'shop', 'hub', 'india', 'store'];
   for (const s of suffixes) {
     if ((base + s).length <= 25) candidates.push(base + s);
-    // Prefix "the" or "my"
-    if (s === 'the' && ('the' + base).length <= 25) candidates.push('the' + base);
   }
+  if (('the' + base).length <= 25) candidates.push('the' + base);
   if (('my' + base).length <= 25) candidates.push('my' + base);
 
   // Deduplicate

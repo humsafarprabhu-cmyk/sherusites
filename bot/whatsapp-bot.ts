@@ -442,7 +442,8 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         const bizName = session.data.businessName || session.slug || 'business';
         
         try {
-          const suggestions = await findAvailableDomains(bizName, 3);
+          const city = session.data.address || session.data.city || '';
+          const suggestions = await findAvailableDomains(bizName, 3, city);
           if (suggestions.length > 0) {
             session.state = 'domain_search';
             session.data.domainSuggestions = suggestions;

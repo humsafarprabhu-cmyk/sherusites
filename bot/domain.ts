@@ -67,19 +67,27 @@ export async function checkDomainAvailability(domain: string): Promise<{ availab
 
 // ─── SMART DOMAIN SUGGESTIONS ────────────────────────────────────────────────
 
-function generateCandidates(businessName: string): string[] {
+function generateCandidates(businessName: string, city?: string): string[] {
   const clean = businessName.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
   const words = clean.split(/\s+/).filter(w => w.length > 1);
+  const cityClean = city?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
   const candidates: string[] = [];
 
   // Full name joined
   const full = words.join('');
-  if (full.length <= 20) candidates.push(full);
+  if (full.length <= 25) candidates.push(full);
 
-  // Abbreviation: first letters of each word + last word
+  // Full name with city (e.g. kumarelectronicspatna)
+  if (cityClean && (full + cityClean).length <= 25) candidates.push(full + cityClean);
+
+  // First word + city (e.g. kumarpatna)
+  if (words[0] && cityClean && (words[0] + cityClean).length <= 25) candidates.push(words[0] + cityClean);
+
+  // Abbreviation: first letters + last word
   if (words.length >= 2) {
     const abbr = words.slice(0, -1).map(w => w[0]).join('') + words[words.length - 1];
     candidates.push(abbr);
+    if (cityClean && (abbr + cityClean).length <= 25) candidates.push(abbr + cityClean);
   }
 
   // First word only
@@ -87,17 +95,20 @@ function generateCandidates(businessName: string): string[] {
 
   // Variations with suffixes
   const base = candidates[0] || full;
-  const suffixes = ['online', 'shop', 'hub', 'wala', 'india', 'app'];
+  const suffixes = ['online', 'shop', 'hub', 'wala', 'india', 'store', 'site', 'the'];
   for (const s of suffixes) {
-    if ((base + s).length <= 20) candidates.push(base + s);
+    if ((base + s).length <= 25) candidates.push(base + s);
+    // Prefix "the" or "my"
+    if (s === 'the' && ('the' + base).length <= 25) candidates.push('the' + base);
   }
+  if (('my' + base).length <= 25) candidates.push('my' + base);
 
   // Deduplicate
-  return [...new Set(candidates)].slice(0, 9);
+  return [...new Set(candidates)].slice(0, 15);
 }
 
-export async function findAvailableDomains(businessName: string, count: number = 3): Promise<string[]> {
-  const candidates = generateCandidates(businessName);
+export async function findAvailableDomains(businessName: string, count: number = 3, city?: string): Promise<string[]> {
+  const candidates = generateCandidates(businessName, city);
   const available: string[] = [];
 
   // Check in batches of 3 for speed

@@ -419,7 +419,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         return { replies: [categoryListMsg()] };
       }
 
-      if (lower === 'wb_upgrade' || lower === 'upgrade' || lower === 'premium' || lower === '999' || lower === 'pay') {
+      if (lower === 'wb_upgrade' || lower === 'upgrade' || lower === 'premium' || lower === '1499' || lower === '999' || lower === 'pay') {
         // Start domain suggestion flow
         const { findAvailableDomains, calculatePlanPrice } = await import('./domain.ts');
         const bizName = session.data.businessName || session.slug || 'business';

@@ -459,9 +459,11 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
               buttons,
             }] };
           } else {
+            session.state = 'domain_search';
+            persistSession(phone, session);
             return { replies: [{
               type: 'buttons',
-              body: `⭐ *Premium Upgrade*\n\nDomain suggestions mil nahi rahe. Try again later ya humse contact karo!`,
+              body: `⭐ *Premium Upgrade — ₹1,499/year*\n\n✨ Custom .in domain\n✨ No branding\n✨ Priority support\n\n🔍 Auto-suggestions mein available domain nahi mila.\n\n*Apna domain name type karo* (bina .in)\nJaise: _${bizName.toLowerCase().replace(/[^a-z0-9]/g, '')}shop_`,
               buttons: [{ id: 'btn_later', title: '🔙 Baad Mein' }]
             }] };
           }
@@ -1058,7 +1060,43 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         }] };
       }
 
-      // Unknown input in domain_search — show suggestions again
+      // User typed a domain name manually — check availability
+      const typed = lower.replace(/\.in$/, '').replace(/[^a-z0-9]/g, '');
+      if (typed.length >= 3 && typed.length <= 25) {
+        const { checkDomainAvailability, calculatePlanPrice } = await import('./domain.ts');
+        const result = await checkDomainAvailability(typed);
+        if (result.available) {
+          session.data.selectedDomain = result.domain;
+          session.data.domainSuggestions = [result.domain];
+          persistSession(phone, session);
+          const price = calculatePlanPrice(result.domain);
+          const slug = session.slug!;
+          const { createPaymentLink } = await import('./payment.ts');
+          const link = await createPaymentLink(slug);
+          if (link) {
+            return { replies: [{
+              type: 'cta_url',
+              body: `✅ *${result.domain}* available hai!\n\n💰 Price: ₹${(link.amount / 100).toLocaleString()}/year\n\n📱 Tap to pay — domain 30 min mein live!`,
+              url: link.url,
+              buttonText: `💳 Pay ₹${(link.amount / 100).toLocaleString()}`,
+            }] };
+          }
+          return { replies: [{
+            type: 'cta_url',
+            body: `✅ *${result.domain}* available hai!\n\n💰 Price: ₹${price.toLocaleString()}/year`,
+            url: `${BASE_URL}/pay/${slug}`,
+            buttonText: `💳 Pay ₹${price.toLocaleString()}`,
+          }] };
+        } else {
+          return { replies: [{
+            type: 'buttons',
+            body: `❌ *${typed}.in* available nahi hai.\n\nKoi aur naam try karo 👇`,
+            buttons: [{ id: 'btn_later', title: '🔙 Baad Mein' }]
+          }] };
+        }
+      }
+
+      // Show suggestions if available, otherwise reset
       const suggestions = session.data.domainSuggestions || [];
       if (suggestions.length > 0) {
         const buttons = suggestions.slice(0, 3).map((d: string, i: number) => ({
@@ -1066,7 +1104,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         }));
         return { replies: [{
           type: 'buttons',
-          body: `🌐 Neeche se domain choose karo 👇`,
+          body: `🌐 Neeche se domain choose karo ya apna domain type karo 👇`,
           buttons,
         }] };
       }

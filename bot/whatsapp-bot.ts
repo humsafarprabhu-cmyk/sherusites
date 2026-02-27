@@ -1259,19 +1259,18 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       if (lower === 'edit_add' || msg === '1') {
         session.editMode = 'add_item';
         persistSession(phone, session);
-        const addExamples: Record<string, string> = {
-          restaurant: '"Paneer Tikka - 250"\n• "Butter Chicken - 350"\n• "Dal Makhani - ₹180"',
-          store: '"Samsung Galaxy - 15999"\n• "iPhone Cover - 499"\n• "Earphones - ₹299"',
-          salon: '"Haircut - 200"\n• "Facial - 500"\n• "Hair Spa - ₹800"',
-          tutor: '"Mathematics - 2000"\n• "Physics - 1500"\n• "Chemistry - ₹1500"',
-          clinic: '"Consultation - 300"\n• "Dental Cleaning - 500"\n• "X-Ray - ₹200"',
-          gym: '"Monthly Plan - 999"\n• "Quarterly - 2500"\n• "Personal Training - ₹3000"',
-          photographer: '"Wedding Package - 25000"\n• "Pre-wedding - 15000"\n• "Portfolio - ₹5000"',
-          service: '"AC Repair - 500"\n• "Plumbing - 300"\n• "Electrician - ₹400"',
-        };
-        const cat = session.data.category || 'service';
-        const examples = addExamples[cat] || addExamples['service'];
-        return { replies: [`➕ *Naya item add karo*\n\nAise likho:\n• ${examples}\n\nMultiple items ek saath bhi bhej sakte ho (ek line mein ek) 👇`] };
+        const site = getSiteData(session.slug || '');
+        const items = site?.menu || site?.services || site?.packages || site?.subjects || site?.plans || [];
+        let existingList = '';
+        if (items.length > 0) {
+          const sample = items.slice(0, 3).map((it: any) => {
+            const name = it.name || it.title || it;
+            const price = it.price || '';
+            return price ? `${name} - ₹${price}` : name;
+          }).join('\n• ');
+          existingList = `\n\n📋 *Aapke current items:*\n• ${sample}${items.length > 3 ? `\n_...aur ${items.length - 3} items_` : ''}`;
+        }
+        return { replies: [`➕ *Naya item add karo*\n\nAise likho:\n• "Item Name - Price"\n\nJaise: "New Product - 500"${existingList}\n\nMultiple items ek saath bhi bhej sakte ho (ek line mein ek) 👇`] };
       }
 
       if (lower === 'edit_remove' || msg === '2') {

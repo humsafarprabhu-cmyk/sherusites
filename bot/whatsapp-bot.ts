@@ -634,6 +634,23 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       if (trimmed.includes('?') || lower.match(/^(kya|kaun|kaise|kyun|kab|kidhar|what|how|why|who|when|where|help|madad|nahi|no|haan|yes|ok|hi|hello|hey)[\s!?.]*$/)) {
         return { replies: ['🤔 Ye business ka naam nahi lag raha.\n\nApne *business/dukaan ka naam* batao jaise:\n• "Sharma Ji Ka Dhaba"\n• "Priya Beauty Parlour"\n• "Royal Gym & Fitness"'] };
       }
+
+      // Confirm suspicious/conversational names
+      const suspiciousWords = /\b(suggest|batao|bolo|karo|chahiye|kuch bhi|pata nahi|sochne|socho|decide|random|test|abcd|xyz|asdf|example|sample|demo|aap|tum|mujhe|mera|please|plz|hmm|accha|theek|thik|sahi|haa+n)\b/i;
+      if (suspiciousWords.test(lower) && session.state !== 'confirming_name') {
+        session.data.pendingName = trimmed;
+        session.state = 'confirming_name';
+        persistSession(phone, session);
+        return { replies: [{
+          type: 'buttons',
+          body: `🤔 Kya aapke business ka naam *"${trimmed}"* hai?\n\nAgar nahi toh apne business/dukaan ka asli naam batao.`,
+          buttons: [
+            { id: 'confirm_name_yes', title: '✅ Haan yahi hai' },
+            { id: 'confirm_name_no', title: '❌ Nahi, badlo' },
+          ]
+        }] };
+      }
+
       session.data.businessName = trimmed;
       session.data.slug = generateSlug(trimmed);
       session.state = 'awaiting_phone';
@@ -655,6 +672,40 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       return { replies: [
         `🏪 *${trimmed}* — bahut accha naam!\n\nAb apna *phone number* bhejo? 📱\n(Ye website pe dikhega — customers call kar payenge)`
       ]};
+    }
+
+    case 'confirming_name': {
+      if (lower === 'confirm_name_yes') {
+        const name = session.data.pendingName || msg.trim();
+        session.data.businessName = name;
+        session.data.slug = generateSlug(name);
+        session.state = 'awaiting_phone';
+        delete session.data.pendingName;
+        persistSession(phone, session);
+        const senderPhone = phone.replace(/^91/, '');
+        if (senderPhone.length === 10) {
+          return { replies: [{
+            type: 'buttons',
+            body: `🏪 *${name}* — done!\n\n📱 Aapka phone number *${senderPhone}* use kare website pe?`,
+            buttons: [
+              { id: `usephone_${senderPhone}`, title: `✅ Haan yahi karo` },
+              { id: 'usephone_new', title: '📱 Dusra Number' },
+            ]
+          }] };
+        }
+        return { replies: [`🏪 *${name}* — done!\n\nAb apna *phone number* bhejo? 📱`] };
+      }
+      if (lower === 'confirm_name_no') {
+        session.state = 'awaiting_name';
+        delete session.data.pendingName;
+        persistSession(phone, session);
+        return { replies: ['👍 Koi baat nahi! Apne business ka *asli naam* batao 👇'] };
+      }
+      // User typed a new name directly
+      session.state = 'awaiting_name';
+      delete session.data.pendingName;
+      persistSession(phone, session);
+      return handleMessage(phone, message);
     }
 
     case 'awaiting_phone': {

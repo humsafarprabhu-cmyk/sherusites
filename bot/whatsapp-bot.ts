@@ -97,6 +97,23 @@ function extractPhone(msg: string): string | null {
   return match ? match[1] : null;
 }
 
+// ─── EDIT GUIDE (category-specific) ──────────────────────────────────────────
+function getEditGuide(category: string, businessName: string): string {
+  const guides: Record<string, string> = {
+    restaurant: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Menu mein Paneer Tikka add karo ₹250"\n• "Butter Chicken ka price ₹350 karo"\n• "Timing change karo 11am-10pm"\n• "Address change karo: MG Road, Patna"\n• "Description badlo: Best North Indian food"\n• Photo bhejo + bolo "Menu photo lagao"`,
+    store: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Samsung Galaxy add karo ₹15,999"\n• "iPhone ka price ₹49,999 karo"\n• "Timing change karo 10am-9pm"\n• "Address update karo: Station Road"\n• "Description badlo: Best electronics store"\n• Photo bhejo + bolo "Product photo lagao"`,
+    salon: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Hair Spa add karo ₹800"\n• "Haircut ka price ₹200 karo"\n• "Timing change karo 10am-8pm"\n• "Address update karo: Boring Road"\n• "Description badlo: Best unisex salon"\n• Photo bhejo + bolo "Salon photo lagao"`,
+    tutor: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Maths add karo subjects mein"\n• "Physics ka fee ₹2,000 karo"\n• "Timing change karo 4pm-8pm"\n• "Address update karo: Kankarbagh"\n• "Description badlo: 10+ years experience"\n• Photo bhejo + bolo "Class photo lagao"`,
+    clinic: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Dental Cleaning add karo ₹500"\n• "Consultation fee ₹300 karo"\n• "Timing change karo 9am-1pm, 5pm-9pm"\n• "Address update karo: Bailey Road"\n• "Description badlo: 15 years experienced doctor"\n• Photo bhejo + bolo "Clinic photo lagao"`,
+    gym: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Yoga Class add karo ₹1,500/month"\n• "Monthly plan ka price ₹999 karo"\n• "Timing change karo 5am-10pm"\n• "Address update karo: Fraser Road"\n• "Description badlo: AC gym with trainer"\n• Photo bhejo + bolo "Gym photo lagao"`,
+    photographer: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Pre-wedding shoot add karo ₹15,000"\n• "Wedding package ka price ₹25,000 karo"\n• "Address update karo: Dak Bungalow"\n• "Description badlo: 8 years experience"\n• Photo bhejo + bolo "Portfolio mein lagao"`,
+    service: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "AC Repair add karo ₹500"\n• "Plumbing ka price ₹300 karo"\n• "Timing change karo 8am-8pm"\n• "Address update karo: Rajendra Nagar"\n• "Description badlo: Same day service"\n• Photo bhejo + bolo "Work photo lagao"`,
+    wedding: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Venue change karo: Hotel Maurya, Patna"\n• "Date change karo 15 March 2026"\n• "Description badlo: A Royal Wedding"\n• Photo bhejo + bolo "Wedding photo lagao"`,
+    event: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Venue change karo: Convention Center"\n• "Date change karo 20 April 2026"\n• "Ticket price ₹499 karo"\n• "Description badlo: Biggest tech meetup"\n• Photo bhejo + bolo "Event photo lagao"`,
+  };
+  return guides[category] || guides['service']!;
+}
+
 // ─── URL HELPER ──────────────────────────────────────────────────────────────
 function getPublicUrl(slug: string): string {
   const site = getSiteData(slug);
@@ -958,6 +975,8 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         session.paid = false;
         persistSession(phone, session);
 
+        const editGuide = getEditGuide(category, session.data.businessName!);
+
         return { replies: [{
           type: 'buttons',
           body: `👏 *Kya baat! Aapne apna website bana liya!* 🎉\n\n🏪 *${session.data.businessName}*\n🔗 ${getPublicUrl(session.slug!)}\n\n✅ WhatsApp button\n✅ Call button\n✅ Google Maps\n✅ Mobile responsive\n✅ Professional design\n\n⭐ *Premium loge toh apna domain milega!*\n_jaise: ${session.data.businessName!.toLowerCase().replace(/\s+/g, '')}.in_`,
@@ -966,7 +985,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
             { id: 'wb_edit', title: '✏️ Edit Website' },
             { id: 'btn_share', title: '📤 Share Karo' },
           ]
-        }]};
+        }, editGuide]};
       } catch (err: any) {
         session.state = 'awaiting_timings';
         persistSession(phone, session);

@@ -1394,6 +1394,14 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         }]};
       }
 
+      // Escape from edit sub-modes on greeting/reset
+      if (session.editMode && lower.match(/^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru|website|site|reset|restart|naya|new|back|cancel|menu|home)$/)) {
+        session.editMode = undefined;
+        session.state = 'complete';
+        persistSession(phone, session);
+        return handleMessage(phone, message);
+      }
+
       // Handle edit sub-modes
       if (session.editMode === 'add_item') {
         const lines = msg.split('\n').filter(l => l.trim());

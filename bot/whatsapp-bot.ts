@@ -439,10 +439,12 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       if (lower === 'wb_upgrade' || lower === 'upgrade' || lower === 'premium' || lower === '1499' || lower === '999' || lower === 'pay') {
         // Start domain suggestion flow
         const { findAvailableDomains, calculatePlanPrice } = await import('./domain.ts');
-        const bizName = session.data.businessName || session.slug || 'business';
+        // Always use latest name from DB (user may have edited after creation)
+        const latestSite = session.slug ? getSiteData(session.slug) : null;
+        const bizName = latestSite?.businessName || session.data.businessName || session.slug || 'business';
         
         try {
-          const city = session.data.address || session.data.city || '';
+          const city = latestSite?.address || session.data.address || session.data.city || '';
           const suggestions = await findAvailableDomains(bizName, 3, city);
           if (suggestions.length > 0) {
             session.state = 'domain_search';

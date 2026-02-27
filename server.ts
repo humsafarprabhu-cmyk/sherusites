@@ -167,6 +167,27 @@ Sitemap: https://whatswebsite.com/sitemap-seo-areas.xml
 `);
 });
 
+// Main sitemap — dynamic, only whatswebsite.com URLs
+app.get('/sitemap.xml', (_req, res) => {
+  const sites = listAllSites();
+  const urls = [
+    { loc: 'https://whatswebsite.com/', priority: '1.0', freq: 'daily' },
+    { loc: 'https://whatswebsite.com/blog/', priority: '0.8', freq: 'weekly' },
+    { loc: 'https://whatswebsite.com/privacy.html', priority: '0.3', freq: 'monthly' },
+    { loc: 'https://whatswebsite.com/terms.html', priority: '0.3', freq: 'monthly' },
+    ...sites.map(s => ({
+      loc: `https://whatswebsite.com/site/${s}`,
+      priority: '0.6',
+      freq: 'weekly'
+    }))
+  ];
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map(u => `  <url><loc>${u.loc}</loc><changefreq>${u.freq}</changefreq><priority>${u.priority}</priority></url>`).join('\n')}
+</urlset>`;
+  res.type('application/xml').send(xml);
+});
+
 // Sitemap for Level 1 SEO city pages (300 URLs)
 app.get('/sitemap-seo.xml', (_req, res) => {
   import('./bot/seo-pages.ts').then(({ generateSeoSitemap }) => {

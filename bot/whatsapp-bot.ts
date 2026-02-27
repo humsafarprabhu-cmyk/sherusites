@@ -239,7 +239,7 @@ function welcomeBackMsg(sites: any[]): Reply {
     const domainHint = s.businessName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
     const body = isPremium
       ? `👋 *Welcome back!*\n\n🏪 *${s.businessName}*\n🔗 ${BASE_URL}/site/${s.slug}\n\nKya karna hai?`
-      : `👋 *Welcome back!*\n\n🏪 *${s.businessName}*\n🔗 ${BASE_URL}/site/${s.slug}\n\n💡 *${domainHint}.in* jaisa domain milega*\n_*sirf ₹1,499/yr_`;
+      : `👋 *Welcome back!*\n\n🏪 *${s.businessName}*\n🔗 ${BASE_URL}/site/${s.slug}\n\n💡 *${domainHint}.in* jaisa domain milega*\n_*₹1,499/yr · availability pe_`;
     const buttons = isPremium
       ? [
           { id: 'wb_edit', title: '✏️ Edit Website' },
@@ -549,7 +549,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
           const domainHint = siteData.businessName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
           const selBody = session.paid
             ? `✅ *${siteData.businessName}* selected!\n🔗 ${getPublicUrl(session.slug!)}\n\nKya karna hai?`
-            : `✅ *${siteData.businessName}* selected!\n🔗 ${getPublicUrl(session.slug!)}\n\n💡 *${domainHint}.in* jaisa domain milega*\n_*sirf ₹1,499/yr_`;
+            : `✅ *${siteData.businessName}* selected!\n🔗 ${getPublicUrl(session.slug!)}\n\n💡 *${domainHint}.in* jaisa domain milega*\n_*₹1,499/yr · availability pe_`;
           return { replies: [{
             type: 'buttons',
             body: selBody,

@@ -225,27 +225,28 @@ export function getPaymentPageHTML(slug: string, orderId: string, amount: number
 </head>
 <body>
   <div class="card">
-    <div class="logo">🦁</div>
-    <h1>SheruSites Premium</h1>
+    <div class="logo">🌐</div>
+    <h1>WhatsWebsite Premium</h1>
     <div class="subtitle">Professional website for your business</div>
     <div class="business-name">${businessName}</div>
 
     <div class="features">
       <div class="feature"><span class="check">✓</span> Custom domain${pendingDomain ? `: <strong>${pendingDomain}</strong>` : ''}</div>
-      <div class="feature"><span class="check">✓</span> No SheruSites branding</div>
+      <div class="feature"><span class="check">✓</span> No branding</div>
       <div class="feature"><span class="check">✓</span> Priority support</div>
-      <div class="feature"><span class="check">✓</span> Google Business setup</div>
+      <div class="feature"><span class="check">✓</span> Google Analytics setup</div>
       <div class="feature"><span class="check">✓</span> SSL certificate included</div>
       <div class="feature"><span class="check">✓</span> 1 year validity</div>
     </div>
 
     <div class="price-box">
-      <div class="price">₹999</div>
+      <div style="font-size:18px;text-decoration:line-through;color:rgba(255,255,255,0.5)">₹2,999</div>
+      <div class="price">${displayPrice}</div>
       <div class="price-sub">per year • Custom domain included</div>
     </div>
 
     <button class="pay-btn" id="payBtn" onclick="startPayment()">
-      💳 Pay ₹999 — Go Premium
+      💳 Pay ${displayPrice} — Go Premium
     </button>
     <div class="error-msg" id="errorMsg"></div>
     <div class="secure">🔒 Secured by Razorpay • 100% safe payment</div>
@@ -277,7 +278,7 @@ export function getPaymentPageHTML(slug: string, orderId: string, amount: number
         key: KEY_ID,
         amount: ${amount},
         currency: "INR",
-        name: "SheruSites",
+        name: "WhatsWebsite",
         description: "Premium Plan — " + "${businessName}",
         order_id: ORDER_ID,
         prefill: {
@@ -314,7 +315,7 @@ export function getPaymentPageHTML(slug: string, orderId: string, amount: number
         modal: {
           ondismiss: function() {
             btn.disabled = false;
-            btn.textContent = '💳 Pay ₹999 — Go Premium';
+            btn.textContent = '💳 Pay  — Go Premium';
           }
         }
       };
@@ -329,7 +330,7 @@ export function getPaymentPageHTML(slug: string, orderId: string, amount: number
     function showError(msg) {
       const btn = document.getElementById('payBtn');
       btn.disabled = false;
-      btn.textContent = '💳 Pay ₹999 — Go Premium';
+      btn.textContent = '💳 Pay  — Go Premium';
       const err = document.getElementById('errorMsg');
       err.textContent = msg;
       err.style.display = 'block';

@@ -451,6 +451,10 @@ app.get('/api/webhook', (req, res) => {
   res.sendStatus(403);
 });
 
+const processedMsgIds = new Set<string>();
+// Clean up old message IDs every 5 minutes
+setInterval(() => { processedMsgIds.clear(); }, 5 * 60 * 1000);
+
 app.post('/api/webhook', webhookLimiter, async (req, res) => {
   res.sendStatus(200);
   try {
@@ -462,6 +466,13 @@ app.post('/api/webhook', webhookLimiter, async (req, res) => {
         const value = change.value;
         if (!value.messages) continue;
         for (const message of value.messages) {
+          // Dedup by WhatsApp message ID
+          const wamid = message.id;
+          if (wamid && processedMsgIds.has(wamid)) {
+            console.log(`[Webhook] Skipping duplicate wamid: ${wamid}`);
+            continue;
+          }
+          if (wamid) processedMsgIds.add(wamid);
           const phone = message.from;
           let text = '';
           if (message.type === 'text') text = message.text?.body || '';

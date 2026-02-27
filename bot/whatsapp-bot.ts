@@ -323,7 +323,28 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
   const lower = msg.toLowerCase();
   const session = loadSession(phone);
 
-  // Global commands  
+  // Global: greeting from ANY mid-flow state → reset to welcome/complete
+  const isGreeting = /^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru)$/.test(lower);
+  if (isGreeting && session.state !== 'complete' && session.state !== 'idle') {
+    const user = getOrCreateUser(phone);
+    const userSites = (user.sites || []).map((sl: string) => getSiteData(sl)).filter(Boolean);
+    if (userSites.length > 0) {
+      session.state = 'complete';
+      session.slug = userSites[0].slug;
+      session.data.businessName = userSites[0].businessName;
+      session.data.category = userSites[0].category;
+      session.editMode = undefined;
+      persistSession(phone, session);
+      return { replies: [welcomeBackMsg(userSites)] };
+    }
+    session.state = 'awaiting_category';
+    session.data = {};
+    session.editMode = undefined;
+    persistSession(phone, session);
+    return { replies: [categoryListMsg()] };
+  }
+
+  // Global commands
   if (lower === 'reset' || lower === 'restart' || lower === 'naya' || lower === 'new' || lower === 'wb_new' || lower === 'naya website banao') {
     const s = loadSession(phone);
     s.state = 'awaiting_category';

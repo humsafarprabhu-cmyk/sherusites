@@ -437,7 +437,7 @@ const CATEGORY_FAQS: Record<string, FaqItem[]> = {
     },
     {
       q: 'How much does a salon website actually cost?',
-      a: 'WhatsWebsite is free to start — your website lives at yourname.whatswebsite.com at zero cost. A custom domain like yoursalonname.in costs ₹999/year (less than ₹3/day). Most salons recover this cost with a single extra booking from an online inquiry.',
+      a: 'WhatsWebsite is free to start — your website lives at yourname.whatswebsite.com at zero cost. A custom domain like yoursalonname.in costs ₹1,499/year (less than ₹3/day). Most salons recover this cost with a single extra booking from an online inquiry.',
     },
     {
       q: 'I work from home. Should I still have a website?',
@@ -2089,7 +2089,7 @@ export function generateSeoPage(category: string, city: string): string | null {
   const count = CITY_COUNTS[cityKey] || 50;
 
   const title = `Free ${catName} Website in ${cityName} | WhatsWebsite`;
-  const metaDesc = `Get a FREE ${catName.toLowerCase()} website in ${cityName} in 2 minutes via WhatsApp — digital menu, booking form, Google-ready. ${count}+ ${cityName} businesses already use WhatsWebsite. Custom domain ₹999/year.`;
+  const metaDesc = `Get a FREE ${catName.toLowerCase()} website in ${cityName} in 2 minutes via WhatsApp — digital menu, booking form, Google-ready. ${count}+ ${cityName} businesses already use WhatsWebsite. Custom domain ₹1,499/year.`;
   const h1 = `Free ${catName} Website in ${cityName}`;
 
   const mainDesc = isMetro ? content.descEn(cityName, flavor) : content.descHi(cityName, flavor);
@@ -2131,7 +2131,7 @@ export function generateSeoPage(category: string, city: string): string | null {
         name: `Free ${catName} Website in ${cityName}`,
         description: metaDesc,
         brand: { '@type': 'Brand', name: 'WhatsWebsite' },
-        offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR', availability: 'https://schema.org/InStock', description: 'Free website. Custom domain ₹999/year.' },
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR', availability: 'https://schema.org/InStock', description: 'Free website. Custom domain ₹1,499/year.' },
       },
     ],
   }, null, 2);
@@ -2224,7 +2224,7 @@ export function generateSeoPage(category: string, city: string): string | null {
       </div>
       <div class="step">
         <div class="step-num">3</div>
-        <div><h4>Your Website is LIVE ✅</h4><p>Get your free whatswebsite.com link immediately. Upgrade to your own domain (like your${catKey}.in) for just ₹999/year.</p></div>
+        <div><h4>Your Website is LIVE ✅</h4><p>Get your free whatswebsite.com link immediately. Upgrade to your own domain (like your${catKey}.in) for just ₹1,499/year.</p></div>
       </div>
     </div>
   </section>
@@ -2238,7 +2238,7 @@ export function generateSeoPage(category: string, city: string): string | null {
       📱 Get Free Website on WhatsApp
     </a>
     <p style="margin-top:16px; font-size:13px; color:var(--muted);">
-      💬 WhatsApp: +91 91875 78351 &nbsp;|&nbsp; Free forever • Custom domain ₹999/year
+      💬 WhatsApp: +91 91875 78351 &nbsp;|&nbsp; Free forever • Custom domain ₹1,499/year
     </p>
   </section>
 
@@ -2275,7 +2275,7 @@ export function generateAreaSeoPage(category: string, city: string, area: string
   const count = areaData.businessCount;
 
   const title = `Free ${catName} Website in ${areaData.display}, ${cityName} | WhatsWebsite`;
-  const metaDesc = `Get a FREE ${catName.toLowerCase()} website in ${areaData.display}, ${cityName} in 2 minutes via WhatsApp. ${areaData.tagline}. Join ${count}+ local businesses already online. Custom domain ₹999/year.`;
+  const metaDesc = `Get a FREE ${catName.toLowerCase()} website in ${areaData.display}, ${cityName} in 2 minutes via WhatsApp. ${areaData.tagline}. Join ${count}+ local businesses already online. Custom domain ₹1,499/year.`;
 
   const h1 = `Free ${catName} Website in ${areaData.display}, ${cityName}`;
 
@@ -2430,7 +2430,7 @@ export function generateAreaSeoPage(category: string, city: string, area: string
       </div>
       <div class="step">
         <div class="step-num">3</div>
-        <div><h4>Go Live ✅</h4><p>Your website is live at a free whatswebsite.com link. Upgrade to a custom domain for ₹999/year — your own ${catKey}name.in or ${cityKey.replace(/-/g,'')}${catKey}.com.</p></div>
+        <div><h4>Go Live ✅</h4><p>Your website is live at a free whatswebsite.com link. Upgrade to a custom domain for ₹1,499/year — your own ${catKey}name.in or ${cityKey.replace(/-/g,'')}${catKey}.com.</p></div>
       </div>
     </div>
   </section>
@@ -2445,7 +2445,7 @@ export function generateAreaSeoPage(category: string, city: string, area: string
       📱 Get Free Website on WhatsApp
     </a>
     <p style="margin-top:16px; font-size:13px; color:var(--muted);">
-      💬 WhatsApp: +91 91875 78351 &nbsp;|&nbsp; Free forever • Custom domain ₹999/year
+      💬 WhatsApp: +91 91875 78351 &nbsp;|&nbsp; Free forever • Custom domain ₹1,499/year
     </p>
   </section>
 

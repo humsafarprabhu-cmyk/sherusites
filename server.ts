@@ -153,6 +153,20 @@ app.get('/free-website/:category', (req, res) => {
   res.redirect(301, `/free-website/${category.toLowerCase()}/mumbai`);
 });
 
+// Robots.txt — served via route to override Cloudflare managed rules
+app.get('/robots.txt', (_req, res) => {
+  res.type('text/plain').send(`User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: https://whatswebsite.com/sitemap-index.xml
+Sitemap: https://whatswebsite.com/sitemap.xml
+Sitemap: https://whatswebsite.com/sitemap-seo.xml
+Sitemap: https://whatswebsite.com/sitemap-seo-areas.xml
+`);
+});
+
 // Sitemap for Level 1 SEO city pages (300 URLs)
 app.get('/sitemap-seo.xml', (_req, res) => {
   import('./bot/seo-pages.ts').then(({ generateSeoSitemap }) => {

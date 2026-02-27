@@ -1,6 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://whatswebsite.com/sitemap.xml
-Sitemap: https://whatswebsite.com/sitemap-seo.xml
-Sitemap: https://whatswebsite.com/sitemap-index.xml

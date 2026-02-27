@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsWebsite Admin</title>
+  <meta name="robots" content="noindex,nofollow">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50:'#f0fdf4', 100:'#dcfce7', 400:'#4ade80', 500:'#22c55e', 600:'#16a34a', 700:'#15803d' },
+            surface: { 800:'#1e1e2e', 900:'#11111b', 700:'#2a2a3c' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    [x-cloak] { display: none !important; }
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #11111b; }
+    .glass { background: rgba(30,30,46,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.06); }
+    .stat-card { transition: transform 0.2s; }
+    .stat-card:hover { transform: translateY(-2px); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+  </style>
+</head>
+<body class="text-gray-200 min-h-screen" x-data="dashboard()" x-init="init()">
+
+  <!-- Auth Screen -->
+  <div x-show="!authenticated" x-cloak class="min-h-screen flex items-center justify-center">
+    <div class="glass rounded-2xl p-8 w-full max-w-sm text-center">
+      <div class="text-4xl mb-4">🦁</div>
+      <h1 class="text-xl font-bold mb-6">WhatsWebsite Admin</h1>
+      <input type="password" x-model="password" @keydown.enter="login()"
+        placeholder="Password"
+        class="w-full px-4 py-3 rounded-xl bg-surface-900 border border-white/10 focus:border-brand-500 focus:outline-none mb-4">
+      <p x-show="authError" class="text-red-400 text-sm mb-3" x-text="authError"></p>
+      <button @click="login()" class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 font-semibold transition">Login</button>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div x-show="authenticated" x-cloak>
+    <!-- Header -->
+    <header class="glass sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">🦁</span>
+        <h1 class="text-lg font-bold">WhatsWebsite</h1>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-brand-600/20 text-brand-400">Admin</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="text-xs text-gray-500" x-text="'Last updated: ' + lastUpdated"></span>
+        <button @click="refresh()" class="p-2 rounded-lg hover:bg-white/5 transition" title="Refresh">🔄</button>
+        <button @click="authenticated=false;password=''" class="text-xs text-gray-500 hover:text-red-400 transition">Logout</button>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <template x-for="stat in stats" :key="stat.label">
+          <div class="glass rounded-xl p-4 stat-card">
+            <div class="text-2xl mb-1" x-text="stat.icon"></div>
+            <div class="text-2xl font-bold" x-text="stat.value"></div>
+            <div class="text-xs text-gray-500 mt-1" x-text="stat.label"></div>
+          </div>
+        </template>
+      </div>
+
+      <!-- Two Column: Recent Users + Revenue -->
+      <div class="grid lg:grid-cols-2 gap-6">
+        
+        <!-- Recent Users -->
+        <div class="glass rounded-xl p-5">
+          <h2 class="font-semibold mb-4 flex items-center gap-2">👤 Recent Users</h2>
+          <div class="space-y-3 max-h-80 overflow-y-auto">
+            <template x-for="u in recentUsers" :key="u.phone">
+              <div class="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-white/5">
+                <div>
+                  <div class="font-medium text-sm" x-text="u.phone"></div>
+                  <div class="text-xs text-gray-500" x-text="u.sites + ' sites · ' + u.created"></div>
+                </div>
+                <span class="text-xs px-2 py-0.5 rounded-full" 
+                  :class="u.hasPaid ? 'bg-brand-600/20 text-brand-400' : 'bg-gray-700 text-gray-400'"
+                  x-text="u.hasPaid ? '⭐ Premium' : '🆓 Free'"></span>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Payments -->
+        <div class="glass rounded-xl p-5">
+          <h2 class="font-semibold mb-4 flex items-center gap-2">💰 Payments</h2>
+          <div class="space-y-3 max-h-80 overflow-y-auto">
+            <template x-for="p in payments" :key="p.id">
+              <div class="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-white/5">
+                <div>
+                  <div class="font-medium text-sm" x-text="p.slug"></div>
+                  <div class="text-xs text-gray-500" x-text="p.phone + ' · ' + p.created"></div>
+                </div>
+                <div class="text-right">
+                  <div class="font-bold text-brand-400" x-text="'₹' + p.amount"></div>
+                  <div class="text-xs" :class="p.status === 'verified' ? 'text-brand-400' : 'text-yellow-400'" x-text="p.status"></div>
+                </div>
+              </div>
+            </template>
+            <div x-show="payments.length === 0" class="text-center text-gray-500 py-8 text-sm">No payments yet</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sites Table -->
+      <div class="glass rounded-xl p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-semibold flex items-center gap-2">🌐 All Sites</h2>
+          <input type="text" x-model="siteSearch" placeholder="Search sites..."
+            class="px-3 py-1.5 rounded-lg bg-surface-900 border border-white/10 text-sm focus:border-brand-500 focus:outline-none w-48">
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-xs text-gray-500 border-b border-white/5">
+                <th class="pb-3 pr-4">Business</th>
+                <th class="pb-3 pr-4">Category</th>
+                <th class="pb-3 pr-4">Phone</th>
+                <th class="pb-3 pr-4">Plan</th>
+                <th class="pb-3 pr-4">Domain</th>
+                <th class="pb-3 pr-4">Created</th>
+                <th class="pb-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="s in filteredSites" :key="s.slug">
+                <tr class="border-b border-white/5 hover:bg-white/5">
+                  <td class="py-3 pr-4">
+                    <div class="font-medium" x-text="s.businessName"></div>
+                    <div class="text-xs text-gray-500" x-text="s.slug"></div>
+                  </td>
+                  <td class="py-3 pr-4"><span class="text-xs px-2 py-0.5 rounded-full bg-white/5" x-text="s.category"></span></td>
+                  <td class="py-3 pr-4 text-xs" x-text="s.phone"></td>
+                  <td class="py-3 pr-4">
+                    <span class="text-xs px-2 py-0.5 rounded-full"
+                      :class="s.plan === 'premium' ? 'bg-brand-600/20 text-brand-400' : 'bg-gray-700 text-gray-400'"
+                      x-text="s.plan === 'premium' ? '⭐ Premium' : '🆓 Free'"></span>
+                  </td>
+                  <td class="py-3 pr-4 text-xs" x-text="s.customDomain || '—'"></td>
+                  <td class="py-3 pr-4 text-xs text-gray-500" x-text="s.created"></td>
+                  <td class="py-3">
+                    <a :href="'https://whatswebsite.com/site/' + s.slug" target="_blank" 
+                      class="text-xs text-brand-400 hover:underline">View ↗</a>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent Chat -->
+      <div class="glass rounded-xl p-5">
+        <h2 class="font-semibold mb-4 flex items-center gap-2">💬 Recent Chats</h2>
+        <div class="space-y-2 max-h-96 overflow-y-auto">
+          <template x-for="c in chats" :key="c.id">
+            <div class="flex gap-3 py-2 px-3 rounded-lg hover:bg-white/5">
+              <span class="text-xs font-mono text-gray-500 w-28 shrink-0" x-text="c.time"></span>
+              <span class="text-xs w-24 shrink-0" :class="c.role === 'user' ? 'text-blue-400' : 'text-brand-400'" x-text="c.phone"></span>
+              <span class="text-xs" :class="c.role === 'user' ? 'text-gray-300' : 'text-gray-500'" x-text="c.content.substring(0,120)"></span>
+            </div>
+          </template>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    function dashboard() {
+      return {
+        authenticated: false,
+        password: '',
+        authError: '',
+        token: '',
+        lastUpdated: '',
+        stats: [],
+        recentUsers: [],
+        payments: [],
+        sites: [],
+        chats: [],
+        siteSearch: '',
+
+        get filteredSites() {
+          if (!this.siteSearch) return this.sites;
+          const q = this.siteSearch.toLowerCase();
+          return this.sites.filter(s =>
+            s.businessName.toLowerCase().includes(q) ||
+            s.slug.includes(q) ||
+            s.phone.includes(q) ||
+            s.category.includes(q)
+          );
+        },
+
+        async init() {
+          this.token = localStorage.getItem('admin_token') || '';
+          if (this.token) {
+            this.authenticated = true;
+            await this.refresh();
+          }
+        },
+
+        async login() {
+          this.authError = '';
+          try {
+            const res = await fetch('/api/admin/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ password: this.password })
+            });
+            const data = await res.json();
+            if (data.token) {
+              this.token = data.token;
+              localStorage.setItem('admin_token', data.token);
+              this.authenticated = true;
+              await this.refresh();
+            } else {
+              this.authError = data.error || 'Invalid password';
+            }
+          } catch (e) {
+            this.authError = 'Connection error';
+          }
+        },
+
+        async api(endpoint) {
+          const res = await fetch(endpoint, { headers: { 'Authorization': 'Bearer ' + this.token } });
+          if (res.status === 401) { this.authenticated = false; this.token = ''; localStorage.removeItem('admin_token'); return null; }
+          return res.json();
+        },
+
+        async refresh() {
+          const data = await this.api('/api/admin/dashboard');
+          if (!data) return;
+          
+          this.stats = [
+            { icon: '👤', value: data.totalUsers, label: 'Total Users' },
+            { icon: '🌐', value: data.totalSites, label: 'Total Sites' },
+            { icon: '⭐', value: data.premiumSites, label: 'Premium' },
+            { icon: '🆓', value: data.freeSites, label: 'Free' },
+            { icon: '💰', value: '₹' + (data.totalRevenue || 0).toLocaleString(), label: 'Revenue' },
+            { icon: '📅', value: data.todayUsers, label: 'Today Users' },
+          ];
+          this.recentUsers = data.recentUsers || [];
+          this.payments = data.payments || [];
+          this.sites = data.sites || [];
+          this.chats = data.chats || [];
+          this.lastUpdated = new Date().toLocaleTimeString();
+        }
+      }
+    }
+  </script>
+</body>
+</html>

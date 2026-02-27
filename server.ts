@@ -438,6 +438,56 @@ async function triggerProvisionIfNeeded(slug: string, paymentId?: string) {
   }
 }
 
+// ─── ADMIN DASHBOARD API ────────────────────────────────────────────────────
+import { getDb } from './bot/db.ts';
+import crypto from 'crypto';
+
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'sheru2026';
+const adminTokens = new Set<string>();
+
+app.post('/api/admin/login', (req, res) => {
+  if (req.body?.password === ADMIN_PASSWORD) {
+    const token = crypto.randomBytes(32).toString('hex');
+    adminTokens.add(token);
+    return res.json({ token });
+  }
+  res.status(401).json({ error: 'Wrong password' });
+});
+
+function adminAuth(req: any, res: any, next: any) {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token || !adminTokens.has(token)) return res.status(401).json({ error: 'Unauthorized' });
+  next();
+}
+
+app.get('/api/admin/dashboard', adminAuth, (req, res) => {
+  const db = getDb();
+  const totalUsers = (db.prepare('SELECT COUNT(*) as c FROM users').get() as any).c;
+  const totalSites = (db.prepare('SELECT COUNT(*) as c FROM sites').get() as any).c;
+  const premiumSites = (db.prepare("SELECT COUNT(*) as c FROM sites WHERE plan='premium'").get() as any).c;
+  const freeSites = totalSites - premiumSites;
+  const todayUsers = (db.prepare("SELECT COUNT(*) as c FROM users WHERE created_at >= date('now')").get() as any).c;
+  const totalRevenue = (db.prepare("SELECT COALESCE(SUM(amount),0) as s FROM payments WHERE status='verified'").get() as any).s / 100;
+
+  const recentUsers = db.prepare('SELECT phone, sites, created_at FROM users ORDER BY created_at DESC LIMIT 15').all()
+    .map((u: any) => {
+      const sites = JSON.parse(u.sites || '[]');
+      const hasPaid = sites.length > 0 && db.prepare("SELECT plan FROM sites WHERE slug=?").get(sites[0])?.plan === 'premium';
+      return { phone: u.phone, sites: sites.length, created: u.created_at?.slice(0,16), hasPaid };
+    });
+
+  const payments = db.prepare('SELECT * FROM payments ORDER BY created_at DESC LIMIT 20').all()
+    .map((p: any) => ({ id: p.id, slug: p.slug, phone: p.phone, amount: p.amount/100, status: p.status, created: p.created_at?.slice(0,16) }));
+
+  const sites = db.prepare('SELECT slug, business_name, category, phone, plan, custom_domain, created_at FROM sites ORDER BY created_at DESC').all()
+    .map((s: any) => ({ slug: s.slug, businessName: s.business_name, category: s.category, phone: s.phone, plan: s.plan, customDomain: s.custom_domain, created: s.created_at?.slice(0,10) }));
+
+  const chats = db.prepare('SELECT * FROM chat_history ORDER BY created_at DESC LIMIT 50').all()
+    .map((c: any) => ({ id: c.id, phone: c.phone, role: c.role, content: c.content, time: c.created_at?.slice(5,16) }));
+
+  res.json({ totalUsers, totalSites, premiumSites, freeSites, todayUsers, totalRevenue, recentUsers, payments, sites, chats });
+});
+
 // ─── WHATSAPP META WEBHOOK ──────────────────────────────────────────────────
 
 app.get('/api/webhook', (req, res) => {

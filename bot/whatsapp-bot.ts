@@ -234,15 +234,24 @@ function editOptionsMsg(): ListMsg {
 
 function welcomeBackMsg(sites: any[]): Reply {
   if (sites.length === 1) {
-    return {
-      type: 'buttons',
-      body: `👋 *Welcome back!*\n\n🏪 *${sites[0].businessName}*\n🔗 ${BASE_URL}/site/${sites[0].slug}\n\nKya karna hai?`,
-      buttons: [
-        { id: 'wb_edit', title: '✏️ Edit Website' },
-        { id: 'wb_new', title: '🆕 Naya Website' },
-        { id: 'wb_upgrade', title: '⭐ Upgrade' },
-      ]
-    };
+    const s = sites[0];
+    const isPremium = s.plan === 'premium';
+    const domainHint = s.businessName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const body = isPremium
+      ? `👋 *Welcome back!*\n\n🏪 *${s.businessName}*\n🔗 ${BASE_URL}/site/${s.slug}\n\nKya karna hai?`
+      : `👋 *Welcome back!*\n\n🏪 *${s.businessName}*\n🔗 ${BASE_URL}/site/${s.slug}\n\n💡 *${domainHint}.in* jaise apna domain lo — sirf ₹1,499/yr!\nCustomers ko yaad rahega, Google pe rank hoga 🚀`;
+    const buttons = isPremium
+      ? [
+          { id: 'wb_edit', title: '✏️ Edit Website' },
+          { id: 'wb_new', title: '🆕 Naya Website' },
+          { id: 'btn_share', title: '📤 Share Karo' },
+        ]
+      : [
+          { id: 'wb_upgrade', title: '⭐ Premium ₹1,499/yr' },
+          { id: 'wb_edit', title: '✏️ Edit Website' },
+          { id: 'wb_new', title: '🆕 Naya Website' },
+        ];
+    return { type: 'buttons', body, buttons };
   }
   // Multiple sites — show list
   return {
@@ -537,12 +546,16 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
           const user = getOrCreateUser(phone);
           saveUser(phone, { ...user, active_site: selectedSlug });
 
+          const domainHint = siteData.businessName.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const selBody = session.paid
+            ? `✅ *${siteData.businessName}* selected!\n🔗 ${getPublicUrl(session.slug!)}\n\nKya karna hai?`
+            : `✅ *${siteData.businessName}* selected!\n🔗 ${getPublicUrl(session.slug!)}\n\n💡 *${domainHint}.in* — apna domain lo sirf ₹1,499/yr!`;
           return { replies: [{
             type: 'buttons',
-            body: `✅ *${siteData.businessName}* selected!\n🔗 ${getPublicUrl(session.slug!)}\n\nKya karna hai?`,
+            body: selBody,
             buttons: session.paid
               ? [{ id: 'wb_edit', title: '✏️ Edit' }, { id: 'btn_share', title: '📤 Share' }]
-              : [{ id: 'wb_edit', title: '✏️ Edit' }, { id: 'wb_upgrade', title: '⭐ Upgrade' }, { id: 'btn_share', title: '📤 Share' }]
+              : [{ id: 'wb_upgrade', title: '⭐ Premium ₹1,499/yr' }, { id: 'wb_edit', title: '✏️ Edit' }, { id: 'btn_share', title: '📤 Share' }]
           }]};
         }
       }

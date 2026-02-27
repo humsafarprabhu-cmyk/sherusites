@@ -555,7 +555,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
             body: selBody,
             buttons: session.paid
               ? [{ id: 'wb_edit', title: '✏️ Edit' }, { id: 'btn_share', title: '📤 Share' }]
-              : [{ id: 'wb_upgrade', title: '⭐ Premium ₹1,499/yr' }, { id: 'wb_edit', title: '✏️ Edit' }, { id: 'wb_new', title: '🆕 Naya Website' }]
+              : [{ id: 'wb_upgrade', title: '⭐ Premium ₹1,499/yr' }, { id: 'wb_edit', title: '✏️ Edit' }, { id: 'btn_share', title: '📤 Share' }]
           }]};
         }
       }

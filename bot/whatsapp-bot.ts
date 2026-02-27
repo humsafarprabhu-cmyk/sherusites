@@ -97,21 +97,45 @@ function extractPhone(msg: string): string | null {
   return match ? match[1] : null;
 }
 
-// ─── EDIT GUIDE (category-specific) ──────────────────────────────────────────
-function getEditGuide(category: string, businessName: string): string {
-  const guides: Record<string, string> = {
-    restaurant: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Menu mein Paneer Tikka add karo ₹250"\n• "Butter Chicken ka price ₹350 karo"\n• "Timing change karo 11am-10pm"\n• "Address change karo: MG Road, Patna"\n• "Description badlo: Best North Indian food"\n• Photo bhejo + bolo "Menu photo lagao"`,
-    store: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Samsung Galaxy add karo ₹15,999"\n• "iPhone ka price ₹49,999 karo"\n• "Timing change karo 10am-9pm"\n• "Address update karo: Station Road"\n• "Description badlo: Best electronics store"\n• Photo bhejo + bolo "Product photo lagao"`,
-    salon: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Hair Spa add karo ₹800"\n• "Haircut ka price ₹200 karo"\n• "Timing change karo 10am-8pm"\n• "Address update karo: Boring Road"\n• "Description badlo: Best unisex salon"\n• Photo bhejo + bolo "Salon photo lagao"`,
-    tutor: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Maths add karo subjects mein"\n• "Physics ka fee ₹2,000 karo"\n• "Timing change karo 4pm-8pm"\n• "Address update karo: Kankarbagh"\n• "Description badlo: 10+ years experience"\n• Photo bhejo + bolo "Class photo lagao"`,
-    clinic: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Dental Cleaning add karo ₹500"\n• "Consultation fee ₹300 karo"\n• "Timing change karo 9am-1pm, 5pm-9pm"\n• "Address update karo: Bailey Road"\n• "Description badlo: 15 years experienced doctor"\n• Photo bhejo + bolo "Clinic photo lagao"`,
-    gym: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Yoga Class add karo ₹1,500/month"\n• "Monthly plan ka price ₹999 karo"\n• "Timing change karo 5am-10pm"\n• "Address update karo: Fraser Road"\n• "Description badlo: AC gym with trainer"\n• Photo bhejo + bolo "Gym photo lagao"`,
-    photographer: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Pre-wedding shoot add karo ₹15,000"\n• "Wedding package ka price ₹25,000 karo"\n• "Address update karo: Dak Bungalow"\n• "Description badlo: 8 years experience"\n• Photo bhejo + bolo "Portfolio mein lagao"`,
-    service: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "AC Repair add karo ₹500"\n• "Plumbing ka price ₹300 karo"\n• "Timing change karo 8am-8pm"\n• "Address update karo: Rajendra Nagar"\n• "Description badlo: Same day service"\n• Photo bhejo + bolo "Work photo lagao"`,
-    wedding: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Venue change karo: Hotel Maurya, Patna"\n• "Date change karo 15 March 2026"\n• "Description badlo: A Royal Wedding"\n• Photo bhejo + bolo "Wedding photo lagao"`,
-    event: `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n• "Venue change karo: Convention Center"\n• "Date change karo 20 April 2026"\n• "Ticket price ₹499 karo"\n• "Description badlo: Biggest tech meetup"\n• Photo bhejo + bolo "Event photo lagao"`,
-  };
-  return guides[category] || guides['service']!;
+// ─── EDIT GUIDE (DB-driven) ──────────────────────────────────────────────────
+function getEditGuide(category: string, businessName: string, slug?: string): string {
+  const site = slug ? getSiteData(slug) : null;
+  const items = site?.menu || site?.services || site?.packages || site?.subjects || site?.plans || [];
+  
+  let lines: string[] = [];
+  
+  // Item-based examples from DB
+  if (items.length > 0) {
+    const first = items[0] as any;
+    const firstName = first?.name || first?.title || first;
+    const firstPrice = first?.price || '';
+    if (firstName && firstPrice) {
+      lines.push(`"${firstName} ka price ₹${Number(firstPrice) + 100} karo"`);
+    }
+    lines.push(`"Naya item add karo - 500"`);
+  } else {
+    lines.push(`"Naya item add karo - 500"`);
+  }
+  
+  // Timing from DB
+  if (site?.timings) {
+    lines.push(`"Timing change karo ${site.timings === '9am-9pm' ? '10am-8pm' : '9am-9pm'}"`);
+  } else {
+    lines.push(`"Timing change karo 10am-8pm"`);
+  }
+  
+  // Address from DB
+  if (site?.address) {
+    lines.push(`"Address update karo: ${site.address}"`);
+  } else {
+    lines.push(`"Address update karo: New Address"`);
+  }
+  
+  lines.push(`"Description badlo: Naya description"`);
+  lines.push(`Photo bhejo + bolo "Photo lagao"`);
+  
+  const examples = lines.map(l => `• ${l}`).join('\n');
+  return `✏️ *${businessName} mein kuch bhi edit karo!*\n\nBas mujhe WhatsApp pe bolo:\n${examples}`;
 }
 
 // ─── URL HELPER ──────────────────────────────────────────────────────────────
@@ -1044,7 +1068,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         session.paid = false;
         persistSession(phone, session);
 
-        const editGuide = getEditGuide(category, session.data.businessName!);
+        const editGuide = getEditGuide(category, session.data.businessName!, session.slug);
 
         return { replies: [{
           type: 'buttons',

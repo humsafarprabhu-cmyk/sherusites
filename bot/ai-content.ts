@@ -360,7 +360,7 @@ IMPORTANT: Analyze the business name and location to INTELLIGENTLY infer what th
       // Call 1: Menu/Services only (heaviest, but isolated)
       aiCall(
         `"${businessName}" in ${address}. Category: ${category}.\nInfer from the name "${businessName}" what EXACTLY this business sells/serves.\n${category === 'restaurant' ? 
-          `This is a RESTAURANT. Infer cuisine from name: "Bihari"=litti chokha/sattu paratha, "South Indian"=dosa/idli, "Chinese"=noodles/manchurian, "Punjabi"=butter chicken/dal makhani. NO generic items — ONLY items matching the inferred cuisine.\nGenerate 12-15 menu items: name, price ₹, category, description (1 line). 3-4 popular:true.` :
+          `This is a RESTAURANT. Infer cuisine STRICTLY from name and address. Examples: "Bihari/Bihar"=litti chokha/sattu, "South Indian/Tamil/Kerala"=dosa/idli, "Chinese/Dragon"=noodles/manchurian, "Punjabi/Dhaba"=butter chicken/dal makhani, "Italian/Cafe/Coffee"=pasta/pizza/coffee/sandwiches. If name is generic (Cafe, Restaurant, Hotel, Food) generate a MIX of popular Indian items (paneer tikka, biryani, dal, pasta, coffee etc) — DO NOT default to Bihari food.\nGenerate 12-15 menu items: name, price ₹, category, description (1 line). 3-4 popular:true.` :
         category === 'store' ? 
           `This is a STORE/SHOP. Infer products from name: "Electronics"=mobiles/laptops/TVs, "Kirana/General"=grocery/daily needs, "Medical"=medicines/health, "Cloth"=garments/fashion. Generate 10-12 products SPECIFIC to this store type.\nEach: name, price ₹, category, description (1 line). 3-4 popular:true.` :
         category === 'salon' ?

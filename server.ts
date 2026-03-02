@@ -495,6 +495,14 @@ function adminAuth(req: any, res: any, next: any) {
   next();
 }
 
+function toIST(utc: string | null): string {
+  if (!utc) return '';
+  try {
+    const d = new Date(utc.includes('T') ? utc : utc + 'Z');
+    return d.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+  } catch { return utc; }
+}
+
 app.get('/api/admin/dashboard', adminAuth, (req, res) => {
   const db = getDb();
   const totalUsers = (db.prepare('SELECT COUNT(*) as c FROM users').get() as any).c;
@@ -508,17 +516,17 @@ app.get('/api/admin/dashboard', adminAuth, (req, res) => {
     .map((u: any) => {
       const sites = JSON.parse(u.sites || '[]');
       const hasPaid = sites.length > 0 && db.prepare("SELECT plan FROM sites WHERE slug=?").get(sites[0])?.plan === 'premium';
-      return { phone: u.phone, sites: sites.length, created: u.created_at?.slice(0,16), hasPaid };
+      return { phone: u.phone, sites: sites.length, created: toIST(u.created_at), hasPaid };
     });
 
   const payments = db.prepare('SELECT * FROM payments ORDER BY created_at DESC LIMIT 20').all()
-    .map((p: any) => ({ id: p.id, slug: p.slug, phone: p.phone, amount: p.amount/100, status: p.status, created: p.created_at?.slice(0,16) }));
+    .map((p: any) => ({ id: p.id, slug: p.slug, phone: p.phone, amount: p.amount/100, status: p.status, created: toIST(p.created_at) }));
 
   const sites = db.prepare('SELECT slug, business_name, category, phone, plan, custom_domain, created_at FROM sites ORDER BY created_at DESC').all()
-    .map((s: any) => ({ slug: s.slug, businessName: s.business_name, category: s.category, phone: s.phone, plan: s.plan, customDomain: s.custom_domain, created: s.created_at?.slice(0,10) }));
+    .map((s: any) => ({ slug: s.slug, businessName: s.business_name, category: s.category, phone: s.phone, plan: s.plan, customDomain: s.custom_domain, created: toIST(s.created_at) }));
 
   const chats = db.prepare('SELECT * FROM chat_history ORDER BY created_at DESC LIMIT 50').all()
-    .map((c: any) => ({ id: c.id, phone: c.phone, role: c.role, content: c.content, time: c.created_at?.slice(5,16) }));
+    .map((c: any) => ({ id: c.id, phone: c.phone, role: c.role, content: c.content, time: toIST(c.created_at) }));
 
   res.json({ totalUsers, totalSites, premiumSites, freeSites, todayUsers, totalRevenue, recentUsers, payments, sites, chats });
 });

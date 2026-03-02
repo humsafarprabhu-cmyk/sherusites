@@ -324,7 +324,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
   const session = loadSession(phone);
 
   // Global: greeting from ANY mid-flow state → reset to welcome/complete
-  const isGreeting = /^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru)$/.test(lower);
+  const isGreeting = /^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru)\b/.test(lower) || /website\s*(chahiye|banao|banana|bana do)/i.test(lower);
   if (isGreeting && session.state !== 'complete' && session.state !== 'idle') {
     const user = getOrCreateUser(phone);
     const userSites = (user.sites || []).map((sl: string) => getSiteData(sl)).filter(Boolean);

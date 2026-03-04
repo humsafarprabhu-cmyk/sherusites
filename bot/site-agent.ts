@@ -642,7 +642,7 @@ If no action needed: {"reply": "your message", "actions": [{"action": "no_action
     let raw = '';
     try {
       raw = execSync(
-        `openclaw agent --session-id whatsbot-${phone.slice(-6)} --message '${escaped}' --timeout 25`,
+        `openclaw agent --session-id whatsbot-${phone} --message '${escaped}' --timeout 25`,
         { timeout: 30000, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
       ).trim();
       console.log(`[Agent] OpenClaw response for ${phone}: ${raw.slice(0, 200)}`);

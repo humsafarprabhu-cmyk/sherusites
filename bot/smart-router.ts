@@ -364,6 +364,12 @@ export async function smartRoute(phone: string, message: string, siteSlug: strin
     }
   }
   
+  // Quick info queries
+  if (/^(name of|website.*name|naam kya|mera website|my website|website link|link bhejo|mera link)/i.test(lower)) {
+    const url = data.customDomain ? `https://${data.customDomain}` : `${process.env.TUNNEL_URL || 'https://whatswebsite.com'}/site/${data.slug}`;
+    return { matched: true, reply: `Aapki website: *${data.businessName}*\n\n🔗 ${url}` };
+  }
+
   // Handle non-website requests gracefully
   if (/\b(video|app\b|application|software|game|logo\s+ban|logo\s+design)/i.test(lower)) {
     return `🙏 Hum sirf *website* banate hain — aur wo bhi WhatsApp se!\n\nAgar aapki business ke liye website chahiye toh "naya website" type karo 🌐`;

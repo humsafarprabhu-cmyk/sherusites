@@ -349,8 +349,16 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
     return { replies: ['Namaste! 🙏\n\nMain Hinglish mein baat karta hoon — Hindi aur English dono samajh aata hai!\n\nAap Hindi ya English mein likh sakte ho — main samajh lunga 😊\n\nShuru karne ke liye *Hi* likho!'] };
   }
 
-  // "Dusri/Naya website" 
-  if (/dusri|doosri|nayi|naya|new|another/.test(lower) && /website|site|web/.test(lower)) {
+  // "Dusra/Dusri/Naya website" or "switch/change website"
+  if (/dusra|dusri|dusre|doosra|doosri|nayi|naya|new|another/.test(lower) && /website|site|web/.test(lower)) {
+    // If user has multiple sites, show chooser instead of creating new
+    const userSites = listUserSites(phone);
+    if (userSites.length > 1 && /dusra|dusri|dusre|doosra|doosri|switch|change/.test(lower)) {
+      session.state = 'idle';
+      session.slug = '';
+      persistSession(phone, session);
+      return { replies: [welcomeBackMsg(userSites)] };
+    }
     session.state = 'awaiting_category';
     session.data = {};
     persistSession(phone, session);

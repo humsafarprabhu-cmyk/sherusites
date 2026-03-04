@@ -12,6 +12,7 @@
  */
 
 import { getSiteData, saveSiteData, getOrCreateUser, listUserSites, addChatMessage, getChatHistory, getSession, saveSession } from './db.ts';
+import { openclawAgent } from './openclaw-agent.ts';
 
 type SiteData = {
   slug: string;
@@ -530,7 +531,12 @@ If no action needed: {"reply": "your message", "actions": [{"action": "no_action
 
 ## Rules:
 - If user asks about something unrelated to their website, just chat friendly (use no_action)
-- If user gives vague input, ask clarifying questions (use no_action)
+- If user gives vague input (like "change karna hai", "edit", "update"), DON'T ask open-ended "kya change?". Instead ANALYZE their site data and give PERSONALIZED recommendations of what's missing or can be improved:
+  1. Check what's MISSING: no photos? no services/menu? generic tagline? no address? no offer?
+  2. Suggest the TOP 3-4 most impactful improvements specific to their business
+  Example for a photographer with no gallery: "Aapki Dx PRIME STUDIO website dekhi 👀 Ye improvements suggest karunga:\n\n📸 *Portfolio photos add karo* — abhi 0 photos hain, clients ko dikhana zaroori hai! Photo bhejo\n💰 *Packages add karo* — 'add Wedding Package ₹25000'\n✏️ *Tagline update* — 'edit tagline [catchy tagline]'\n📍 *Address update* — exact location daalo Google Maps pe dikhe\n\nKya karna hai?"
+  Example for restaurant with menu but no offer: "Aapke menu mein 15 items hain 👍 Ye aur better ho sakta hai:\n\n🎯 *Today's Special lagao* — daily special se customers attract hote hain\n📸 *Food photos bhejo* — menu items ki photo se 3x zyada orders aate hain\n🏷️ *Offer lagao* — 'offer 10% off on first order'\n\nKya karna hai?"
+  Always be specific to THEIR data. Never give generic lists.
 - NEVER say generic greetings like "Hello! How can I assist you today?" — always be specific
 - If user says "upgrade"/"premium"/"domain" — reply "upgrade type karo ya ⭐ Upgrade button dabao" (use no_action)
 - If you don't understand, say "Samajh nahi aaya. Kya change karna hai batao?" — don't give generic English responses

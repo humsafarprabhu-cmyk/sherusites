@@ -364,6 +364,11 @@ export async function smartRoute(phone: string, message: string, siteSlug: strin
     }
   }
   
+  // Handle non-website requests gracefully
+  if (/\b(video|app\b|application|software|game|logo\s+ban|logo\s+design)/i.test(lower)) {
+    return `🙏 Hum sirf *website* banate hain — aur wo bhi WhatsApp se!\n\nAgar aapki business ke liye website chahiye toh "naya website" type karo 🌐`;
+  }
+
   // No pattern matched → use AI agent (PAID)
   const callCount = getAiCallCount(phone);
   const limit = data.plan === 'premium' ? PREMIUM_AI_LIMIT : FREE_AI_LIMIT;

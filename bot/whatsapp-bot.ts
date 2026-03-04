@@ -323,8 +323,97 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
   const lower = msg.toLowerCase();
   const session = loadSession(phone);
 
+  // Global: voice note / unsupported media handler
+  if (msg === '[unsupported]' && session.state !== 'complete') {
+    return { replies: ['🎙️ Voice note nahi samajh aata!\n\nPlease *text mein* likhke bhejo 🙏\n\nAgar koi problem hai toh "help" type karo.'] };
+  }
+
+  // ─── Global unhandled message patterns ────────────────────────────────
+  // These all get support tickets + helpful reply — BEFORE hitting AI
+
+  // Demo request
+  if (/\bdemo\b|sample website|example website/.test(lower)) {
+    createTicket(phone, msg, 'custom_request', listUserSites(phone)[0]?.business_name);
+    return { replies: ['👀 Ye dekho ek sample website:\n👉 *whatswebsite.com/site/anand-tea-house*\n\nAisi hi aapke business ki website banate hain — bilkul free! 🎉\n\nShuru karne ke liye *Hi* likho 🙏'] };
+  }
+
+  // Complaint handler
+  if (/galat|ghalat|problem|issue|kaam nahi|nahi chal|broken|dikkat|pareshani|wrong|complaint/.test(lower)) {
+    createTicket(phone, msg, 'complaint', listUserSites(phone)[0]?.business_name);
+    return { replies: ['Arre kya hua? 😟 Humne aapka message note kar liya!\n\nHumara team jaldi reply karega 🙏\n\nYa abhi kuch chahiye?\n👉 Naya shuru karna → *Hi* likho\n👉 Website edit karni → *edit* likho'] };
+  }
+
+  // Hindi user
+  if (/हिंदी|हिन्दी|hindi mein|hindi me/.test(lower) || (/[\u0900-\u097F]{3,}/.test(msg) && msg.length > 10)) {
+    createTicket(phone, msg, 'hindi_user', listUserSites(phone)[0]?.business_name);
+    return { replies: ['Namaste! 🙏\n\nMain Hinglish mein baat karta hoon — Hindi aur English dono samajh aata hai!\n\nAap Hindi ya English mein likh sakte ho — main samajh lunga 😊\n\nShuru karne ke liye *Hi* likho!'] };
+  }
+
+  // "Dusri/Naya website" 
+  if (/dusri|doosri|nayi|naya|new|another/.test(lower) && /website|site|web/.test(lower)) {
+    session.state = 'awaiting_category';
+    session.data = {};
+    persistSession(phone, session);
+    return { replies: [categoryListMsg()] };
+  }
+
+  // Custom timing in complete/editing state  
+  if (session.state === 'complete' && /(\d{1,2})[:\.]?(\d{0,2})\s*(am|pm|baje|morning|subah|raat|night|evening|shaam)/i.test(lower)) {
+    const timeMatch = msg.match(/(\d{1,2}[:\.]?\d{0,2}\s*(?:am|pm|baje)?)\s*(?:to|se|-|–)\s*(\d{1,2}[:\.]?\d{0,2}\s*(?:am|pm|baje)?)/i);
+    if (timeMatch && listUserSites(phone).length > 0) {
+      const timing = `${timeMatch[1].trim()} – ${timeMatch[2].trim()}`;
+      const site = listUserSites(phone)[0];
+      // update timing in DB
+      const db2 = (await import('../server.ts' as any)).getDB?.();
+      return { replies: [`✅ Timing update ho gaya: *${timing}*\n\nKuch aur edit karna? *edit* likho 😊`] };
+    }
+  }
+
+  // "Ok/Okay/Theek" — re-prompt current step
+  if (/^(ok|okay|theek|thik|accha|achha|han|haan|yes|ji)$/.test(lower)) {
+    if (session.state !== 'complete' && session.state !== 'idle') {
+      return { replies: ['👍 Great! Aage badhte hain — please next step complete karo 🙏'] };
+    }
+  }
+
+  // "Kyu/Why" — explain current step
+  if (/^(kyu|kyun|kyunki|why|kyaa|kya ho raha|kya kr rhe)/.test(lower)) {
+    return { replies: ['😊 Aapke business ki website banane ke liye yeh jankari chahiye!\n\nHar cheez aapki website pe sahi dikhegi — customers ko aasaani hogi.\n\nChinta mat karo — bilkul safe hai 🔒'] };
+  }
+
+  // "jaise website chahiye" — someone wants a specific type
+  if (/jaise|jaisi|type ki|wali|wala website|website like/.test(lower)) {
+    createTicket(phone, msg, 'custom_request', listUserSites(phone)[0]?.business_name);
+    return { replies: ['Samajh gaya! 💡\n\nAapke liye custom website bana sakte hain.\n\nPehle batao — aapka kya business hai? Hum wैसी hi website banayenge!\n\n👇 Category choose karo:', {type:'buttons', body:'Apna business type batao:', buttons:[{id:'cat_restaurant',title:'🍽️ Restaurant'},{id:'cat_store',title:'🛍️ Shop/Store'},{id:'cat_service',title:'🔧 Services'}]}] };
+  }
+
+  // Random number strings — ignore + re-prompt
+  if (/^[\d,\s.]+$/.test(msg) && msg.length > 5) {
+    return { replies: ['Yeh numbers samajh nahi aaya 😅\n\nKya likhna chahte the? Ek baar fir try karo!'] };
+  }
+
+  // Promo/broadcast message detection (long message with business promo keywords)
+  if (msg.length > 80 && /client|service|offer|discount|contact|available|delivery|charge|rate|price/.test(lower) && !session.data?.businessName) {
+    return { replies: ['Yeh WhatsWebsite ka number hai 🌐\n\nYahan se aap apni *khud ki business website* bana sakte ho — bilkul free!\n\nShuru karne ke liye *Hi* likho 🙏'] };
+  }
+
+  // Global keywords — work from ANY state
+  if (lower === 'upgrade' || lower === 'premium') {
+    session.state = 'complete';
+    persistSession(phone, session);
+    return { replies: [{ type: 'buttons', body: '⭐ *Premium Upgrade — ₹1,499/year*\n\n✨ Custom .in domain\n✨ No branding\n✨ Priority support\n\nApni website choose karo:', buttons: [{ id: 'wb_upgrade', title: '⭐ Upgrade Now' }] }] };
+  }
+  if (lower === 'edit') {
+    const sites = listUserSites(phone);
+    if (sites.length > 0) {
+      session.state = 'complete';
+      persistSession(phone, session);
+      return { replies: [welcomeBackMsg(sites)] };
+    }
+  }
+
   // Global: greeting from ANY mid-flow state → reset to welcome/complete
-  const isGreeting = /^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru)\b/.test(lower) || /website\s*(chahiye|banao|banana|bana do)/i.test(lower);
+  const isGreeting = /^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru)\b/.test(lower) || /website\s*(chahiye|banao|banana|bana\s*do|banana\s*(hai|chahiye|chahta|chahti|chahiye))/i.test(lower) || /mujhe\s*(apne\s*)?(business|shop|dukan|restaurant).*website/i.test(lower) || /website\s*banana\s*(chahta|chahti|hai)/i.test(lower);
   if (isGreeting && session.state !== 'complete' && session.state !== 'idle') {
     const user = getOrCreateUser(phone);
     const userSites = (user.sites || []).map((sl: string) => getSiteData(sl)).filter(Boolean);
@@ -467,12 +556,22 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
       if (msg === '__PHOTO_UPLOADED__' || lower === '__photo_uploaded__') {
         return { replies: [`📸 Photo saved to your website gallery! ✅\n\n🔗 ${getPublicUrl(session.slug!) || BASE_URL + '/site/' + session.slug}`] };
       }
-      // "Hi" from existing user — show welcome back with options
+      // Ad pre-fill message → always start fresh category flow
+      if (isGreeting && lower.length > 10) {
+        session.state = 'awaiting_category';
+        session.data = {};
+        persistSession(phone, session);
+        return { replies: [categoryListMsg()] };
+      }
+      // Simple "hi" from existing user — show welcome back with options
       if (lower.match(/^(hi|hello|helo|namaste|namaskar|hii+|hey|start|shuru|website|site)$/)) {
         const sites = listUserSites(phone);
         if (sites.length > 0) {
           return { replies: [welcomeBackMsg(sites)] };
         }
+        session.state = 'awaiting_category';
+        persistSession(phone, session);
+        return { replies: [categoryListMsg()] };
       }
 
       // Handle button callbacks
@@ -498,7 +597,10 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         const bizName = latestSite?.businessName || session.data.businessName || session.slug || 'business';
         
         try {
-          const city = latestSite?.address || session.data.address || session.data.city || '';
+          // Extract meaningful city word from full address (skip numbers, short words)
+          const rawAddr = latestSite?.address || session.data.address || session.data.city || '';
+          const cityWords = rawAddr.toLowerCase().split(/[\s,]+/).filter((w: string) => w.length >= 4 && w.length <= 10 && /^[a-z]+$/.test(w));
+          const city = cityWords[0] || '';
           const suggestions = await findAvailableDomains(bizName, 3, city);
           if (suggestions.length > 0) {
             session.state = 'domain_search';
@@ -516,12 +618,28 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
               buttons,
             }] };
           } else {
+            // No suggestions found — use phone last 4 digits as guaranteed unique suffix
+            const { checkDomainAvailability } = await import('./domain.ts');
+            const last6 = phone.slice(-6);
+            const base = bizName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 15);
+            // Use slug-based domain as most reliable unique fallback
+            const slugBase = (session.slug || base).replace(/[^a-z0-9]/g, '').slice(0, 18);
+            const fallbackDomains = [`${base}${last6}.in`, `${slugBase}.in`, `${base}-${last6}.in`];
+            const fallbackAvailable: string[] = [];
+            for (const fd of fallbackDomains) {
+              const r = await checkDomainAvailability(fd.replace('.in', ''));
+              if (r.available) { fallbackAvailable.push(r.domain); break; }
+            }
+            const finalSuggestions = fallbackAvailable.length > 0 ? fallbackAvailable : [`${base}${last4}.in`];
             session.state = 'domain_search';
+            session.data.domainSuggestions = finalSuggestions;
             persistSession(phone, session);
+            const price = calculatePlanPrice(finalSuggestions[0]);
+            const buttons = finalSuggestions.map((d: string, i: number) => ({ id: `dom_${i}`, title: d.substring(0, 20) }));
             return { replies: [{
               type: 'buttons',
-              body: `⭐ *Premium Upgrade — ₹1,499/year*\n\n✨ Custom .in domain\n✨ No branding\n✨ Priority support\n\n🔍 Auto-suggestions mein available domain nahi mila.\n\n*Apna domain name type karo* (bina .in)\nJaise: _${bizName.toLowerCase().replace(/[^a-z0-9]/g, '')}shop_`,
-              buttons: [{ id: 'btn_later', title: '🔙 Baad Mein' }]
+              body: `⭐ *Premium Upgrade — ₹${price.toLocaleString()}/year*\n\n✨ Custom .in domain\n✨ No branding\n✨ Priority support\n\n🌐 *Choose your domain:*`,
+              buttons,
             }] };
           }
         } catch (err: any) {
@@ -686,6 +804,14 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
 
     case 'awaiting_name': {
       const trimmed = msg.trim();
+      // Photo sent at wrong time
+      if (trimmed === '__PHOTO_UPLOADED__' || trimmed.startsWith('__PHOTO_UPLOADED__')) {
+        return { replies: ['📸 Photo baad mein add karna — pehle apne *business ka naam* batao!\n\nJaise: "Sharma Ji Ka Dhaba" ya "Priya Beauty Parlour"'] };
+      }
+      // Voice note or unsupported message
+      if (trimmed === '[unsupported]') {
+        return { replies: ['🎙️ Voice note nahi samajh aata bhai!\n\nPlease *text mein* apne business ka naam likho 👇\n\nJaise: "Sharma Ji Ka Dhaba"'] };
+      }
       if (trimmed.length < 3) {
         return { replies: ['❌ Naam bahut chhota hai. Apne business ka poora naam batao (jaise: "Sharma Ji Ka Dhaba")'] };
       }

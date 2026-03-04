@@ -69,45 +69,62 @@ export async function checkDomainAvailability(domain: string): Promise<{ availab
 
 function generateCandidates(businessName: string, city?: string): string[] {
   const clean = businessName.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
-  const words = clean.split(/\s+/).filter(w => w.length > 1);
-  const cityClean = city?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+  // Filter out common filler words
+  const stopWords = new Set(['and', 'the', 'of', 'for', 'in', 'a', 'an', 'by', 'at', 'to', 'ka', 'ki', 'ke', 'aur', 'or', 'with', 'co', 'ltd', 'pvt', 'inc']);
+  const words = clean.split(/\s+/).filter(w => w.length > 1 && !stopWords.has(w));
+  // Extract first meaningful word from city/address (avoid long concatenated strings)
+  const cityWords = (city || '').toLowerCase().split(/[\s,]+/).map(w => w.replace(/[^a-z]/g, '')).filter(w => w.length >= 3 && w.length <= 8);
+  const cityClean = cityWords[0] || '';
   const candidates: string[] = [];
 
-  // Hyphenated full name (e.g. kumar-electronics)
-  const hyphenated = words.join('-');
-  if (hyphenated.length <= 25) candidates.push(hyphenated);
+  const w1 = words[0] || '';
+  const w2 = words[1] || '';
+  const base12 = w1 + w2; // e.g. kumarelectronics
 
-  // Full name joined (e.g. kumarelectronics)
-  const full = words.join('');
-  if (full.length <= 25) candidates.push(full);
+  const hyph12 = w1 + '-' + w2; // e.g. kumar-electronics
 
-  // First two words joined (e.g. kumarelectronics from "Kumar Electronics And More")
+  // RULE 1: First + Second joined (kumarelectronics)
+  if (base12.length >= 5 && base12.length <= 25) candidates.push(base12);
+
+  // RULE 2: First - Second hyphenated (kumar-electronics)
+  if (hyph12.length <= 25) candidates.push(hyph12);
+
+  // RULE 3: First + Second + india / First-Second-india
+  if ((base12 + 'india').length <= 25) candidates.push(base12 + 'india');
+  if ((hyph12 + '-india').length <= 25) candidates.push(hyph12 + '-india');
+
+  // RULE 4: First + Second + city / First-Second-city
+  if (cityClean && cityClean !== w1 && cityClean !== w2) {
+    if ((base12 + cityClean).length <= 25) candidates.push(base12 + cityClean);
+    if ((hyph12 + '-' + cityClean).length <= 25) candidates.push(hyph12 + '-' + cityClean);
+  }
+
+  // RULE 5: All words joined / hyphenated (for 3+ word names)
   if (words.length > 2) {
-    const first2 = words.slice(0, 2).join('');
-    if (first2.length >= 5 && first2.length <= 25) candidates.push(first2);
+    const full = words.join('');
+    const fullHyph = words.join('-');
+    if (full.length <= 25 && full !== base12) candidates.push(full);
+    if (fullHyph.length <= 25) candidates.push(fullHyph);
+    if ((full + 'india').length <= 25) candidates.push(full + 'india');
+    if ((fullHyph + '-india').length <= 25) candidates.push(fullHyph + '-india');
   }
 
-  // With city: hyphenated (kumar-electronics-patna)
-  if (cityClean) {
-    if ((hyphenated + '-' + cityClean).length <= 25) candidates.push(hyphenated + '-' + cityClean);
-    if ((full + cityClean).length <= 25) candidates.push(full + cityClean);
-    if (words[0] && (words[0] + cityClean).length <= 25) candidates.push(words[0] + cityClean);
+  // RULE 6: First word + abbreviated second word (e.g. kumarelec, kumarrestau)
+  if (w2.length > 6) {
+    const w2short = w2.slice(0, 4);
+    const shortBase = w1 + w2short;
+    if (shortBase.length >= 5) {
+      candidates.push(shortBase);
+      if (cityClean) candidates.push(shortBase + cityClean);
+      candidates.push(shortBase + 'india');
+    }
   }
 
-  // First word only (if meaningful, 4+ chars)
-  if (words[0] && words[0].length >= 4) candidates.push(words[0]);
+  // RULE 7: First word + india (last resort)
+  if (w1.length >= 4 && (w1 + 'india').length <= 25) candidates.push(w1 + 'india');
 
-  // Prefixes & suffixes on full joined name
-  const base = full || words[0] || '';
-  const suffixes = ['online', 'shop', 'hub', 'india', 'store'];
-  for (const s of suffixes) {
-    if ((base + s).length <= 25) candidates.push(base + s);
-  }
-  if (('the' + base).length <= 25) candidates.push('the' + base);
-  if (('my' + base).length <= 25) candidates.push('my' + base);
-
-  // Deduplicate
-  return [...new Set(candidates)].slice(0, 15);
+  // Deduplicate & remove empty
+  return [...new Set(candidates)].filter(c => c.length >= 5).slice(0, 18);
 }
 
 export async function findAvailableDomains(businessName: string, count: number = 3, city?: string): Promise<string[]> {

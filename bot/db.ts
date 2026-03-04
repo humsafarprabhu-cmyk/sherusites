@@ -127,12 +127,14 @@ const stmts = {
     slug, owner_phone, business_name, category, tagline, phone, whatsapp, address, timings, about,
     owner_name, experience, specialization, menu, services, subjects, packages, plans, photos,
     delivery, delivery_area, emergency_available, active_offer, is_open, plan, custom_domain,
-    payment_id, paid_at, created_at, updated_at, today_special, reviews, pending_domain, pending_plan_price, stats, section_content
+    payment_id, paid_at, created_at, updated_at, today_special, reviews, pending_domain, pending_plan_price, stats, section_content,
+    theme_color, hidden_sections, section_order, social_links, upi_id, upi_name, faq
   ) VALUES (
     @slug, @owner_phone, @business_name, @category, @tagline, @phone, @whatsapp, @address, @timings, @about,
     @owner_name, @experience, @specialization, @menu, @services, @subjects, @packages, @plans, @photos,
     @delivery, @delivery_area, @emergency_available, @active_offer, @is_open, @plan, @custom_domain,
-    @payment_id, @paid_at, @created_at, @updated_at, @today_special, @reviews, @pending_domain, @pending_plan_price, @stats, @section_content
+    @payment_id, @paid_at, @created_at, @updated_at, @today_special, @reviews, @pending_domain, @pending_plan_price, @stats, @section_content,
+    @theme_color, @hidden_sections, @section_order, @social_links, @upi_id, @upi_name, @faq
   )`),
   getUserSites: db.prepare("SELECT * FROM sites WHERE owner_phone = ? ORDER BY CASE WHEN plan='premium' THEN 0 ELSE 1 END, rowid DESC"),
   listAllSites: db.prepare('SELECT slug FROM sites'),
@@ -258,6 +260,13 @@ function rowToSite(row: any): SiteData {
     pendingPlanPrice: row.pending_plan_price ? Number(row.pending_plan_price) : undefined,
     paymentId: row.payment_id,
     paidAt: row.paid_at,
+    themeColor: row.theme_color || null,
+    hiddenSections: JSON.parse(row.hidden_sections || '[]'),
+    sectionOrder: JSON.parse(row.section_order || '[]'),
+    socialLinks: JSON.parse(row.social_links || '{}'),
+    upiId: row.upi_id || null,
+    upiName: row.upi_name || null,
+    faq: JSON.parse(row.faq || '[]'),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -299,6 +308,13 @@ function siteToRow(data: SiteData, ownerPhone: string) {
     reviews: JSON.stringify(data.reviews || []),
     payment_id: data.paymentId || null,
     paid_at: data.paidAt || null,
+    theme_color: (data as any).themeColor || '',
+    hidden_sections: JSON.stringify((data as any).hiddenSections || []),
+    section_order: JSON.stringify((data as any).sectionOrder || []),
+    social_links: JSON.stringify((data as any).socialLinks || {}),
+    upi_id: (data as any).upiId || '',
+    upi_name: (data as any).upiName || '',
+    faq: JSON.stringify((data as any).faq || []),
     created_at: data.createdAt || new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };

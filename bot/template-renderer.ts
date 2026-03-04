@@ -194,6 +194,13 @@ function injectDynamicContent(html: string, data: SiteData): string {
     experience: (data as any).experience || '',
     sectionContent: (data as any).sectionContent || {},
     trustBadges: (data as any).trustBadges || null,
+    themeColor: (data as any).themeColor || null,
+    hiddenSections: (data as any).hiddenSections || [],
+    sectionOrder: (data as any).sectionOrder || [],
+    socialLinks: (data as any).socialLinks || {},
+    upiId: (data as any).upiId || null,
+    upiName: (data as any).upiName || null,
+    faq: (data as any).faq || [],
     // wedding-specific top-level shortcuts
     brideName: (data as any).sectionContent?.brideName || (data as any).brideName || null,
     groomName: (data as any).sectionContent?.groomName || (data as any).groomName || null,
@@ -214,11 +221,77 @@ function injectDynamicContent(html: string, data: SiteData): string {
   const dataScript = `
   <script>window.__SITE_DATA__ = ${jsonData};</script>`;
   
+  // Dynamic features script (theme, hidden sections, social, UPI, FAQ)
+  const featuresScript = `
+  <script>
+  (function(){
+    const D = window.__SITE_DATA__ || {};
+    
+    // Theme color override
+    if (D.themeColor) {
+      const r = document.documentElement;
+      r.style.setProperty('--blue', D.themeColor);
+      r.style.setProperty('--primary', D.themeColor);
+      // Generate lighter variant
+      const hex = D.themeColor.replace('#','');
+      const rr = parseInt(hex.substr(0,2),16), gg = parseInt(hex.substr(2,2),16), bb = parseInt(hex.substr(4,2),16);
+      r.style.setProperty('--blue-light', 'rgba('+rr+','+gg+','+bb+',0.1)');
+      // Update meta theme-color
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', D.themeColor);
+    }
+    
+    // Hidden sections
+    if (D.hiddenSections && D.hiddenSections.length) {
+      const sectionMap = {products:'products',gallery:'gallerySection',reviews:'reviewSection',location:'locSection',about:'aboutSection',trust:'trustSection',stats:'statsSection',faq:'faqSection',offers:'offer-banner'};
+      D.hiddenSections.forEach(function(s){
+        const id = sectionMap[s] || s;
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+        // Also hide from nav
+        document.querySelectorAll('a[href="#'+id+'"]').forEach(function(a){ a.style.display='none'; });
+      });
+    }
+    
+    // Social links
+    if (D.socialLinks && Object.keys(D.socialLinks).length) {
+      const icons = {instagram:'📷',facebook:'📘',youtube:'▶️',twitter:'🐦',linkedin:'💼',telegram:'✈️'};
+      let socialHtml = '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:16px 0;">';
+      for (const [p, url] of Object.entries(D.socialLinks)) {
+        socialHtml += '<a href="'+url+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:50px;background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);color:inherit;text-decoration:none;font-size:14px;font-weight:500;transition:transform .2s;border:1px solid rgba(255,255,255,0.15);" onmouseover="this.style.transform=\\'scale(1.05)\\'" onmouseout="this.style.transform=\\'scale(1)\\'">'+(icons[p]||'🔗')+' '+p.charAt(0).toUpperCase()+p.slice(1)+'</a>';
+      }
+      socialHtml += '</div>';
+      const ftr = document.querySelector('.ftr-copy') || document.querySelector('footer');
+      if (ftr) ftr.insertAdjacentHTML('beforebegin', socialHtml);
+    }
+    
+    // UPI Payment section
+    if (D.upiId) {
+      const upiHtml = '<section class="section" style="text-align:center;"><div class="sec-hdr fade-up"><h2 class="sec-t">💳 Pay Online</h2><p class="sec-desc">Scan QR or tap to pay via UPI</p></div><div style="margin:20px auto;max-width:250px;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa='+encodeURIComponent(D.upiId)+'%26pn='+encodeURIComponent(D.upiName||D.businessName)+'" alt="UPI QR" style="width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);"/><p style="margin-top:12px;font-size:14px;opacity:0.7;">'+D.upiId+'</p><a href="upi://pay?pa='+encodeURIComponent(D.upiId)+'&pn='+encodeURIComponent(D.upiName||D.businessName)+'" style="display:inline-block;margin-top:12px;padding:10px 24px;background:var(--blue,#2563eb);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">Pay Now</a></div></section>';
+      const loc = document.getElementById('locSection');
+      if (loc) loc.insertAdjacentHTML('beforebegin', upiHtml);
+      else document.querySelector('footer')?.insertAdjacentHTML('beforebegin', upiHtml);
+    }
+    
+    // FAQ section
+    if (D.faq && D.faq.length) {
+      let faqHtml = '<section class="section" id="faqSection"><div class="sec-hdr fade-up"><h2 class="sec-t">❓ FAQ</h2><p class="sec-desc">Frequently Asked Questions</p></div><div style="max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:8px;">';
+      D.faq.forEach(function(f,i){
+        faqHtml += '<div class="fade-up" style="transition-delay:'+i*50+'ms;border:1px solid rgba(0,0,0,0.08);border-radius:12px;overflow:hidden;"><button onclick="var a=this.nextElementSibling;var open=a.style.maxHeight!==\\'0px\\';a.style.maxHeight=open?\\'0px\\':\\'500px\\';this.querySelector(\\'span:last-child\\').textContent=open?\\'+\\':\\'−\\'" style="width:100%;padding:16px 20px;background:none;border:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:15px;font-weight:600;text-align:left;"><span>'+f.question+'</span><span style="font-size:20px;color:var(--blue,#2563eb);">+</span></button><div style="max-height:0px;overflow:hidden;transition:max-height .3s ease;padding:0 20px;"><p style="padding:0 0 16px;font-size:14px;opacity:0.75;line-height:1.6;">'+f.answer+'</p></div></div>';
+      });
+      faqHtml += '</div></section>';
+      const loc = document.getElementById('locSection');
+      if (loc) loc.insertAdjacentHTML('beforebegin', faqHtml);
+      else document.querySelector('footer')?.insertAdjacentHTML('beforebegin', faqHtml);
+    }
+  })();
+  </script>`;
+
   // Inject at marker if present, otherwise before </body>
   if (html.includes('<!-- __INJECT_DATA__ -->')) {
-    html = html.replace('<!-- __INJECT_DATA__ -->', dataScript);
+    html = html.replace('<!-- __INJECT_DATA__ -->', dataScript + featuresScript);
   } else {
-    html = html.replace('</body>', `${dataScript}\n</body>`);
+    html = html.replace('</body>', `${dataScript}\n${featuresScript}\n</body>`);
   }
   return html;
 }

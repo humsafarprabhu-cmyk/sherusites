@@ -408,6 +408,80 @@ function executeActions(slug: string, actions: AgentAction[], phone?: string): s
           results.push(`✅ Sab ${count} photos delete ho gayi`);
           break;
         }
+        case 'change_theme_color': {
+          const colorMap: Record<string, string> = {
+            red: '#e63946', blue: '#2563eb', green: '#16a34a', purple: '#7c3aed',
+            orange: '#ea580c', pink: '#ec4899', teal: '#0d9488', yellow: '#ca8a04',
+            black: '#1a1a1a', maroon: '#800000', navy: '#1e3a5f', gold: '#b8860b',
+          };
+          const c = (params.color || '').toLowerCase();
+          const hex = colorMap[c] || (c.startsWith('#') ? c : colorMap.blue);
+          (siteData as any).themeColor = hex;
+          results.push(`✅ Theme color → ${c} (${hex})`);
+          break;
+        }
+        case 'toggle_section': {
+          if (!siteData.hiddenSections) (siteData as any).hiddenSections = [];
+          const sec = (params.section || '').toLowerCase();
+          if (params.visible === false || params.visible === 'false') {
+            if (!siteData.hiddenSections.includes(sec)) siteData.hiddenSections.push(sec);
+            results.push(`✅ "${sec}" section hidden`);
+          } else {
+            (siteData as any).hiddenSections = siteData.hiddenSections.filter((s: string) => s !== sec);
+            results.push(`✅ "${sec}" section visible`);
+          }
+          break;
+        }
+        case 'reorder_sections': {
+          (siteData as any).sectionOrder = params.order || [];
+          results.push(`✅ Sections reordered`);
+          break;
+        }
+        case 'add_social_link': {
+          if (!siteData.socialLinks) (siteData as any).socialLinks = {};
+          const platform = (params.platform || '').toLowerCase();
+          (siteData as any).socialLinks[platform] = params.url;
+          results.push(`✅ ${platform} link added`);
+          break;
+        }
+        case 'remove_social_link': {
+          if (siteData.socialLinks) {
+            delete (siteData as any).socialLinks[(params.platform || '').toLowerCase()];
+            results.push(`✅ ${params.platform} link removed`);
+          }
+          break;
+        }
+        case 'add_upi': {
+          (siteData as any).upiId = params.upiId;
+          (siteData as any).upiName = params.name || siteData.businessName;
+          results.push(`✅ UPI payment added: ${params.upiId}`);
+          break;
+        }
+        case 'remove_upi': {
+          delete (siteData as any).upiId;
+          delete (siteData as any).upiName;
+          results.push(`✅ UPI removed`);
+          break;
+        }
+        case 'add_faq': {
+          if (!siteData.faq) (siteData as any).faq = [];
+          (siteData as any).faq.push({ question: params.question, answer: params.answer });
+          results.push(`✅ FAQ added: ${params.question}`);
+          break;
+        }
+        case 'remove_faq': {
+          if (siteData.faq) {
+            const q = (params.question || '').toLowerCase();
+            (siteData as any).faq = siteData.faq.filter((f: any) => !f.question.toLowerCase().includes(q));
+            results.push(`✅ FAQ removed`);
+          }
+          break;
+        }
+        case 'clear_all_faq': {
+          (siteData as any).faq = [];
+          results.push(`✅ All FAQs cleared`);
+          break;
+        }
         case 'no_action': {
           // Agent decided no website change needed — just conversation
           break;
@@ -519,6 +593,22 @@ STATUS:
 - set_closed: {}
 - set_open: {}
 - set_delivery: {enabled, area?}
+
+THEME & DESIGN:
+- change_theme_color: {color} — primary color (red, blue, green, purple, orange, pink, teal, yellow, black)
+- toggle_section: {section, visible} — show/hide a section. sections: products, gallery, reviews, location, offers, about, trust, stats, faq
+- reorder_sections: {order} — array of section names in desired order
+
+SOCIAL & LINKS:
+- add_social_link: {platform, url} — platform: instagram, facebook, youtube, twitter, linkedin, telegram
+- remove_social_link: {platform}
+- add_upi: {upiId, name?} — add UPI payment QR on website
+- remove_upi: {}
+
+FAQ:
+- add_faq: {question, answer}
+- remove_faq: {question}
+- clear_all_faq: {}
 
 OTHER:
 - no_action: {} (just chatting, no website change)
@@ -697,6 +787,18 @@ Plan: ${data.plan}
     data.subjects.forEach(s => {
       ctx += `  - ${s.name}: ${s.price}${s.duration ? ` (${s.duration})` : ''}\n`;
     });
+  }
+
+  // New features context
+  if ((data as any).themeColor) ctx += `Theme Color: ${(data as any).themeColor}\n`;
+  if ((data as any).hiddenSections?.length) ctx += `Hidden Sections: ${(data as any).hiddenSections.join(', ')}\n`;
+  if ((data as any).socialLinks && Object.keys((data as any).socialLinks).length) {
+    ctx += `Social Links: ${Object.entries((data as any).socialLinks).map(([k,v]) => `${k}: ${v}`).join(', ')}\n`;
+  }
+  if ((data as any).upiId) ctx += `UPI: ${(data as any).upiId}\n`;
+  if ((data as any).faq?.length) {
+    ctx += `\nFAQ (${(data as any).faq.length}):\n`;
+    (data as any).faq.forEach((f: any) => { ctx += `  Q: ${f.question}\n  A: ${f.answer}\n`; });
   }
 
   return ctx;

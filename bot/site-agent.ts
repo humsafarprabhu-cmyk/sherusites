@@ -12,7 +12,7 @@
  */
 
 import { getSiteData, saveSiteData, getOrCreateUser, listUserSites, addChatMessage, getChatHistory, getSession, saveSession } from './db.ts';
-import { openclawAgent } from './openclaw-agent.ts';
+
 
 type SiteData = {
   slug: string;
@@ -515,12 +515,6 @@ export async function agentHandle(phone: string, message: string, siteSlug: stri
   
   addToHistory(phone, 'user', message);
 
-  if (!OPENAI_KEY) {
-    // Fallback: return a helpful message without AI
-    addToHistory(phone, 'assistant', 'AI agent available nahi hai abhi. "edit" command use karo menu-based editing ke liye.');
-    return 'AI agent available nahi hai abhi. "edit" command use karo menu-based editing ke liye.';
-  }
-
   try {
     const systemPrompt = `You are a WhatsApp business website manager for an Indian small business.
 
@@ -636,33 +630,42 @@ If no action needed: {"reply": "your message", "actions": [{"action": "no_action
 - If user sends multiple items, handle them all in one go
 - Prices should always be in ₹ format`;
 
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      ...getHistory(phone).slice(-8), // Last 8 messages for context
-    ];
-
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages,
-        max_tokens: 500,
-        temperature: 0.3,
-        response_format: { type: 'json_object' },
-      }),
-    });
-
-    if (!res.ok) {
-      console.error('[Agent] API error:', res.status);
-      return 'AI agent se baat nahi ho pa rahi. Thodi der baad try karo. 😅';
+    const history = getHistory(phone).slice(-8);
+    const historyStr = history.map(h => `${h.role}: ${h.content}`).join('\n');
+    
+    const fullPrompt = `${systemPrompt}\n\nConversation history:\n${historyStr}\n\nUser message: ${message}`;
+    
+    // Use OpenClaw agent (Claude) instead of OpenAI
+    const { execSync } = await import('child_process');
+    const escaped = fullPrompt.replace(/'/g, "'\\''");
+    
+    let raw = '';
+    try {
+      raw = execSync(
+        `openclaw agent --session-id whatsbot-${phone.slice(-6)} --message '${escaped}' --timeout 25`,
+        { timeout: 30000, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
+      ).trim();
+      console.log(`[Agent] OpenClaw response for ${phone}: ${raw.slice(0, 200)}`);
+    } catch (clawErr: any) {
+      console.error('[Agent] OpenClaw error:', clawErr.message?.slice(0, 200));
+      // Fallback to OpenAI if available
+      if (OPENAI_KEY) {
+        const messages = [
+          { role: 'system', content: systemPrompt },
+          ...history,
+        ];
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${OPENAI_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: 'gpt-4o-mini', messages, max_tokens: 500, temperature: 0.3, response_format: { type: 'json_object' } }),
+        });
+        if (!res.ok) return 'AI agent se baat nahi ho pa rahi. Thodi der baad try karo. 😅';
+        const d = await res.json();
+        raw = d.choices?.[0]?.message?.content || '';
+      } else {
+        return 'AI agent se baat nahi ho pa rahi. Thodi der baad try karo. 😅';
+      }
     }
-
-    const data = await res.json();
-    const raw = data.choices?.[0]?.message?.content || '';
     
     // Parse response
     let parsed: { reply: string; actions: AgentAction[] };

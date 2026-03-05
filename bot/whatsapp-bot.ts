@@ -323,6 +323,38 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
   const lower = msg.toLowerCase();
   const session = loadSession(phone);
 
+  // Global: feedback survey response handler
+  if (lower.startsWith('fb_')) {
+    const feedbackMap: Record<string, string> = {
+      'fb_love': '❤️ Bahut accha laga',
+      'fb_ok': '👍 Theek hai',
+      'fb_confused': '😕 Samajh nahi aaya',
+      'fb_design': '🎨 Design pasand nahi',
+      'fb_expensive': '💰 Price zyada hai',
+      'fb_no_need': '🤷 Zaroorat nahi',
+      'fb_features': '⚙️ Features kam hain',
+      'fb_payment': '💳 Payment nahi ho raha',
+      'fb_other': '💬 Kuch aur',
+    };
+    const feedback = feedbackMap[lower] || lower;
+    console.log(`[FEEDBACK] ${phone}: ${feedback}`);
+    // Store feedback
+    addChatMessage(phone, 'user', `[FEEDBACK] ${feedback}`);
+    
+    const replies: Record<string, string> = {
+      'fb_love': 'Dhanyavaad! ❤️ Aapko pasand aaya sun ke bahut khushi hui! Agar premium features chahiye toh "upgrade" type karo ⭐',
+      'fb_ok': 'Shukriya feedback ke liye! 🙏 Kya changes chahiye? Batao hum abhi kar dete hain!',
+      'fb_confused': 'Sorry bhai! 😅 Batao kya samajh nahi aaya? Main step by step guide karunga. "help" type karo ya seedha apna sawaal poocho!',
+      'fb_design': 'Koi baat nahi! 🎨 Hum design change kar sakte hain — color, sections, layout sab. Batao kya change karna hai!',
+      'fb_expensive': 'Samajhte hain! 💰 Hum jald hi ₹200/month ka plan la rahe hain — affordable aur sab premium features ke saath! Stay tuned 🔥',
+      'fb_no_need': 'Koi baat nahi bhai! 🙏 Jab bhi zaroorat ho "hi" type karo — website ready hai aapki!',
+      'fb_features': 'Batao kya features chahiye! ⚙️ Hum naye features add karte rehte hain — aapka feedback important hai!',
+      'fb_payment': 'Oh! 😟 Payment mein dikkat aa rahi hai? Abhi batao kya error aa raha hai — hum fix karenge!',
+      'fb_other': 'Haan batao! 💬 Jo bhi feedback hai likh do — hum zaroor improve karenge!',
+    };
+    return { replies: [replies[lower] || 'Shukriya feedback ke liye! 🙏'] };
+  }
+
   // Global: voice note / unsupported media handler
   if (msg === '[unsupported]' && session.state !== 'complete') {
     return { replies: ['🎙️ Voice note nahi samajh aata!\n\nPlease *text mein* likhke bhejo 🙏\n\nAgar koi problem hai toh "help" type karo.'] };

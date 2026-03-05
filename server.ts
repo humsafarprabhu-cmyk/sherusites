@@ -531,6 +531,16 @@ app.get('/api/admin/dashboard', adminAuth, (req, res) => {
   res.json({ totalUsers, totalSites, premiumSites, freeSites, todayUsers, totalRevenue, recentUsers, payments, sites, chats });
 });
 
+app.get('/api/admin/feedback', adminAuth, (req, res) => {
+  const db = getDb();
+  const feedback = db.prepare("SELECT phone, content, created_at FROM chat_history WHERE content LIKE '%[FEEDBACK]%' ORDER BY created_at DESC").all()
+    .map((f: any) => {
+      const site = db.prepare("SELECT business_name, category FROM sites WHERE owner_phone=? LIMIT 1").get(f.phone) as any;
+      return { phone: f.phone, feedback: f.content.replace('[FEEDBACK] ', ''), business: site?.business_name || 'Unknown', category: site?.category || '', time: toIST(f.created_at) };
+    });
+  res.json({ feedback });
+});
+
 // ─── WHATSAPP META WEBHOOK ──────────────────────────────────────────────────
 
 app.get('/api/webhook', (req, res) => {

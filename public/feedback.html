@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WhatsWebsite — Feedback Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#e5e5e5;min-height:100vh;padding:20px}
+.container{max-width:900px;margin:0 auto}
+h1{font-size:24px;margin-bottom:8px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{color:#737373;margin-bottom:24px;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.stat{background:#171717;border:1px solid #262626;border-radius:12px;padding:16px;text-align:center}
+.stat-num{font-size:28px;font-weight:700;margin-bottom:4px}
+.stat-label{font-size:12px;color:#737373;text-transform:uppercase;letter-spacing:.5px}
+.stat.love .stat-num{color:#ef4444}
+.stat.ok .stat-num{color:#22c55e}
+.stat.features .stat-num{color:#f59e0b}
+.stat.payment .stat-num{color:#ec4899}
+.stat.expensive .stat-num{color:#f97316}
+.stat.confused .stat-num{color:#a855f7}
+.stat.noneed .stat-num{color:#6b7280}
+.stat.other .stat-num{color:#06b6d4}
+.stat.total .stat-num{color:#3b82f6}
+.bar{margin-bottom:24px}
+.bar-row{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.bar-label{width:180px;font-size:13px;flex-shrink:0}
+.bar-track{flex:1;height:28px;background:#1a1a1a;border-radius:6px;overflow:hidden;position:relative}
+.bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:10px;font-size:12px;font-weight:600;min-width:30px;transition:width .5s}
+.bar-count{margin-left:8px;font-size:13px;color:#737373;width:30px}
+table{width:100%;border-collapse:collapse;margin-top:16px}
+th{text-align:left;padding:10px 12px;font-size:12px;color:#737373;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #262626}
+td{padding:10px 12px;font-size:14px;border-bottom:1px solid #1a1a1a}
+tr:hover{background:#171717}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.badge-love{background:#ef44441a;color:#ef4444}
+.badge-ok{background:#22c55e1a;color:#22c55e}
+.badge-features{background:#f59e0b1a;color:#f59e0b}
+.badge-payment{background:#ec48991a;color:#ec4899}
+.badge-expensive{background:#f973161a;color:#f97316}
+.badge-confused{background:#a855f71a;color:#a855f7}
+.badge-noneed{background:#6b72801a;color:#6b7280}
+.badge-other{background:#06b6d41a;color:#06b6d4}
+.refresh{background:#262626;color:#e5e5e5;border:1px solid #404040;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;float:right}
+.refresh:hover{background:#333}
+.empty{text-align:center;padding:40px;color:#525252}
+.login{max-width:320px;margin:100px auto;text-align:center}
+.login input{width:100%;padding:12px;background:#171717;border:1px solid #262626;border-radius:8px;color:#e5e5e5;margin-bottom:12px;font-size:14px}
+.login button{width:100%;padding:12px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:14px}
+.sent{font-size:11px;color:#525252}
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <div class="login" id="loginBox">
+    <h1>🔒 Admin Login</h1>
+    <br>
+    <input type="password" id="pwd" placeholder="Admin password" onkeydown="if(event.key==='Enter')login()">
+    <button onclick="login()">Login</button>
+  </div>
+  <div id="dashboard" style="display:none">
+    <button class="refresh" onclick="load()">🔄 Refresh</button>
+    <h1>📊 Feedback Dashboard</h1>
+    <p class="subtitle">Survey sent to 96 users • Live responses</p>
+    <div class="stats" id="stats"></div>
+    <h2 style="font-size:18px;margin-bottom:12px">Response Distribution</h2>
+    <div class="bar" id="bars"></div>
+    <h2 style="font-size:18px;margin-bottom:4px">All Responses</h2>
+    <table>
+      <thead><tr><th>Business</th><th>Category</th><th>Feedback</th><th>Time</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty" id="empty" style="display:none">No feedback responses yet. Check back soon!</div>
+  </div>
+</div>
+<script>
+let token='';
+function login(){
+  const pwd=document.getElementById('pwd').value;
+  fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pwd})})
+    .then(r=>r.json()).then(d=>{
+      if(d.token){token=d.token;document.getElementById('loginBox').style.display='none';document.getElementById('dashboard').style.display='block';load();}
+      else alert('Wrong password');
+    });
+}
+const COLORS={
+  '❤️ Bahut accha laga':'#ef4444','👍 Theek hai':'#22c55e','⚙️ Features kam hain':'#f59e0b',
+  '💳 Payment nahi ho raha':'#ec4899','💰 Price zyada hai':'#f97316','😕 Samajh nahi aaya':'#a855f7',
+  '🤷 Zaroorat nahi':'#6b7280','💬 Kuch aur':'#06b6d4','🎨 Design pasand nahi':'#8b5cf6'
+};
+const BADGES={
+  '❤️ Bahut accha laga':'badge-love','👍 Theek hai':'badge-ok','⚙️ Features kam hain':'badge-features',
+  '💳 Payment nahi ho raha':'badge-payment','💰 Price zyada hai':'badge-expensive','😕 Samajh nahi aaya':'badge-confused',
+  '🤷 Zaroorat nahi':'badge-noneed','💬 Kuch aur':'badge-other','🎨 Design pasand nahi':'badge-confused'
+};
+function load(){
+  fetch('/api/admin/feedback',{headers:{'Authorization':'Bearer '+token}})
+    .then(r=>r.json()).then(d=>{
+      const fb=d.feedback||[];
+      if(!fb.length){document.getElementById('empty').style.display='block';return;}
+      document.getElementById('empty').style.display='none';
+      // Count
+      const counts={};
+      fb.forEach(f=>{counts[f.feedback]=(counts[f.feedback]||0)+1;});
+      const total=fb.length;
+      const responded=new Set(fb.map(f=>f.phone)).size;
+      // Stats
+      document.getElementById('stats').innerHTML=
+        `<div class="stat total"><div class="stat-num">${total}</div><div class="stat-label">Responses</div></div>`+
+        `<div class="stat ok"><div class="stat-num">${responded}</div><div class="stat-label">Unique Users</div></div>`+
+        `<div class="stat love"><div class="stat-num">${Math.round(responded/96*100)}%</div><div class="stat-label">Response Rate</div></div>`+
+        `<div class="stat features"><div class="stat-num">${96-responded}</div><div class="stat-label">No Reply</div></div>`;
+      // Bars
+      const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+      const max=sorted[0]?sorted[0][1]:1;
+      document.getElementById('bars').innerHTML=sorted.map(([k,v])=>
+        `<div class="bar-row"><div class="bar-label">${k}</div><div class="bar-track"><div class="bar-fill" style="width:${v/max*100}%;background:${COLORS[k]||'#3b82f6'}">${v}</div></div></div>`
+      ).join('');
+      // Table
+      document.getElementById('tbody').innerHTML=fb.map(f=>
+        `<tr><td>${f.business}</td><td>${f.category}</td><td><span class="badge ${BADGES[f.feedback]||''}">${f.feedback}</span></td><td class="sent">${f.time||''}</td></tr>`
+      ).join('');
+    });
+}
+// Auto-refresh every 30s
+setInterval(()=>{if(token)load();},30000);
+</script>
+</body>
+</html>

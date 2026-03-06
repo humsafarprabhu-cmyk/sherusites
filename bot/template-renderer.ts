@@ -82,6 +82,10 @@ export function renderSite(data: SiteData): string {
   html = injectDynamicContent(html, data);
   
   // Inject offer banner if active
+  // Google Ads tag
+  const gtagSnippet = `<!-- Google tag (gtag.js) -->\n<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17933228526"></script>\n<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','AW-17933228526');</script>`;
+  html = html.replace('<head>', `<head>\n${gtagSnippet}`);
+
   if (data.activeOffer) {
     const offerHtml = `
     <div id="offer-banner" style="position:fixed;top:0;left:0;right:0;z-index:10000;background:linear-gradient(135deg,#f59e0b,#ef4444);padding:10px 16px;text-align:center;font-family:Inter,sans-serif;animation:slideDown 0.5s ease;">

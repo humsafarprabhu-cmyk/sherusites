@@ -763,9 +763,14 @@ async function sendInteractiveMessage(to: string, interactive: any) {
 
 // Helper: send a BotResponse (text or interactive)
 async function sendBotResponse(to: string, response: any) {
-  for (const reply of response.replies || []) {
+  for (let i = 0; i < (response.replies || []).length; i++) {
+    const reply = response.replies[i];
+    // Delay before sending (e.g., edit guide after main message)
+    if (reply?.delay) await new Promise(r => setTimeout(r, reply.delay));
     if (typeof reply === 'string') {
       await sendTextMessage(to, reply);
+    } else if (reply.text && !reply.type) {
+      await sendTextMessage(to, reply.text);
     } else if (reply.type === 'buttons') {
       if (!reply.buttons?.length) { await sendTextMessage(to, reply.body); continue; }
       await sendInteractiveMessage(to, {

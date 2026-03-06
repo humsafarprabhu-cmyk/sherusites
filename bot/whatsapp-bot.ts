@@ -1285,7 +1285,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         const siteCount = (() => { try { return getDb().prepare('SELECT COUNT(*) as c FROM sites').get() as any; } catch { return { c: 160 }; } })().c;
         const domainExample = session.data.businessName!.toLowerCase().replace(/[^a-z0-9]/g, '') + '.in';
 
-        const editGuide = `✏️ Kuch bhi change karna ho — bas bolo:\n\n• "Menu mein Paneer Tikka add karo ₹220"\n• "Photo lagao" + photo bhejo\n• "Timing 9am-9pm karo"\n\nBas itna! ✅`;
+        const editGuide = { text: `✏️ Kuch bhi change karna ho — bas bolo:\n\n• "Menu mein Paneer Tikka add karo ₹220"\n• "Photo lagao" + photo bhejo\n• "Timing 9am-9pm karo"\n\nBas itna! ✅`, delay: 4000 };
 
         return { replies: [{
           type: 'buttons',

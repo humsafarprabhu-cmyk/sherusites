@@ -301,6 +301,13 @@ app.get('/preview/:template', (req, res) => {
   }
 });
 
+app.get('/api/stats', (_req, res) => {
+  try {
+    const count = (getDb().prepare('SELECT COUNT(*) as c FROM sites').get() as any).c;
+    res.json({ sites: count });
+  } catch { res.json({ sites: 220 }); }
+});
+
 app.get('/api/templates', (_req, res) => {
   if (!fs.existsSync(TEMPLATES_DIR)) return res.json([]);
   res.json(fs.readdirSync(TEMPLATES_DIR).filter(f => f.endsWith('.html')).map(f => f.replace('.html', '')));

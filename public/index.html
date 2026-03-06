@@ -734,13 +734,13 @@ gtag('config', 'AW-17933238526');
 
 <!-- TRUST & SOCIAL PROOF -->
 <section class="section" style="background: linear-gradient(135deg, rgba(37,99,235,0.05), rgba(16,185,129,0.05));">
-  <h2 class="section-title">220+ businesses ne trust kiya</h2>
+  <h2 class="section-title"><span id="trust-count">220</span>+ businesses ne trust kiya</h2>
   <p class="section-sub">Real Indian businesses. Real websites. WhatsApp se banayi.</p>
   
   <!-- Stats counter -->
   <div style="display:flex;justify-content:center;gap:40px;flex-wrap:wrap;margin:32px 0 48px;">
     <div style="text-align:center;">
-      <div style="font-size:clamp(36px,6vw,56px);font-weight:900;background:linear-gradient(135deg,#2563eb,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">220+</div>
+      <div style="font-size:clamp(36px,6vw,56px);font-weight:900;background:linear-gradient(135deg,#2563eb,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;"><span id="stats-count">220</span>+</div>
       <div style="color:#64748b;font-size:14px;font-weight:600;">Websites Banaye</div>
     </div>
     <div style="text-align:center;">
@@ -958,5 +958,14 @@ gtag('config', 'AW-17933238526');
   observer.observe(chatBody);
 </script>
 
+<script>
+fetch('/api/stats').then(r=>r.json()).then(d=>{
+  const c=d.sites||220;
+  const el1=document.getElementById('trust-count');
+  const el2=document.getElementById('stats-count');
+  if(el1)el1.textContent=c;
+  if(el2)el2.textContent=c;
+}).catch(()=>{});
+</script>
 </body>
 </html>

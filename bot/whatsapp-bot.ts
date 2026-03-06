@@ -8,7 +8,7 @@
 
 import { generateSlug } from './site-generator.ts';
 import {
-  getOrCreateUser, saveUser, getUser,
+  getDb, getOrCreateUser, saveUser, getUser,
   getSiteData, saveSiteData, createSiteData, generateUniqueSlug,
   getSession, saveSession, deleteSession, listUserSites,
 } from './db.ts';
@@ -95,6 +95,13 @@ function detectCategory(input: string): string | null {
 function extractPhone(msg: string): string | null {
   const match = msg.replace(/[\s\-\+]/g, '').match(/(?:91)?(\d{10})/);
   return match ? match[1] : null;
+}
+
+// ─── PREMIUM UPGRADE BODY ────────────────────────────────────────────────────
+function getPremiumBody(price: number, bizName?: string): string {
+  const sc = (() => { try { return (getDb().prepare('SELECT COUNT(*) as c FROM sites').get() as any).c; } catch { return 160; } })();
+  const domainEx = bizName ? bizName.toLowerCase().replace(/[^a-z0-9]/g, '') + '.in' : 'apnabusiness.in';
+  return `⭐ *Premium mein kya milega:*\n\n🌐 *Apna domain* — ${domainEx}\n   (Customer ko professional link bhejo — trust badhega)\n🏷️ *No branding* — "WhatsWebsite" badge hat jayega\n📊 *Google pe rank* — apna domain = zyada trust\n🔒 *SSL certificate* — secure website\n✏️ *Edit bhi kar sakte ho* — WhatsApp pe bolo, ho jayega\n\n💰 Sirf ₹${price.toLocaleString()}/saal = ₹${Math.round(price/365)}/din\n   Ek chai se bhi sasta ☕\n\n✅ ${sc}+ businesses ne trust kiya\n🔒 Razorpay se safe payment\n\n🌐 *Domain choose karo:*`;
 }
 
 // ─── EDIT GUIDE (DB-driven) ──────────────────────────────────────────────────
@@ -460,7 +467,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
   if (lower === 'upgrade' || lower === 'premium') {
     session.state = 'complete';
     persistSession(phone, session);
-    return { replies: [{ type: 'buttons', body: '⭐ *Premium Upgrade — ₹1,499/year*\n\n✨ Custom .in domain\n✨ No branding\n✨ Priority support\n\nApni website choose karo:', buttons: [{ id: 'wb_upgrade', title: '⭐ Upgrade Now' }] }] };
+    return { replies: [{ type: 'buttons', body: getPremiumBody(1499, session.data.businessName), buttons: [{ id: 'wb_upgrade', title: '⭐ Upgrade Now' }] }] };
   }
   if (lower === 'edit') {
     const sites = listUserSites(phone);
@@ -673,7 +680,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
             
             return { replies: [{
               type: 'buttons',
-              body: `⭐ *Premium Upgrade — ₹${price.toLocaleString()}/year*\n\n✨ Custom .in domain\n✨ No branding\n✨ Priority support\n\n🌐 *Choose your domain:*`,
+              body: getPremiumBody(price, bizName),
               buttons,
             }] };
           } else {
@@ -697,7 +704,7 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
             const buttons = finalSuggestions.map((d: string, i: number) => ({ id: `dom_${i}`, title: d.substring(0, 20) }));
             return { replies: [{
               type: 'buttons',
-              body: `⭐ *Premium Upgrade — ₹${price.toLocaleString()}/year*\n\n✨ Custom .in domain\n✨ No branding\n✨ Priority support\n\n🌐 *Choose your domain:*`,
+              body: getPremiumBody(price, bizName),
               buttons,
             }] };
           }
@@ -1274,15 +1281,19 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
         session.paid = false;
         persistSession(phone, session);
 
-        const editGuide = getEditGuide(category, session.data.businessName!, session.slug);
+        // Dynamic site counter
+        const siteCount = (() => { try { return getDb().prepare('SELECT COUNT(*) as c FROM sites').get() as any; } catch { return { c: 160 }; } })().c;
+        const domainExample = session.data.businessName!.toLowerCase().replace(/[^a-z0-9]/g, '') + '.in';
+
+        const editGuide = `✏️ Kuch bhi change karna ho — bas bolo:\n\n• "Menu mein Paneer Tikka add karo ₹220"\n• "Photo lagao" + photo bhejo\n• "Timing 9am-9pm karo"\n\nBas itna! ✅`;
 
         return { replies: [{
           type: 'buttons',
-          body: `👏 *Kya baat! Aapne apna website bana liya!* 🎉\n\n🏪 *${session.data.businessName}*\n🔗 ${getPublicUrl(session.slug!)}\n\n✅ WhatsApp button\n✅ Call button\n✅ Google Maps\n✅ Mobile responsive\n✅ Professional design\n\n⭐ *Premium loge toh apna domain milega!*\n_jaise: ${session.data.businessName!.toLowerCase().replace(/\s+/g, '')}.in_`,
+          body: `🎉 *Website No. ${siteCount} LIVE!*\n\n🏪 *${session.data.businessName}*\n🔗 ${getPublicUrl(session.slug!)}\n\nAap hamare ${siteCount}ve business owner ho! 🙌\nAb aapke customers aapko online dhundh sakte hain.\n\n⭐ *Premium lo — apna domain milega!*\n_jaise: ${domainExample}_ — apna professional domain 🏆\nSirf ₹4/din — ${siteCount}+ businesses ne trust kiya ✅\n\nKuch bhi edit karna ho — bas WhatsApp pe bolna!`,
           buttons: [
             { id: 'wb_upgrade', title: '⭐ Premium ₹1,499/yr' },
-            { id: 'wb_edit', title: '✏️ Edit Website' },
-            { id: 'btn_share', title: '📤 Share Karo' },
+            { id: 'wb_edit', title: '✏️ Edit' },
+            { id: 'btn_share', title: '📤 Share' },
           ]
         }, editGuide]};
       } catch (err: any) {

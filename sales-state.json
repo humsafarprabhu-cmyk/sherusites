@@ -1,0 +1,49 @@
+{
+  "leads": {
+    "918058052416": {
+      "name": "KnotnWhimsy (Roti Wrap)",
+      "slug": "knotnwhimsy",
+      "category": "handmade crochet",
+      "last_contacted": "2026-03-06T17:45:00Z",
+      "last_reply": "2026-03-06T17:24:00Z",
+      "stage": "follow_up",
+      "messages_sent": 4,
+      "notes": "Female user. Said 'premium chahiye' twice. Creating crochet business site. Said 'kal contact karungi'. Wants domain for knotnwhimsy not roti-wrap.",
+      "next_action": "Wait until Saturday afternoon IST. If no message by 2 PM, send gentle follow-up about knotnwhimsy.in domain."
+    },
+    "918415004836": {
+      "name": "Punjab Rasoi",
+      "slug": "punjab-rasoi",
+      "category": "restaurant",
+      "last_contacted": "2026-03-06T17:40:00Z",
+      "last_reply": "2026-03-06T14:08:13Z",
+      "stage": "pitched",
+      "messages_sent": 1,
+      "notes": "Bangalore Thanisandra restaurant. Asked 'Premium main kya kya milega' and 'kya kya service milega'. Sent detailed personal pitch at 11:10 PM. Will see it morning.",
+      "next_action": "Wait for morning reply. If no reply by 1 PM Saturday, send a value message (not pitch)."
+    },
+    "916394180724": {
+      "name": "Shivan",
+      "slug": "shivan",
+      "category": "unknown",
+      "last_contacted": null,
+      "last_reply": "2026-03-05T12:30:15Z",
+      "stage": "engaged",
+      "messages_sent": 0,
+      "notes": "Asked '1499 domain + hosting ka h?' and 'Design change krna ho kabhi toh' and 'Ecommerce hojayega'. Price aware, interested in features.",
+      "next_action": "Send personal intro + answer their questions about design changes and ecommerce."
+    },
+    "917879111320": {
+      "name": "Practo Doctor / Kumar Electronics / Momets Studio",
+      "slug": "practo-doctor",
+      "category": "multiple",
+      "last_contacted": null,
+      "last_reply": null,
+      "stage": "identified",
+      "messages_sent": 0,
+      "notes": "Said 'Upgrade'. Has 3 different sites. Serious user.",
+      "next_action": "Check their sites, find the best one, send personal message."
+    }
+  },
+  "last_scan": "2026-03-06T18:20:00Z"
+}

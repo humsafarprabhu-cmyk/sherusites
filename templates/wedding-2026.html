@@ -550,7 +550,9 @@ button{font-family:var(--ui);cursor:pointer;border:none;background:none;color:in
   const groom = D.groomName || sec.groomName || '';
   t('heroBride', bride || 'Bride');
   t('heroGroom', groom || 'Groom');
-  t('heroDate', D.weddingDate || sec.weddingDate || 'Save the Date');
+  const rawDate = D.weddingDate || sec.weddingDate || '';
+  const fmtDate = rawDate ? new Date(rawDate).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}) : 'Save the Date';
+  t('heroDate', fmtDate !== 'Invalid Date' ? fmtDate : rawDate || 'Save the Date');
   t('heroVenue', D.tagline || D.address || '');
 
   // Hero photo

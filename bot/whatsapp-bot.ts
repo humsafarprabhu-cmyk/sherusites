@@ -355,6 +355,25 @@ export async function handleMessage(phone: string, message: string): Promise<Bot
     return { replies: [replies[lower] || 'Shukriya feedback ke liye! 🙏'] };
   }
 
+  // Global: payment survey response handler
+  if (lower.startsWith('pay_')) {
+    const payMap: Record<string, string> = {
+      'pay_expensive': '💰 Mehenga hai',
+      'pay_noneed': '🤷 Zaroorat nahi',
+      'pay_later': '⏰ Baad mein lunga',
+    };
+    const fb = payMap[lower] || lower;
+    console.log(`[FEEDBACK-PAY] ${phone}: ${fb}`);
+    addChatMessage(phone, 'user', `[FEEDBACK-PAY] ${fb}`);
+    
+    const replies: Record<string, string> = {
+      'pay_expensive': 'Samajhte hain! 💰\n\nAapko kitna sahi lagega? Batao — hum aapke liye kuch karte hain 😊',
+      'pay_noneed': 'Koi baat nahi! 🙏\n\nAapki free website hamesha active rahegi. Jab custom domain (.in) chahiye toh "upgrade" type karo!',
+      'pay_later': 'Bilkul! ⏰\n\nJab ready ho "upgrade" type karo — 2 minute mein ho jayega.\n\nAapka domain reserved rahega 👍',
+    };
+    return { replies: [replies[lower] || 'Shukriya! 🙏'] };
+  }
+
   // Global: voice note / unsupported media handler
   if (msg === '[unsupported]' && session.state !== 'complete') {
     return { replies: ['🎙️ Voice note nahi samajh aata!\n\nPlease *text mein* likhke bhejo 🙏\n\nAgar koi problem hai toh "help" type karo.'] };

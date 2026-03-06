@@ -101,7 +101,7 @@ function extractPhone(msg: string): string | null {
 function getPremiumBody(price: number, bizName?: string): string {
   const sc = (() => { try { return (getDb().prepare('SELECT COUNT(*) as c FROM sites').get() as any).c; } catch { return 160; } })();
   const domainEx = bizName ? bizName.toLowerCase().replace(/[^a-z0-9]/g, '') + '.in' : 'apnabusiness.in';
-  return `⭐ *Premium mein kya milega:*\n\n🌐 *Apna domain* — ${domainEx}\n   (Customer ko professional link bhejo — trust badhega)\n🏷️ *No branding* — "WhatsWebsite" badge hat jayega\n📊 *Google pe rank* — apna domain = zyada trust\n🔒 *SSL certificate* — secure website\n✏️ *Edit bhi kar sakte ho* — WhatsApp pe bolo, ho jayega\n\n💰 Sirf ₹${price.toLocaleString()}/saal = ₹${Math.round(price/365)}/din\n   Ek chai se bhi sasta ☕\n\n✅ ${sc}+ businesses ne trust kiya\n🔒 Razorpay se safe payment\n\n🌐 *Domain choose karo:*`;
+  return `⭐ *Premium mein kya milega:*\n\n🌐 *Apna domain* — ${domainEx}\n🏷️ No "WhatsWebsite" branding\n🔒 SSL secure website\n✏️ WhatsApp se edit karo\n\n💰 Market mein website ka ₹10,000-₹50,000 lete hain.\nHum sirf *₹${price.toLocaleString()}/saal* = ₹${Math.round(price/365)}/din ☕\n\n✅ ${sc}+ businesses ne trust kiya\n\n🌐 *Domain choose karo:*`;
 }
 
 // ─── EDIT GUIDE (DB-driven) ──────────────────────────────────────────────────

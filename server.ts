@@ -110,7 +110,14 @@ app.use(webappRoutes);
 // ─── STATIC FILES ────────────────────────────────────────────────────────────
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
-app.use(express.static(PUBLIC_DIR, { maxAge: '1h' }));
+app.use(express.static(PUBLIC_DIR, {
+  maxAge: '1h',
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('index.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+  }
+}));
 
 // ─── PROGRAMMATIC SEO PAGES ──────────────────────────────────────────────────
 

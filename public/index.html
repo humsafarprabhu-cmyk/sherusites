@@ -45,12 +45,15 @@ gtag('config', 'AW-17933238526');
       --muted: #9ca3af;
     }
 
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+    }
     body {
       font-family: 'Inter', -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       line-height: 1.6;
-      overflow-x: hidden;
     }
 
     /* ── NAV ── */
@@ -770,7 +773,7 @@ gtag('config', 'AW-17933238526');
   </div>
 
   <!-- Real websites showcase -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:900px;margin:0 auto 48px;">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:20px;max-width:900px;margin:0 auto 48px;padding:0 16px;">
     <a href="/site/punjab-rasoi" target="_blank" style="text-decoration:none;background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.06);transition:transform 0.2s;display:flex;align-items:center;gap:16px;">
       <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🍽️</div>
       <div>

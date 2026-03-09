@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nayi Website Banao — WhatsWebsite</title>
+  <link rel="icon" href="/favicon.svg">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
+      --primary: #22c55e; --primary-glow: rgba(34,197,94,0.15);
+      --text: #f5f5f5; --text2: #a1a1aa; --border: #2a2a2a;
+      --danger: #ef4444; --warning: #eab308;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100dvh;
+    }
+    .nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: var(--bg); z-index: 10;
+    }
+    .nav-brand { font-size: 18px; font-weight: 800; color: var(--primary); text-decoration: none; }
+    .nav-step { color: var(--text2); font-size: 13px; }
+
+    .page { max-width: 600px; margin: 0 auto; padding: 24px 20px 100px; }
+
+    h1 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .subtitle { color: var(--text2); font-size: 14px; margin-bottom: 28px; }
+
+    /* Steps */
+    .step { display: none; animation: fadeUp 0.3s ease; }
+    .step.active { display: block; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
+
+    /* Category Grid */
+    .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .cat-card {
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius: 14px; padding: 20px 16px; cursor: pointer;
+      transition: all 0.2s; text-align: center;
+    }
+    .cat-card:hover { border-color: rgba(34,197,94,0.5); background: var(--surface2); }
+    .cat-card.selected { border-color: var(--primary); background: var(--primary-glow); }
+    .cat-icon { font-size: 36px; margin-bottom: 8px; display: block; }
+    .cat-name { font-size: 14px; font-weight: 700; }
+    .cat-desc { font-size: 11px; color: var(--text2); margin-top: 4px; }
+
+    /* Form */
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block; font-size: 13px; font-weight: 600;
+      color: var(--text2); margin-bottom: 8px;
+    }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 14px 16px;
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 12px; color: var(--text); font-size: 15px;
+      outline: none; transition: border 0.2s; font-family: inherit;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-group .hint { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+    /* Services/Menu dynamic list */
+    .items-list { display: grid; gap: 8px; margin-bottom: 12px; }
+    .item-row {
+      display: flex; gap: 8px; align-items: center;
+    }
+    .item-row input { flex: 1; }
+    .item-row .price-input { width: 100px; flex: none; }
+    .item-row .remove-btn {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+      color: var(--danger); cursor: pointer; font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .add-item-btn {
+      background: var(--surface2); border: 1.5px dashed var(--border);
+      border-radius: 10px; padding: 10px; width: 100%;
+      color: var(--primary); font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .add-item-btn:hover { border-color: var(--primary); background: var(--primary-glow); }
+
+    /* Buttons */
+    .btn-row { display: flex; gap: 12px; margin-top: 28px; }
+    .btn {
+      flex: 1; padding: 16px; border: none; border-radius: 12px;
+      font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white; box-shadow: 0 4px 16px var(--primary-glow);
+    }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .spinner { display:inline-block; width:18px; height:18px; border:2.5px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.6s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    .error {
+      background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+      color: var(--danger); padding: 12px 16px; border-radius: 10px;
+      font-size: 14px; margin-bottom: 16px; display: none;
+    }
+    .error.show { display: block; }
+
+    /* Success */
+    .success-card {
+      text-align: center; padding: 40px 20px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    .success-card .emoji { font-size: 64px; margin-bottom: 16px; }
+    .success-card h2 { font-size: 22px; margin-bottom: 8px; }
+    .success-card p { color: var(--text2); font-size: 14px; margin-bottom: 24px; line-height: 1.6; }
+    .success-card .url {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px;
+      font-size: 14px; word-break: break-all;
+      color: var(--primary); margin-bottom: 20px;
+    }
+    .success-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .success-actions a {
+      padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600;
+      text-decoration: none; transition: all 0.2s;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a class="nav-brand" href="/dashboard">🌐 WhatsWebsite</a>
+    <span class="nav-step" id="step-indicator">Step 1 of 3</span>
+  </nav>
+
+  <div class="page">
+    <div class="error" id="error-msg"></div>
+
+    <!-- Step 1: Category -->
+    <div class="step active" id="step-1">
+      <h1>Kya type ka business hai? 🏪</h1>
+      <p class="subtitle">Category chuno — template iske hisaab se milega</p>
+
+      <div class="cat-grid" id="cat-grid"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="goStep(2)" id="btn-step1">Aage Badho →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Details -->
+    <div class="step" id="step-2">
+      <h1>Business ki details bharo 📝</h1>
+      <p class="subtitle">Ye info website pe dikhegi</p>
+
+      <div class="form-group">
+        <label>Business ka Naam *</label>
+        <input type="text" id="biz-name" placeholder="Jaise: Punjab Rasoi, Sharma Salon" maxlength="60">
+      </div>
+
+      <div class="form-group">
+        <label>Tagline / Slogan</label>
+        <input type="text" id="biz-tagline" placeholder="Jaise: Best Punjabi Food in Town" maxlength="100">
+        <div class="hint">Optional — ek catchy line jo customers yaad rakhein</div>
+      </div>
+
+      <div class="form-group">
+        <label>Phone Number (customers ke liye)</label>
+        <input type="tel" id="biz-phone" placeholder="9876543210" maxlength="10" inputmode="numeric">
+      </div>
+
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" id="biz-address" placeholder="Shop No. 5, Main Market, Sector 12, Noida">
+      </div>
+
+      <div class="form-group">
+        <label>About (Apne business ke baare mein)</label>
+        <textarea id="biz-about" placeholder="Hum 10 saal se Punjabi khana bana rahe hain..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Timings</label>
+        <input type="text" id="biz-timings" placeholder="10:00 AM - 10:00 PM" value="10:00 AM - 9:00 PM">
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goStep(1)">← Back</button>
+        <button class="btn btn-primary" onclick="goStep(3)">Aage →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Services/Menu -->
+    <div class="step" id="step-3">
+      <h1 id="step3-title">Services / Menu 🍽️</h1>
+      <p class="subtitle" id="step3-subtitle">Items add karo — naam aur price</p>
+
+      <div class="items-list" id="items-list"></div>
+      <button class="add-item-btn" onclick="addItem()">+ Item Add Karo</button>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="goStep(2)">← Back</button>
+        <button class="btn btn-primary" id="btn-create" onclick="createSite()">🚀 Website Banao!</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Success -->
+    <div class="step" id="step-4">
+      <div class="success-card">
+        <div class="emoji">🎉</div>
+        <h2>Website Live Hai!</h2>
+        <p>Aapki website tayyar hai — ab share karo duniya ke saath!</p>
+        <div class="url" id="site-url"></div>
+        <div class="success-actions">
+          <a href="" id="link-view" target="_blank" style="background:var(--primary);color:white;">👁️ Website Dekho</a>
+          <a href="" id="link-edit" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);">✏️ Edit Karo</a>
+          <a href="/dashboard" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);">📊 Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let selectedCategory = '';
+    const categories = [
+      { id:'restaurant', name:'Restaurant / Café', icon:'🍽️', desc:'Menu, orders, booking' },
+      { id:'store', name:'Retail Store', icon:'🛒', desc:'Products, pricing, delivery' },
+      { id:'salon', name:'Salon / Beauty', icon:'💇', desc:'Services, pricing, booking' },
+      { id:'tutor', name:'Coaching / Tutor', icon:'📚', desc:'Subjects, batches, fees' },
+      { id:'clinic', name:'Clinic / Doctor', icon:'🏥', desc:'Services, timings, appointment' },
+      { id:'gym', name:'Gym / Fitness', icon:'💪', desc:'Plans, trainers, facilities' },
+      { id:'photographer', name:'Photographer', icon:'📸', desc:'Portfolio, packages' },
+      { id:'service', name:'Service Business', icon:'🔧', desc:'Plumber, electrician, etc.' },
+    ];
+
+    // Render categories
+    const catGrid = document.getElementById('cat-grid');
+    categories.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'cat-card';
+      div.innerHTML = `<span class="cat-icon">${c.icon}</span><div class="cat-name">${c.name}</div><div class="cat-desc">${c.desc}</div>`;
+      div.onclick = () => {
+        document.querySelectorAll('.cat-card').forEach(el => el.classList.remove('selected'));
+        div.classList.add('selected');
+        selectedCategory = c.id;
+      };
+      catGrid.appendChild(div);
+    });
+
+    function showError(msg) {
+      const el = document.getElementById('error-msg');
+      el.textContent = msg; el.classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => el.classList.remove('show'), 5000);
+    }
+
+    function goStep(n) {
+      // Validation
+      if (n === 2 && !selectedCategory) return showError('Pehle category chuno!');
+      if (n === 3) {
+        const name = document.getElementById('biz-name').value.trim();
+        if (!name) return showError('Business ka naam daalo!');
+        // Update step 3 titles based on category
+        const isFood = ['restaurant'].includes(selectedCategory);
+        document.getElementById('step3-title').textContent = isFood ? 'Menu Items 🍽️' : 'Services / Products 🛠️';
+        document.getElementById('step3-subtitle').textContent = isFood
+          ? 'Apne menu items add karo — naam aur price'
+          : 'Apni services ya products add karo — naam aur price';
+        // Add default empty row if none
+        if (!document.getElementById('items-list').children.length) { addItem(); addItem(); addItem(); }
+      }
+
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById(`step-${n}`).classList.add('active');
+      document.getElementById('step-indicator').textContent = n < 4 ? `Step ${n} of 3` : 'Done! ✅';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function addItem() {
+      const list = document.getElementById('items-list');
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <input type="text" placeholder="Item ka naam" class="item-name">
+        <input type="text" placeholder="₹ Price" class="price-input item-price" inputmode="numeric">
+        <button class="remove-btn" onclick="this.parentElement.remove()">×</button>
+      `;
+      list.appendChild(row);
+    }
+
+    async function createSite() {
+      const btn = document.getElementById('btn-create');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Bana rahe hain...';
+
+      const isFood = ['restaurant'].includes(selectedCategory);
+
+      // Collect items
+      const items = [];
+      document.querySelectorAll('.item-row').forEach(row => {
+        const name = row.querySelector('.item-name').value.trim();
+        const price = row.querySelector('.item-price').value.trim().replace(/[₹,\s]/g, '');
+        if (name) items.push({ name, price: price ? `₹${price}` : '' });
+      });
+
+      const body = {
+        businessName: document.getElementById('biz-name').value.trim(),
+        category: selectedCategory,
+        tagline: document.getElementById('biz-tagline').value.trim(),
+        phone: document.getElementById('biz-phone').value.trim(),
+        address: document.getElementById('biz-address').value.trim(),
+        about: document.getElementById('biz-about').value.trim(),
+        timings: document.getElementById('biz-timings').value.trim(),
+      };
+
+      if (isFood) body.menu = items;
+      else body.services = items;
+
+      try {
+        const res = await fetch('/api/site/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.error || 'Something went wrong');
+          btn.disabled = false;
+          btn.textContent = '🚀 Website Banao!';
+          return;
+        }
+
+        // Success
+        const fullUrl = `${window.location.origin}/site/${data.slug}`;
+        document.getElementById('site-url').textContent = fullUrl;
+        document.getElementById('link-view').href = `/site/${data.slug}`;
+        document.getElementById('link-edit').href = `/edit/${data.slug}`;
+        goStep(4);
+      } catch (e) {
+        showError('Network error — try again');
+        btn.disabled = false;
+        btn.textContent = '🚀 Website Banao!';
+      }
+    }
+  </script>
+</body>
+</html>

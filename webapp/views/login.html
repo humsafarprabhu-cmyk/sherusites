@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsWebsite — Free Website Banao</title>
+  <meta name="description" content="Apne business ki website banao 2 minute mein. Free. Sirf mobile number chahiye.">
+  <link rel="icon" href="/favicon.svg">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
+      --primary: #22c55e; --primary-glow: rgba(34,197,94,0.15);
+      --text: #f5f5f5; --text2: #a1a1aa; --border: #2a2a2a;
+      --danger: #ef4444;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100dvh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .container {
+      width: 100%; max-width: 400px;
+      animation: fadeUp 0.5s ease;
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .logo {
+      text-align: center; margin-bottom: 40px;
+    }
+    .logo h1 {
+      font-size: 28px; font-weight: 800;
+      background: linear-gradient(135deg, #22c55e, #10b981);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .logo p { color: var(--text2); font-size: 15px; margin-top: 8px; }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 32px 24px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .step { display: none; }
+    .step.active { display: block; animation: fadeUp 0.3s ease; }
+
+    .step h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .step p { color: var(--text2); font-size: 14px; margin-bottom: 24px; line-height: 1.5; }
+
+    .input-group {
+      position: relative; margin-bottom: 20px;
+    }
+    .input-group .prefix {
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      color: var(--text2); font-size: 16px; font-weight: 600;
+    }
+    input[type="tel"], input[type="text"] {
+      width: 100%; padding: 16px 16px 16px 56px;
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 12px; color: var(--text); font-size: 18px;
+      letter-spacing: 1px; outline: none; transition: border 0.2s;
+    }
+    input:focus { border-color: var(--primary); }
+    .otp-input {
+      padding-left: 16px !important; text-align: center;
+      font-size: 24px; letter-spacing: 8px; font-weight: 700;
+    }
+
+    .btn {
+      width: 100%; padding: 16px; border: none; border-radius: 12px;
+      font-size: 16px; font-weight: 700; cursor: pointer;
+      transition: all 0.2s; position: relative; overflow: hidden;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white; box-shadow: 0 4px 16px var(--primary-glow);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px var(--primary-glow); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+    .btn-ghost {
+      background: transparent; color: var(--text2); margin-top: 12px;
+    }
+    .btn-ghost:hover { color: var(--text); }
+
+    .error {
+      background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+      color: var(--danger); padding: 12px 16px; border-radius: 10px;
+      font-size: 14px; margin-bottom: 16px; display: none;
+    }
+    .error.show { display: block; animation: shake 0.3s ease; }
+    @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+    .whatsapp-note {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(37,211,102,0.08); border: 1px solid rgba(37,211,102,0.2);
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 20px;
+    }
+    .whatsapp-note svg { flex-shrink: 0; }
+    .whatsapp-note span { font-size: 13px; color: #25d366; line-height: 1.4; }
+
+    .resend { text-align: center; margin-top: 16px; font-size: 13px; color: var(--text2); }
+    .resend a { color: var(--primary); text-decoration: none; cursor: pointer; }
+    .resend a.disabled { color: var(--text2); pointer-events: none; }
+
+    .spinner {
+      display: inline-block; width: 20px; height: 20px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: white; border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .features {
+      margin-top: 32px; display: grid; gap: 12px;
+    }
+    .feature {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 12px;
+    }
+    .feature-icon { font-size: 24px; }
+    .feature-text { font-size: 13px; color: var(--text2); line-height: 1.4; }
+    .feature-text strong { color: var(--text); display: block; font-size: 14px; }
+
+    .footer { text-align: center; margin-top: 24px; font-size: 12px; color: var(--text2); }
+    .footer a { color: var(--primary); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <h1>🌐 WhatsWebsite</h1>
+      <p>Apne business ki FREE website banao — 2 minute mein</p>
+    </div>
+
+    <div class="card">
+      <!-- Step 1: Phone -->
+      <div class="step active" id="step-phone">
+        <h2>Shuru karein 🚀</h2>
+        <p>Apna mobile number daalo — WhatsApp pe OTP aayega</p>
+
+        <div class="error" id="error-phone"></div>
+
+        <div class="whatsapp-note">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          <span>OTP aapke <strong>WhatsApp</strong> pe aayega — SMS nahi</span>
+        </div>
+
+        <div class="input-group">
+          <span class="prefix">+91</span>
+          <input type="tel" id="phone" placeholder="9876543210" maxlength="10" autocomplete="tel" inputmode="numeric" pattern="[0-9]*">
+        </div>
+
+        <button class="btn btn-primary" id="btn-send-otp" onclick="sendOTP()">
+          OTP Bhejo →
+        </button>
+      </div>
+
+      <!-- Step 2: OTP -->
+      <div class="step" id="step-otp">
+        <h2>OTP Daalo 🔐</h2>
+        <p>WhatsApp pe 6-digit code bheja hai <span id="masked-phone"></span> pe</p>
+
+        <div class="error" id="error-otp"></div>
+
+        <div class="input-group">
+          <input type="text" id="otp" class="otp-input" placeholder="••••••" maxlength="6" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*">
+        </div>
+
+        <button class="btn btn-primary" id="btn-verify" onclick="verifyOTP()">
+          Verify & Continue →
+        </button>
+
+        <button class="btn btn-ghost" onclick="goBack()">← Number badlo</button>
+
+        <div class="resend">
+          <span id="resend-timer">60s mein dobara bhej sakte ho</span>
+          <a id="resend-link" class="disabled" onclick="resendOTP()">Dobara Bhejo</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <span class="feature-icon">⚡</span>
+        <div class="feature-text"><strong>2 Minute mein Ready</strong>Details bhar do, website live</div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">🆓</span>
+        <div class="feature-text"><strong>100% Free</strong>Koi hidden charge nahi</div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">📱</span>
+        <div class="feature-text"><strong>WhatsApp se Edit</strong>Kabhi bhi update karo</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · Made with ❤️ in India
+    </div>
+  </div>
+
+  <script>
+    let phoneNumber = '';
+    let resendCountdown = 0;
+
+    function showError(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 5000);
+    }
+
+    function setLoading(btnId, loading) {
+      const btn = document.getElementById(btnId);
+      if (loading) {
+        btn.disabled = true;
+        btn.dataset.text = btn.textContent;
+        btn.innerHTML = '<span class="spinner"></span>';
+      } else {
+        btn.disabled = false;
+        btn.textContent = btn.dataset.text;
+      }
+    }
+
+    async function sendOTP() {
+      const phone = document.getElementById('phone').value.replace(/\D/g, '');
+      if (phone.length !== 10) return showError('error-phone', 'Sahi 10-digit number daalo');
+
+      phoneNumber = phone;
+      setLoading('btn-send-otp', true);
+
+      try {
+        const res = await fetch('/api/auth/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError('error-phone', data.error || 'Something went wrong');
+          setLoading('btn-send-otp', false);
+          return;
+        }
+
+        // Switch to OTP step
+        document.getElementById('step-phone').classList.remove('active');
+        document.getElementById('step-otp').classList.add('active');
+        document.getElementById('masked-phone').textContent = `${phone.slice(0,2)}****${phone.slice(-2)}`;
+        document.getElementById('otp').focus();
+        startResendTimer();
+      } catch (e) {
+        showError('error-phone', 'Network error. Try again.');
+      }
+      setLoading('btn-send-otp', false);
+    }
+
+    async function verifyOTP() {
+      const otp = document.getElementById('otp').value.replace(/\D/g, '');
+      if (otp.length !== 6) return showError('error-otp', '6-digit OTP daalo');
+
+      setLoading('btn-verify', true);
+
+      try {
+        const res = await fetch('/api/auth/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: phoneNumber, otp })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError('error-otp', data.error || 'Wrong OTP');
+          setLoading('btn-verify', false);
+          return;
+        }
+
+        // Success — redirect to dashboard
+        window.location.href = '/dashboard';
+      } catch (e) {
+        showError('error-otp', 'Network error. Try again.');
+      }
+      setLoading('btn-verify', false);
+    }
+
+    function goBack() {
+      document.getElementById('step-otp').classList.remove('active');
+      document.getElementById('step-phone').classList.add('active');
+      document.getElementById('otp').value = '';
+    }
+
+    function startResendTimer() {
+      resendCountdown = 60;
+      const timer = document.getElementById('resend-timer');
+      const link = document.getElementById('resend-link');
+      link.classList.add('disabled');
+
+      const interval = setInterval(() => {
+        resendCountdown--;
+        if (resendCountdown <= 0) {
+          clearInterval(interval);
+          timer.textContent = '';
+          link.classList.remove('disabled');
+          link.textContent = 'Dobara Bhejo';
+        } else {
+          timer.textContent = `${resendCountdown}s mein dobara bhej sakte ho `;
+        }
+      }, 1000);
+    }
+
+    async function resendOTP() {
+      if (resendCountdown > 0) return;
+      setLoading('btn-verify', true);
+      try {
+        const res = await fetch('/api/auth/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: phoneNumber })
+        });
+        const data = await res.json();
+        if (res.ok) startResendTimer();
+        else showError('error-otp', data.error);
+      } catch (e) {
+        showError('error-otp', 'Network error');
+      }
+      setLoading('btn-verify', false);
+    }
+
+    // Auto-submit OTP when 6 digits entered
+    document.getElementById('otp')?.addEventListener('input', function() {
+      if (this.value.replace(/\D/g, '').length === 6) verifyOTP();
+    });
+
+    // Enter key handlers
+    document.getElementById('phone')?.addEventListener('keydown', e => { if (e.key === 'Enter') sendOTP(); });
+    document.getElementById('otp')?.addEventListener('keydown', e => { if (e.key === 'Enter') verifyOTP(); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Website — WhatsWebsite</title>
+  <link rel="icon" href="/favicon.svg">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e;
+      --primary: #22c55e; --primary-glow: rgba(34,197,94,0.15);
+      --text: #f5f5f5; --text2: #a1a1aa; --border: #2a2a2a;
+      --danger: #ef4444; --warning: #eab308;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100dvh;
+    }
+    .nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: var(--bg); z-index: 10;
+    }
+    .nav-brand { font-size: 18px; font-weight: 800; color: var(--primary); text-decoration: none; }
+    .nav-actions { display: flex; gap: 8px; }
+    .nav-actions a {
+      padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      text-decoration: none; transition: all 0.2s; color: var(--text2);
+    }
+    .nav-actions a:hover { color: var(--text); background: var(--surface2); }
+    .nav-actions .act-view { background: var(--primary); color: white; }
+
+    .page { max-width: 600px; margin: 0 auto; padding: 24px 20px 100px; }
+    h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+    .subtitle { color: var(--text2); font-size: 14px; margin-bottom: 28px; }
+
+    .section {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px; margin-bottom: 20px;
+    }
+    .section-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+    .form-group input, .form-group textarea {
+      width: 100%; padding: 12px 14px;
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 10px; color: var(--text); font-size: 14px;
+      outline: none; transition: border 0.2s; font-family: inherit;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); }
+    .form-group textarea { resize: vertical; min-height: 70px; }
+
+    .items-list { display: grid; gap: 8px; margin-bottom: 12px; }
+    .item-row { display: flex; gap: 8px; align-items: center; }
+    .item-row input { flex: 1; padding: 10px 12px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; }
+    .item-row .price-input { width: 90px; flex: none; }
+    .item-row .remove-btn { width: 32px; height: 32px; border-radius: 6px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--danger); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+    .add-item-btn { background: var(--surface2); border: 1.5px dashed var(--border); border-radius: 8px; padding: 8px; width: 100%; color: var(--primary); font-size: 13px; font-weight: 600; cursor: pointer; }
+
+    .btn-save {
+      width: 100%; padding: 16px; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white; font-size: 16px; font-weight: 700; cursor: pointer;
+      box-shadow: 0 4px 16px var(--primary-glow);
+      transition: all 0.2s; position: sticky; bottom: 20px;
+    }
+    .btn-save:hover { transform: translateY(-1px); }
+    .btn-save:disabled { opacity: 0.5; }
+
+    .toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: var(--primary); color: white; padding: 12px 24px;
+      border-radius: 10px; font-size: 14px; font-weight: 600;
+      display: none; z-index: 100; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .toast.show { display: block; animation: fadeUp 0.3s ease; }
+    @keyframes fadeUp { from { opacity:0; transform:translate(-50%,10px); } to { opacity:1; transform:translate(-50%,0); } }
+
+    .loading { text-align: center; padding: 60px; color: var(--text2); }
+    .spinner { display:inline-block; width:18px; height:18px; border:2.5px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.6s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a class="nav-brand" href="/dashboard">← Dashboard</a>
+    <div class="nav-actions">
+      <a href="" id="view-link" target="_blank" class="act-view">👁️ View Live</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div id="content"><div class="loading">Loading...</div></div>
+  </div>
+
+  <div class="toast" id="toast">✅ Saved!</div>
+
+  <script>
+    const slug = window.location.pathname.split('/edit/')[1];
+    let siteData = null;
+
+    async function loadSite() {
+      const res = await fetch(`/api/site/${slug}`);
+      if (res.status === 401) return window.location.href = '/login';
+      if (res.status === 403 || res.status === 404) return document.getElementById('content').innerHTML = '<div class="loading">Site not found or access denied</div>';
+      const { site } = await res.json();
+      siteData = site;
+      document.getElementById('view-link').href = `/site/${slug}`;
+      renderEditor(site);
+    }
+
+    function renderEditor(s) {
+      const isFood = ['restaurant'].includes(s.category);
+      const items = isFood ? (s.menu || []) : (s.services || []);
+
+      document.getElementById('content').innerHTML = `
+        <h1>✏️ ${s.businessName}</h1>
+        <p class="subtitle">${s.category} · whatswebsite.com/site/${slug}</p>
+
+        <div class="section">
+          <div class="section-title">📋 Basic Info</div>
+          <div class="form-group">
+            <label>Business Name</label>
+            <input type="text" id="e-name" value="${esc(s.businessName)}">
+          </div>
+          <div class="form-group">
+            <label>Tagline</label>
+            <input type="text" id="e-tagline" value="${esc(s.tagline || '')}">
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" id="e-phone" value="${esc(s.phone || '')}">
+          </div>
+          <div class="form-group">
+            <label>Address</label>
+            <input type="text" id="e-address" value="${esc(s.address || '')}">
+          </div>
+          <div class="form-group">
+            <label>Timings</label>
+            <input type="text" id="e-timings" value="${esc(s.timings || '')}">
+          </div>
+          <div class="form-group">
+            <label>About</label>
+            <textarea id="e-about">${esc(s.about || '')}</textarea>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">${isFood ? '🍽️ Menu Items' : '🛠️ Services'}</div>
+          <div class="items-list" id="items-list">
+            ${items.map(it => `
+              <div class="item-row">
+                <input type="text" value="${esc(it.name || '')}" class="item-name">
+                <input type="text" value="${esc(String(it.price || ''))}" class="price-input item-price">
+                <button class="remove-btn" onclick="this.parentElement.remove()">×</button>
+              </div>
+            `).join('')}
+          </div>
+          <button class="add-item-btn" onclick="addItem()">+ Add Item</button>
+        </div>
+
+        <button class="btn-save" id="btn-save" onclick="saveSite()">💾 Save Changes</button>
+      `;
+    }
+
+    function esc(s) { return s.replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+    function addItem() {
+      const list = document.getElementById('items-list');
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = '<input type="text" placeholder="Item name" class="item-name"><input type="text" placeholder="₹ Price" class="price-input item-price"><button class="remove-btn" onclick="this.parentElement.remove()">×</button>';
+      list.appendChild(row);
+    }
+
+    async function saveSite() {
+      const btn = document.getElementById('btn-save');
+      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving...';
+
+      const isFood = ['restaurant'].includes(siteData.category);
+      const items = [];
+      document.querySelectorAll('.item-row').forEach(row => {
+        const name = row.querySelector('.item-name').value.trim();
+        const price = row.querySelector('.item-price').value.trim();
+        if (name) items.push({ name, price });
+      });
+
+      const body = {
+        businessName: document.getElementById('e-name').value.trim(),
+        tagline: document.getElementById('e-tagline').value.trim(),
+        phone: document.getElementById('e-phone').value.trim(),
+        address: document.getElementById('e-address').value.trim(),
+        timings: document.getElementById('e-timings').value.trim(),
+        about: document.getElementById('e-about').value.trim(),
+      };
+      if (isFood) body.menu = items; else body.services = items;
+
+      try {
+        const res = await fetch(`/api/site/${slug}/update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (res.ok) {
+          const toast = document.getElementById('toast');
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+      } catch (e) {}
+      btn.disabled = false; btn.textContent = '💾 Save Changes';
+    }
+
+    loadSite();
+  </script>
+</body>
+</html>

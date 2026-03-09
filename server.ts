@@ -6,10 +6,12 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import rateLimit from 'express-rate-limit';
+import webappRoutes from './webapp/routes.ts';
 import { handleMessage, setBaseUrl, getBaseUrl, setBotSendCallback } from './bot/whatsapp-bot.ts';
 import { createOrder, verifyPayment, markPaid, getPaymentPageHTML } from './bot/payment.ts';
 import { listAllSites, getSiteData, saveSiteData, findSiteByDomain, findSiteByPendingDomain } from './bot/db.ts';
@@ -41,6 +43,7 @@ app.use(cors({
   origin: ALLOWED_ORIGINS.includes('*') ? '*' : ALLOWED_ORIGINS,
 }));
 app.use(express.json({ limit: '1mb' }));
+app.use(cookieParser());
 
 // Logging middleware
 app.use((req, _res, next) => {
@@ -99,6 +102,10 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// ─── WEB APP ROUTES ──────────────────────────────────────────────────────────
+
+app.use(webappRoutes);
 
 // ─── STATIC FILES ────────────────────────────────────────────────────────────
 

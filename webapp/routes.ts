@@ -31,8 +31,20 @@ async function sendWhatsAppOTP(phone: string, otp: string): Promise<boolean> {
       body: JSON.stringify({
         messaging_product: 'whatsapp',
         to,
-        type: 'text',
-        text: { body: `🔐 Your WhatsWebsite OTP is: *${otp}*\n\nValid for 5 minutes. Do not share this code.` }
+        type: 'template',
+        template: {
+          name: 'otp_login',
+          language: { code: 'en' },
+          components: [{
+            type: 'body',
+            parameters: [{ type: 'text', text: otp }]
+          }, {
+            type: 'button',
+            sub_type: 'url',
+            index: '0',
+            parameters: [{ type: 'text', text: otp }]
+          }]
+        }
       })
     });
     const data = await res.json();
@@ -223,6 +235,52 @@ router.post('/api/site/:slug/update', apiAuthMiddleware, async (req: any, res) =
   fs.writeFileSync(path.join(sitesDir, `${req.params.slug}.html`), html);
 
   res.json({ ok: true });
+});
+
+// Photo upload for a site
+router.post('/api/site/:slug/upload-photo', apiAuthMiddleware, async (req: any, res) => {
+  const db3 = getDb();
+  const owner3 = db3.prepare('SELECT owner_phone FROM sites WHERE slug = ?').get(req.params.slug) as any;
+  if (!owner3) return res.status(404).json({ error: 'Site not found' });
+  if (owner3.owner_phone !== req.user.phone) return res.status(403).json({ error: 'Not your site' });
+
+  // Read raw body (multipart)
+  const chunks: Buffer[] = [];
+  await new Promise<void>((resolve) => {
+    req.on('data', (c: Buffer) => chunks.push(c));
+    req.on('end', resolve);
+  });
+  const body = Buffer.concat(chunks);
+
+  // Simple multipart boundary parse
+  const contentType = req.headers['content-type'] || '';
+  const boundaryMatch = contentType.match(/boundary=(.+)/);
+  if (!boundaryMatch) return res.status(400).json({ error: 'Invalid upload' });
+
+  const boundary = boundaryMatch[1];
+  const parts = body.toString('binary').split(`--${boundary}`);
+  let imageData: Buffer | null = null;
+
+  for (const part of parts) {
+    if (part.includes('Content-Type: image/')) {
+      const headerEnd = part.indexOf('\r\n\r\n');
+      if (headerEnd >= 0) {
+        imageData = Buffer.from(part.slice(headerEnd + 4).replace(/\r\n$/, ''), 'binary');
+      }
+    }
+  }
+
+  if (!imageData) return res.status(400).json({ error: 'No image found' });
+
+  const sitesDir = path.join(__dirname, '..', 'sites');
+  const imgDir = path.join(sitesDir, req.params.slug, 'images');
+  if (!fs.existsSync(imgDir)) fs.mkdirSync(imgDir, { recursive: true });
+
+  const filename = `photo-${Date.now()}.jpg`;
+  fs.writeFileSync(path.join(imgDir, filename), imageData);
+
+  const url = `/site/${req.params.slug}/images/${filename}`;
+  res.json({ ok: true, url });
 });
 
 // Get available categories

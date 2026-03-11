@@ -131,7 +131,7 @@ export function renderSite(data: SiteData): string {
     // Ad unit helper
     const adUnit = (style: string = 'display:block', format: string = 'auto') => `
     <div style="margin:16px auto;max-width:728px;text-align:center;overflow:hidden;">
-      <ins class="adsbygoogle" style="${style}" data-ad-client="${ADSENSE_PUB_ID}" data-ad-slot="9531117763" data-ad-format="${format}" data-full-width-responsive="true"></ins>
+      <ins class="adsbygoogle" style="${style}" data-ad-client="${ADSENSE_PUB_ID}" data-ad-slot="2280982003" data-ad-format="${format}" data-full-width-responsive="true"></ins>
       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>`;
 

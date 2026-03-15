@@ -120,35 +120,6 @@ export function renderSite(data: SiteData): string {
   };
   html = html.replace('</head>', `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>\n</head>`);
 
-  // Inject AdSense ads for free sites
-  const ADSENSE_PUB_ID = 'ca-pub-2400184142414186';
-  if (data.plan !== 'premium') {
-    // AdSense script in head
-    const adsenseHead = `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_PUB_ID}" crossorigin="anonymous"></script>
-    <meta name="google-adsense-account" content="${ADSENSE_PUB_ID}">`;
-    html = html.replace('</head>', `${adsenseHead}\n</head>`);
-
-    // Ad unit helper
-    const adUnit = (style: string = 'display:block', format: string = 'auto') => `
-    <div style="margin:16px auto;max-width:728px;text-align:center;overflow:hidden;">
-      <ins class="adsbygoogle" style="${style}" data-ad-client="${ADSENSE_PUB_ID}" data-ad-slot="2280982003" data-ad-format="${format}" data-full-width-responsive="true"></ins>
-      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>`;
-
-    // Top ad — after body open
-    html = html.replace(/<body[^>]*>/i, (match) => `${match}\n${adUnit('display:block', 'horizontal')}`);
-
-    // Mid-content ad — after about section or services
-    if (html.includes('id="about"')) {
-      html = html.replace(/(id="about"[^>]*>[\s\S]*?<\/section>)/i, `$1\n${adUnit()}`);
-    } else if (html.includes('id="svcGrid"')) {
-      html = html.replace(/(id="svcGrid"[\s\S]*?<\/section>)/i, `$1\n${adUnit()}`);
-    }
-
-    // Bottom ad — before </body>
-    html = html.replace('</body>', `${adUnit()}\n</body>`);
-  }
-
   // WhatsApp number — single source of truth
   const WA_NUMBER = '919187578351';
   const WA_LINK = `https://wa.me/${WA_NUMBER}?text=Hi%2C%20mujhe%20bhi%20website%20chahiye!`;
